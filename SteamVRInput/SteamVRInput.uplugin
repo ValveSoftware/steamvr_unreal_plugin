@@ -1,0 +1,38 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Release Candidate",
+	"Description": "SteamVR Input System",
+	"Category": "Other",
+	"CreatedBy": "runeberg.io",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "SteamVRInput",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms" :
+			[
+				"Win64",
+				"Linux64"
+			]
+		},
+		{
+			"Name": "SteamVRInputDevice",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms" :
+			[
+				"Win64",
+				"Linux64"
+			]
+		}
+	]
+}

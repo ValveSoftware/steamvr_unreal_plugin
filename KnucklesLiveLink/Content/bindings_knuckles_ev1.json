@@ -1,0 +1,259 @@
+{
+   "bindings" : {
+      "/actions/default" : {
+         "haptics" : [
+            {
+               "output" : "/actions/legacy/out/left_haptic",
+               "path" : "/user/hand/left/output/haptic"
+            },
+            {
+               "output" : "/actions/legacy/out/right_haptic",
+               "path" : "/user/hand/right/output/haptic"
+            }
+         ],
+         "poses" : [
+            {
+               "output" : "/actions/legacy/in/Left_Pose",
+               "path" : "/user/hand/left/pose/raw"
+            },
+            {
+               "output" : "/actions/legacy/in/Right_Pose",
+               "path" : "/user/hand/right/pose/raw"
+            }
+         ],
+         "sources" : [
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/left_system_press"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/system"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis1_value"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/left_axis1_touch"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/right_system_press"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/right_grip_press"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/right_grip_touch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/left_grip_press"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/left_grip_touch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/left_applicationmenu_press"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/left_applicationmenu_touch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/right_applicationmenu_press"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/right_applicationmenu_touch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/left_axis0_press"
+                  },
+                  "position" : {
+                     "output" : "/actions/legacy/in/left_axis0_value"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/left_axis0_touch"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/right_axis0_press"
+                  },
+                  "position" : {
+                     "output" : "/actions/legacy/in/right_axis0_value"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/right_axis0_touch"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis1_value"
+                  },
+                  "touch" : {
+                     "output" : "/actions/legacy/in/right_axis1_touch"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/left_axis1_press"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/legacy/in/right_axis1_press"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis2_value1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis2_value1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis3_value_e0"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/finger/index"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis3_value_e1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/finger/middle"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis4_value_e0"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/finger/ring"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/left_axis4_value_e1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/finger/pinky"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis3_value_e0"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/finger/index"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis3_value_e1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/finger/middle"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis4_value_e0"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/finger/ring"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/legacy/in/right_axis4_value_e1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/finger/pinky"
+            }
+         ]
+      }
+   },
+   "controller_type" : "knuckles_ev1",
+   "description" : "Default binding values for legacy apps using the Knuckles controller",
+   "name" : "Knuckles Legacy Defaults"
+}
