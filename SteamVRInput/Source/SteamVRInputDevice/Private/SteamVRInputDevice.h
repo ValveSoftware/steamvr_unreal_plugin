@@ -66,7 +66,8 @@ public:
 	/* Controller states */
 	FInputDeviceState ControllerStates[SteamVRInputDeviceConstants::MaxControllers];
 
-	TArray<FSteamVRAction> Actions;
+	TArray<FSteamVRInputAction> Actions;
+	TArray<FControllerType> ControllerTypes;
 	VRActionSetHandle_t MainActionSet;
 
 	VRActionHandle_t VRSkeletalHandleLeft;
@@ -103,12 +104,15 @@ private:
 	// Controller Bindings Helper Functions (Editor Only)
 #if WITH_EDITOR
 	FDelegateHandle ActionMappingsChangedHandle;
-	void BuildDefaultActionBindings(const FString& BindingsDir, TArray<TSharedPtr<FJsonValue>>& InOutDefaultBindings, TArray<FSteamVRAction>& InActionsArray, TArray<FInputMapping>& InInputMapping);
+	void GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& InOutDefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping);
 	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray);
 #endif
 
 	// Action Manifest and Bindings Helper Functions
-	void BuildActionManifest();
+	void GenerateActionManifest();
+	bool BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject);
+	void ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
+	void ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 
 	void RegisterDeviceChanges();
 	bool RegisterController(uint32 DeviceIndex);

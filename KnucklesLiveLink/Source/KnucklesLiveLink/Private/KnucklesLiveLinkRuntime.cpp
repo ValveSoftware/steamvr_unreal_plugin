@@ -2,13 +2,11 @@
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
 
-// Sets default values for this component's properties
 UKnucklesLiveLinkRuntime::UKnucklesLiveLinkRuntime()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-// Called when the game starts
 void UKnucklesLiveLinkRuntime::BeginPlay()
 {
 	Super::BeginPlay();

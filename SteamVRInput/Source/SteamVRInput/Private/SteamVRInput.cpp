@@ -9,8 +9,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogSteamInput, Log, All);
 
 void FSteamVRInputModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-
 	// Get the base directory of this plugin
 	FString BaseDir = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*IPluginManager::Get().FindPlugin("SteamVRInput")->GetBaseDir());
 

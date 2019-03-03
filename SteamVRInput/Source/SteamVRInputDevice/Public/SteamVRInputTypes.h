@@ -13,11 +13,13 @@ using namespace vr;
 #define KNUCKLES_TOTAL_HAND_GRIP_AXIS	2
 #define KNUCKLES_UPPER_HAND_GRIP_AXIS	3
 #define KNUCKLES_LOWER_HAND_GRIP_AXIS	4
-#define DOT_45DEG						0.7071f
-#define TOUCHPAD_DEADZONE  0.0f
+#define DOT_45DEG						0.707f
+#define TOUCHPAD_DEADZONE				0.0f
 
 /* SteamVR Input System Constants */
+#define CONTROLLER_BINDING_PATH			"SteamVRBindings"
 #define ACTION_MANIFEST					"steamvr_manifest.json"
+#define ACTION_MANIFEST_UE				"steamvr_actions.json"
 #define ACTION_SET						"/actions/main"
 #define ACTION_PATH_IN					"/actions/main/in"
 #define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"
@@ -53,7 +55,7 @@ namespace SteamVRInputDeviceConstants
 	static const int32 MaxControllers = k_unMaxTrackedDeviceCount;
 
 	/* The maximum number of "Special" hand designations */
-	static const int32 MaxSpecialDesignations = (int32)EControllerHand::Special_9 - (int32)EControllerHand::Special_1 + 1;
+	static const int32 MaxSpecialDesignations = ((int32)EControllerHand::Special_9 - (int32)EControllerHand::Special_1) + 1;
 }
 
 /* Buttons available on a SteamVR controller */
@@ -88,16 +90,6 @@ struct ESteamVRInputButton
 	};
 };
 
-static TTuple<const TCHAR*, FText> CommonControllerTypes[] =
-{
-	MakeTuple(TEXT("knuckles"), NSLOCTEXT("SteamVR", "CTypeKnuckles", "Knuckles Controllers")),
-	MakeTuple(TEXT("vive"), NSLOCTEXT("SteamVR", "CTypeVive", "Vive")),
-	MakeTuple(TEXT("vive_controller"), NSLOCTEXT("SteamVR", "CTypeViveController", "Vive Controllers")),
-	MakeTuple(TEXT("oculus_touch"), NSLOCTEXT("SteamVR", "CTypeOculusTouch", "Oculus Touch Controllers")),
-	MakeTuple(TEXT("holographic_controller"), NSLOCTEXT("SteamVR", "CTypeHolographicController", "Holographic Controllers")),
-	MakeTuple(TEXT("gamepad"), NSLOCTEXT("SteamVR", "CTypeGamepad", "Game Pads"))
-};
-
 /* Available SteamVR Input Action Types */
 enum EActionType
 {
@@ -109,6 +101,31 @@ enum EActionType
 	Pose,
 	Skeleton,
 	Invalid
+};
+
+const FString SActionTypes[] = {
+			TEXT("boolean"),
+			TEXT("vector1"),
+			TEXT("vector2"),
+			TEXT("vector3"),
+			TEXT("vibration"),
+			TEXT("pose"),
+			TEXT("skeleton"),
+			TEXT("")
+};
+
+struct FControllerType
+{
+	bool	bIsGenerated;
+	FName	Name;
+	FString	Description;
+
+	FControllerType() {}
+	FControllerType(const FName& inName, const FString& inDescription)
+		: bIsGenerated(false)
+		, Name(inName)
+		, Description (inDescription)
+	{}
 };
 
 struct FActionPath
@@ -141,122 +158,103 @@ struct FInputMapping
 	FInputMapping() {}
 };
 
-struct FSteamVRAction
+struct FSteamVRInputAction
 {
+	FName		Name;
 	FString		Path;
 	EActionType	Type;
-	bool		Requirement;
-	FName		Name;
-	FString		Skel;
-	FName		ActionKey_X;
-	FName		ActionKey_Y;
-	FName		ActionKey_Z;
-	union {
-		bool	bState;
-		FVector Value;
-	};
+	FName		KeyX;
+	FName		KeyY;
+	FName		KeyZ;
+	FVector		Value;
+	FString		StringPath;
+	bool		bState;
+	bool		bRequirement;
 
-	vr::VRActionHandle_t Handle;
-	vr::EVRInputError LastError;
+	VRActionHandle_t Handle;
+	EVRInputError LastError;
 
-	FString TypeAsString()
+	FString GetActionTypeName()
 	{
-		static FString TypeStrings[] = {
-			TEXT("boolean"),
-			TEXT("vector1"),
-			TEXT("vector2"),
-			TEXT("vector3"),
-			TEXT("vibration"),
-			TEXT("pose"),
-			TEXT("skeleton"),
-			TEXT("")
-		};
-
-		return TypeStrings[(int)Type];
+		return SActionTypes[(int)Type];
 	}
 
-	FSteamVRAction(const FString& inPath, const FName& inName, const FName& inActionKey, bool inState)
+	FSteamVRInputAction(const FString& inPath, EActionType inType, bool inRequirement, const FName& inName, const FString& inStringPath)
 		: Path(inPath)
+		, Name(inName)
+		, Type(inType)
+		, KeyX()
+		, KeyY()
+		, KeyZ()
+		, Value()
+		, StringPath(inStringPath)
+		, bRequirement(inRequirement)
+		, Handle()
+		, LastError(VRInputError_None)
+	{}
+
+	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName, bool inState)
+		: Path(inPath)
+		, Name(inName)
 		, Type(Boolean)
-		, Requirement(false)
-		, Name(inName)
-		, Skel()
-		, ActionKey_X(inActionKey)
-		, ActionKey_Y()
-		, ActionKey_Z()
+		, KeyX(inKeyName)
+		, KeyY()
+		, KeyZ()
 		, Value()
+		, bState(inState)
+		, bRequirement(false)
 		, Handle()
 		, LastError(VRInputError_None)
-	{
-		bState = inState;
-	}
+	{}
 
-	FSteamVRAction(const FString& inPath, const FName& inName, const FName& inActionKey, float inValue1D)
+	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName, float inValue1D)
 		: Path(inPath)
+		, Name(inName)
 		, Type(Vector1)
-		, Requirement(false)
-		, Name(inName)
-		, Skel()
-		, ActionKey_X(inActionKey)
-		, ActionKey_Y()
-		, ActionKey_Z()
-		, Value(inValue1D, 0, 0)
+		, KeyX(inKeyName)
+		, KeyY()
+		, KeyZ()
+		, Value(inValue1D, 0.f, 0.f)
+		, bRequirement(false)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
 
-	FSteamVRAction(const FString& inPath, const FName& inName, const FName& inActionKey_X, const FName& inActionKey_Y, const FVector2D& inValue2D)
+	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName_X, const FName& inKeyName_Y, const FVector2D& inValue2D)
 		: Path(inPath)
+		, Name(inName)
 		, Type(Vector2)
-		, Requirement(false)
-		, Name(inName)
-		, Skel()
-		, ActionKey_X(inActionKey_X)
-		, ActionKey_Y(inActionKey_Y)
-		, ActionKey_Z()
-		, Value(inValue2D.X, inValue2D.Y, 0)
+		, KeyX(inKeyName_X)
+		, KeyY(inKeyName_Y)
+		, KeyZ()
+		, Value(inValue2D.X, inValue2D.Y, 0.f)
+		, bRequirement(false)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
 
-	FSteamVRAction(const FString& inPath, const FName& inName, const FName& inActionKey_X, const FName& inActionKey_Y, const FName& inActionKey_Z, const FVector& inValue3D)
+	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName_X, const FName& inKeyName_Y, const FName& inKeyName_Z, const FVector& inValue3D)
 		: Path(inPath)
-		, Type(Vector2)
-		, Requirement(false)
 		, Name(inName)
-		, Skel()
-		, ActionKey_X(inActionKey_X)
-		, ActionKey_Y(inActionKey_Y)
-		, ActionKey_Z(inActionKey_Z)
-		, Value(inValue3D)
+		, Type(Vector3)
+		, KeyX(inKeyName_X)
+		, KeyY(inKeyName_Y)
+		, KeyZ(inKeyName_Z)
+		, Value(inValue3D.X, inValue3D.Y, inValue3D.Z)
+		, bRequirement(false)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
 
-	FSteamVRAction(const FString& inPath, const EActionType& inActionType, const bool& inRequirement, const FName& inName)
+	FSteamVRInputAction(const FString& inPath, const EActionType& inActionType, const bool& inRequirement, const FName& inName)
 		: Path(inPath)
+		, Name(inName)
 		, Type(inActionType)
-		, Requirement(inRequirement)
-		, Name(inName)
-		, Skel()
-		, ActionKey_X()
-		, ActionKey_Y()
-		, ActionKey_Z()
+		, KeyX()
+		, KeyY()
+		, KeyZ()
 		, Value()
-		, Handle()
-		, LastError(VRInputError_None)
-	{}
-
-	FSteamVRAction(const FString& inPath, const EActionType& inActionType, const bool& inRequirement, const FName& inName, const FString& inSkeleton)
-		: Path(inPath)
-		, Type(inActionType)
-		, Requirement(inRequirement)
-		, Name(inName)
-		, Skel(inSkeleton)
-		, ActionKey_X()
-		, ActionKey_Y()
-		, ActionKey_Z()
-		, Value()
+		, bRequirement(inRequirement)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}

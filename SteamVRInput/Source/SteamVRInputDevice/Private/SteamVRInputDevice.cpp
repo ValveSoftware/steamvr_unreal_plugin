@@ -26,7 +26,7 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 
 	InitControllerMappings();
 	InitKnucklesControllerKeys();
-	BuildActionManifest();
+	GenerateActionManifest();
 
 	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_None;
@@ -327,120 +327,115 @@ void FSteamVRInputDevice::InitControllerMappings()
 }
 
 #if WITH_EDITOR
-void FSteamVRInputDevice::BuildDefaultActionBindings(const FString& BindingsDir, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRAction>& InActionsArray, TArray<FInputMapping>& InInputMapping)
+void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping)
 {
+	// Create the bindings directory if it doesn't exist
 	IFileManager& FileManager = FFileManagerGeneric::Get();
-
-	TSet<FString> ExistingBindings;
-	// TODO PRIORITY: Implement
-
-	if (!FileManager.DirectoryExists(*BindingsDir))
+	if (!FileManager.DirectoryExists(*BindingsPath))
 	{
-		FileManager.MakeDirectory(*BindingsDir);
+		FileManager.MakeDirectory(*BindingsPath);
 	}
 
-	for (auto& Item : CommonControllerTypes)
+	// Go through all supported controller types
+	for (auto& SupportedController : InOutControllerTypes)
 	{
-		if (ExistingBindings.Contains(Item.Key))
+		// If there is no user-defined controller binding or it hasn't been auto-generated yet, generate it
+		if (!SupportedController.bIsGenerated)
 		{
-			continue;
+			// Creating bindings file
+			TSharedRef<FJsonObject> BindingsObject = MakeShareable(new FJsonObject());
+			BindingsObject->SetStringField(TEXT("name"), TEXT("Default bindings for ") + SupportedController.Description);
+			BindingsObject->SetStringField(TEXT("controller_type"), SupportedController.Name.ToString());
+
+			// Create Action Bindings in JSON Format
+			TArray<TSharedPtr<FJsonValue>> JsonValuesArray;
+			GenerateActionBindings(InInputMapping, JsonValuesArray);
+
+			//Create Action Set
+			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
+			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
+
+			// Add Skeleton Mappings
+			TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
+
+			// Add Skeleton: Left Hand 
+			TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
+			SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
+			SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
+
+			TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
+			SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
+
+			// Add Skeleton: Right Hand
+			TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
+			SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
+			SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
+
+			TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
+			SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
+
+			// Add Skeleton Input Array To Action Set
+			ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
+
+			// Add Haptic Mappings
+			TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
+
+			// Add Haptic: Left Hand 
+			TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
+			HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
+			HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
+
+			TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
+			HapticValuesArray.Add(HapticLeftJsonValueObject);
+
+			// Add Haptic: Right Hand
+			TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
+			HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
+			HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
+
+			TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
+			HapticValuesArray.Add(HapticRightJsonValueObject);
+
+			// Add Haptic Output Array To Action Set
+			ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
+
+			// Create Bindings File that includes all Action Sets
+			TSharedRef<FJsonObject> BindingsJsonObject = MakeShareable(new FJsonObject());
+			BindingsJsonObject->SetObjectField(TEXT(ACTION_SET), ActionSetJsonObject);
+			BindingsObject->SetObjectField(TEXT("bindings"), BindingsJsonObject);
+
+			// Set description of Bindings stub to Project Name
+			if (GConfig)
+			{
+				// Retrieve Project Name and Version from DefaultGame.ini
+				FString ProjectName;
+				FString ProjectVersion;
+
+				GConfig->GetString(
+					TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+					TEXT("ProjectName"),
+					ProjectName,
+					GGameIni
+				);
+
+				// Add Project Name and Version to Bindings stub
+				BindingsObject->SetStringField(TEXT("description"), (TEXT("%s"), *ProjectName));
+			}
+			else
+			{
+				BindingsObject->SetStringField(TEXT("description"), TEXT("SteamVRInput UE4 Plugin Generated Bindings"));
+			}
+
+			// Save controller binding
+			FString BindingsFilePath = BindingsPath / SupportedController.Name.ToString() + TEXT(".json");
+			FString OutputJsonString;
+			TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&OutputJsonString);
+			FJsonSerializer::Serialize(BindingsObject, JsonWriter);
+			FFileHelper::SaveStringToFile(OutputJsonString, *BindingsFilePath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+
+			// Add this generate bindings file to the Default Controller Bindings collections we have so far
+			DefaultBindings.Add(MakeShareable(new FJsonValueObject(BindingsObject)));
 		}
-
-		FString BindingsPath;
-		// TODO PRIORITY: Implement
-
-		// Creating bindings file
-		TSharedRef<FJsonObject> BindingsObject = MakeShareable(new FJsonObject());
-		BindingsObject->SetStringField(TEXT("name"), *FText::Format(NSLOCTEXT("SteamVR", "DefaultBindingsFor", "Default bindings for {0}"), Item.Value).ToString());
-		BindingsObject->SetStringField(TEXT("controller_type"), Item.Key);
-
-		// Create Action Bindings in JSON Format
-		TArray<TSharedPtr<FJsonValue>> JsonValuesArray;
-		GenerateActionBindings(InInputMapping, JsonValuesArray);
-
-		//Create Action Set
-		TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
-		ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
-
-		// TODO: Read from mappings instead (low pri) - perhaps more efficient pulling from template file?
-		// TODO: Only generate for supported controllers
-		// Add Skeleton Mappings
-		TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
-
-		// Add Skeleton: Left Hand 
-		TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
-		SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
-		SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
-
-		TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
-		SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
-
-		// Add Skeleton: Right Hand
-		TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
-		SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
-		SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
-
-		TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
-		SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
-
-		// Add Skeleton Input Array To Action Set
-		ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
-
-		// TODO: Read from mappings instead (lowpri) - see similar note to Skeleton Mappings
-		// Add Haptic Mappings
-		TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
-
-		// Add Haptic: Left Hand 
-		TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
-		HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
-		HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
-
-		TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
-		HapticValuesArray.Add(HapticLeftJsonValueObject);
-
-		// Add Haptic: Right Hand
-		TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
-		HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
-		HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
-
-		TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
-		HapticValuesArray.Add(HapticRightJsonValueObject);
-
-		// Add Haptic Output Array To Action Set
-		ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
-
-		// Create Bindings File that includes all Action Sets
-		TSharedRef<FJsonObject> BindingsJsonObject = MakeShareable(new FJsonObject());
-		BindingsJsonObject->SetObjectField(TEXT(ACTION_SET), ActionSetJsonObject);
-		BindingsObject->SetObjectField(TEXT("bindings"), BindingsJsonObject);
-
-		// Set description of Bindings stub to Project Name
-		if (GConfig)
-		{
-			// Retrieve Project Name and Version from DefaultGame.ini
-			FString ProjectName;
-			FString ProjectVersion;
-
-			GConfig->GetString(
-				TEXT("/Script/EngineSettings.GeneralProjectSettings"),
-				TEXT("ProjectName"),
-				ProjectName,
-				GGameIni
-			);
-
-			// Add Project Name and Version to Bindings stub
-			BindingsObject->SetStringField(TEXT("description"), (TEXT("%s"), *ProjectName));
-		}
-		else
-		{
-			BindingsObject->SetStringField(TEXT("description"), TEXT("SteamVRInput UE4 Plugin Generated Bindings"));
-		}
-
-		// Save bindings file
-		// TODO PRIORITY: Implement
-
-		// Add path of generated device input file to the action manifest
-		// TODO PRIORITY: Implement
 	}
 }
 
@@ -568,157 +563,381 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 }
 #endif
 
-void FSteamVRInputDevice::BuildActionManifest()
+/* Generate the SteamVR Input Action Manifest file*/
+void FSteamVRInputDevice::GenerateActionManifest()
 {
-	if (VRInput() != nullptr)
-	{
+	// Set Action Manifest Path
+	const FString ManifestPath = FPaths::GeneratedConfigDir() / ACTION_MANIFEST;
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Action Manifest Path: %s"), *ManifestPath);
 
+	// Create Action Manifest json object
+	TSharedRef<FJsonObject> ActionManifestObject = MakeShareable(new FJsonObject());
+	TArray<FString> LocalizationFields = { "language_tag", "en"  };
+
+	// Set where to look for controller binding files and prepare file manager
+	const FString ControllerBindingsPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH;
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Controller Bindings Path: %s"), *ControllerBindingsPath);
+	IFileManager& FileManager = FFileManagerGeneric::Get();
+
+	// Define Controller Types supported by SteamVR
+	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
+	ControllerTypes.Empty();
+	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Knuckles Controllers")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive")));
+	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch")));
+	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads")));
+
+	#pragma region ACTION SETS
+		// Setup action set json objects
+		TArray<TSharedPtr<FJsonValue>> ActionSets;
+		TSharedRef<FJsonObject> ActionSetObject = MakeShareable(new FJsonObject());
+	
+		// Create action set objects
+		TArray<FString> StringFields = { 
+										 "name", TEXT(ACTION_SET),
+	    								 "usage", TEXT("leftright")
+										};
+		{
+			BuildJsonObject(StringFields, ActionSetObject);
+
+			// Add action sets array to the Action Manifest object
+			ActionSets.Add(MakeShareable(new FJsonValueObject(ActionSetObject)));
+			ActionManifestObject->SetArrayField(TEXT("action_sets"), ActionSets);
+
+			// Set localization text for the action set
+			LocalizationFields.Add(TEXT(ACTION_SET));
+			LocalizationFields.Add("Main Game Actions");
+		}
+	#pragma endregion
+
+	#pragma region ACTIONS
+		// Clear Actions cache
+		Actions.Empty();
+		
+		// Setup Input Mappings cache
 		TArray<FInputMapping> InputMappings;
 		TArray<FName> UniqueInputs;
 
-		// Get Project Action Settings
-		Actions.Empty();
+		// Check if this project have input settings
 		auto InputSettings = GetDefault<UInputSettings>();
-		if (InputSettings != nullptr)
+		if (InputSettings->IsValidLowLevelFast())
 		{
-			// Get all Action Key Mappings
-			TArray<FName> ActionNames;
-			InputSettings->GetActionNames(ActionNames);
-			for (const auto& ActionName : ActionNames)
-			{
-				// TODO PRIORITY: Implement
-			}
+			// Add project's input key mappings to SteamVR's Input Actions
+			ProcessKeyInputMappings(InputSettings, UniqueInputs);
 
-			// Get All Action Axis Mappings
-			TArray<FName> AxisNames;
-			InputSettings->GetAxisNames(AxisNames);
-			for (const auto& AxisName : AxisNames)
-			{
-				// TODO PRIORITY: Implement
-			}
+			// Add project's input axis mappings to SteamVR's Input Actions
+			ProcessKeyAxisMappings(InputSettings, UniqueInputs);
 
+			// Process all actions in this project (if any)
+			TArray<TSharedPtr<FJsonValue>> InputActionsArray;
+
+			// Reorganize all Unique Inputs to Valve style Input to Actions association
 			for (FName UniqueInput : UniqueInputs)
 			{
-				// TODO PRIORITY: Implement
+				// Create New Input Mapping from Unique Input Key
+				FInputMapping NewInputMapping = FInputMapping();
+				NewInputMapping.InputKey = UniqueInput;
+
+				// Go through all processes key and axes actions
+				for (FSteamVRInputAction Action : Actions)
+				{
+					// Setup the Action object and its fields
+					TSharedRef<FJsonObject> ActionObject = MakeShareable(new FJsonObject());
+					TArray<FString> ActionFields = {
+													 TEXT("name"), Action.Path,
+													 TEXT("type"), Action.GetActionTypeName(),
+					};
+
+					// Add optional field if this isn't a required field
+					if (!Action.bRequirement)
+					{
+						FString Optional[] = { TEXT("requirement"), TEXT("optional") };
+						ActionFields.Append(Optional, 2);
+					}
+
+					// Add this action to the array of input actions
+					BuildJsonObject(ActionFields, ActionObject);
+					InputActionsArray.Add(MakeShareable(new FJsonValueObject(ActionObject)));
+
+					// Set localization text for this action
+					FString LocalizationArray[] = { Action.Path, Action.Name.ToString() };
+					LocalizationFields.Append(LocalizationArray, 2);
+				}
+
+				InputMappings.Add(NewInputMapping);
 			}
 
-			// Skeletal Data
+			// If there are input actions, add them to the action manifest object
+			if (InputActionsArray.Num() > 0)
 			{
-				FString ConstActionPath = FString(TEXT(ACTION_PATH_SKELETON_LEFT));
-				Actions.Add(FSteamVRAction(ConstActionPath, EActionType::Skeleton, true,
-					FName(TEXT("Skeleton (Left)")), FString(TEXT(ACTION_PATH_SKEL_HAND_LEFT))));
-			}
-			{
-				FString ConstActionPath = FString(TEXT(ACTION_PATH_SKELETON_RIGHT));
-				Actions.Add(FSteamVRAction(ConstActionPath, EActionType::Skeleton, true,
-					FName(TEXT("Skeleton (Right)")), FString(TEXT(ACTION_PATH_SKEL_HAND_RIGHT))));
-			}
-
-			// Open console
-			{
-				// TODO PRIORITY: Implement
-			}
-
-			// Haptics
-			{
-				FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_LEFT));
-				Actions.Add(FSteamVRAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Left)"))));
-			}
-			{
-				FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_RIGHT));
-				Actions.Add(FSteamVRAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Right)"))));
+				ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
 			}
 		}
-
-		if (Actions.Num() > 0)
+		else
 		{
-			const FString ManifestPath = FPaths::GeneratedConfigDir() / ACTION_MANIFEST;
-			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Manifest Path: %s"), *ManifestPath);
+			UE_LOG(LogSteamVRInputDevice, Error, TEXT("This project does not have any Input Actions defined! Please add Action to Input Mappings in Project Settings > Engine > Input."));
+		}
+	#pragma endregion
 
-			const FString BindingsDir;
-			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Bindings Path: %s"), *BindingsDir);
+	#pragma region DEFAULT CONTROLLER BINDINGS
+			// Start search for controller bindings files
+			TArray<FString> ControllerBindingFiles;
+			FileManager.FindFiles(ControllerBindingFiles, *ControllerBindingsPath, TEXT("*.json"));
+			UE_LOG(LogSteamVRInputDevice, Log, TEXT("Searching for Controller Bindings files at: %s"), *ControllerBindingsPath);
 
-			TSharedPtr<FJsonObject> DescriptionsObject = MakeShareable(new FJsonObject);
-
-			TArray<TSharedPtr<FJsonValue>> ActionsArray;
-			for (auto Action : Actions)
+			// Look for existing controller binding files
+			for (FString& BindingFile : ControllerBindingFiles)
 			{
-				TSharedRef<FJsonObject> ActionObject = MakeShareable(new FJsonObject());
-				// TODO PRIORITY: Implement
+				// Setup cache
+				FString StringCache;
+				FString ControllerType;
 
-				// Add hand if skeleton
-				if (!Action.Skel.IsEmpty())
+				// Load Binding File to a string
+				FFileHelper::LoadFileToString(StringCache, *(ControllerBindingsPath / BindingFile));
+
+				// Convert string to json object
+				TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(StringCache);
+				TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+
+				// Attempt to deserialize string cache to a json object
+				if (!FJsonSerializer::Deserialize(JsonReader, JsonObject) || !JsonObject.IsValid())
 				{
-					ActionObject->SetStringField(TEXT("skeleton"), Action.Skel);
+					UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Invalid json format for controller binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
+				}
+				// Attempt to find what controller this binding file is for (yeah ended this comment with a preposition)
+				else if (!JsonObject->TryGetStringField(TEXT("controller_type"), ControllerType) || ControllerType.IsEmpty())
+				{
+					UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to determine controller type for this binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
+				}
+				else
+				{
+					// Create Controller Binding Object for this binding file
+					TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
+					TArray<FString> ControllerStringFields = { "controller_type", *ControllerType,
+													 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*(ControllerBindingsPath / BindingFile))
+					};
+					BuildJsonObject(ControllerStringFields, ControllerBindingObject);
+					ControllerBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
+
+					// Tag this controller as generated
+					for (auto& DefaultControllerType : ControllerTypes)
+					{
+						if (DefaultControllerType.Name == FName(*ControllerType))
+						{
+							DefaultControllerType.bIsGenerated = true;
+						}
+					}
+				}
+			}
+
+			// If we're running in the editor, build the controller bindings if they don't exist yet
+	#if WITH_EDITOR
+			GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings);
+	#endif
+
+			// Add the default bindings object to the action manifest
+			if (ControllerBindings.Num() == 0)
+			{
+				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Unable to find and/or generate controller binding files in: %s"), *ControllerBindingsPath);
+			}
+			else
+			{
+				ActionManifestObject->SetArrayField(TEXT("default_bindings"), ControllerBindings);
+			}
+	#pragma endregion
+
+	#pragma region LOCALIZATION
+		// Setup localizations json objects
+		TArray<TSharedPtr<FJsonValue>> Localizations;
+		TSharedRef<FJsonObject> LocalizationsObject = MakeShareable(new FJsonObject());
+
+		// Build & add localizations to the Action Manifest object
+		BuildJsonObject(LocalizationFields, LocalizationsObject);
+		Localizations.Add(MakeShareable(new FJsonValueObject(LocalizationsObject)));
+		ActionManifestObject->SetArrayField(TEXT("localization"), Localizations);
+	#pragma endregion
+
+	// Serialize Action Manifest Object
+	FString ActionManifest;
+	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&ActionManifest);
+	FJsonSerializer::Serialize(ActionManifestObject, JsonWriter);
+
+	// Save json as a UTF8 file
+	if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+	{
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
+		return;
+	}
+}
+
+/* Build a JSON object made up of string fields, all entries must be paired */
+bool FSteamVRInputDevice::BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject)
+{
+	// Check if StringFields array is even
+	if (StringFields.Num() > 1 && StringFields.Num() % 2 == 0)
+	{
+		// Generate json object of string field pairs
+		for (int32 i = 0; i < StringFields.Num(); i+=2)
+		{
+			OutJsonObject->SetStringField(StringFields[i], StringFields[i+1]);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs)
+{
+	// Retrieve key actions setup in this project
+	TArray<FName> KeyActionNames;
+	InputSettings->GetActionNames(KeyActionNames);
+
+	// Process all key actions found
+	for (const FName& KeyActionName : KeyActionNames)
+	{
+		// Retrieve input keys associated with this action
+		TArray<FInputActionKeyMapping> KeyMappings;
+		InputSettings->GetActionMappingByName(KeyActionName, KeyMappings);
+
+		// Look for a Motion Controller in the key mappings
+		FInputActionKeyMapping* KeyMapping;
+		KeyMapping = KeyMappings.FindByPredicate([](FInputActionKeyMapping& Mapping)
+		{
+			return Mapping.Key.GetFName().ToString().StartsWith(TEXT("MotionController"));
+		});
+
+		// If no motion controllers are found, get the next valid device input (catch all)
+		if (KeyMapping == nullptr)
+		{
+			KeyMapping = KeyMappings.FindByPredicate([](FInputActionKeyMapping& Mapping)
+			{
+				return Mapping.Key.IsValid();
+			});
+		}
+
+		// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
+		if (KeyMapping != nullptr)
+		{
+			Actions.Add(FSteamVRInputAction(
+				FString(ACTION_PATH_IN) / KeyActionName.ToString(),
+				KeyActionName,
+				KeyMapping->Key.GetFName(),
+				false));
+
+			// Add input names here for use in the auto-generation of controller bindings
+			InOutUniqueInputs.AddUnique(KeyMapping->Key.GetFName());
+		}
+	}
+}
+
+void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs)
+{
+	// Retrieve Key Axis names
+	TArray<FName> KeyAxisNames;
+	InputSettings->GetAxisNames(KeyAxisNames);
+
+	// [1D] All Axis Mappings will have a corresponding Vector1 Action associated with them
+	for (const FName& XAxisName : KeyAxisNames)
+	{
+		// Retrieve input axes associated with this action
+		TArray<FInputAxisKeyMapping> AxisMappings;
+		InputSettings->GetAxisMappingByName(XAxisName, AxisMappings);
+		
+		// Retrieve all float axes
+		TArray<FInputAxisKeyMapping> FloatMappings = AxisMappings.FilterByPredicate([](const FInputAxisKeyMapping& Mapping)
+		{
+			return Mapping.Key.IsFloatAxis();
+		});
+
+		// Add axes names here for use in the auto-generation of controller bindings
+		for (auto AxMapping : FloatMappings)
+		{
+			InOutUniqueInputs.AddUnique(AxMapping.Key.GetFName());
+		}
+
+		if (FloatMappings.Num() > 0)
+		{
+			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
+			FString KeySuffix = (FloatMappings[0].Key.GetFName().ToString()).Right(6);
+			if (KeySuffix.Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				KeySuffix.Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
+				)
+			{
+				// Axes caches
+				FName YAxisName = NAME_None;
+				FName ZAxisName = NAME_None;
+
+				// Go through all the axis names again looking for Y and Z inputs that correspond to this X input
+				for (const FName& KeyAxisNameInner : KeyAxisNames)
+				{
+					// Retrieve input axes associated with this action
+					TArray<FInputAxisKeyMapping> AxisMappingsInner;
+					InputSettings->GetAxisMappingByName(KeyAxisNameInner, AxisMappingsInner);
+
+					// Retrieve all float axes
+					TArray<FInputAxisKeyMapping> FloatMappingsInner = AxisMappingsInner.FilterByPredicate([](const FInputAxisKeyMapping& Mapping)
+					{
+						return Mapping.Key.IsFloatAxis();
+					});
+
+					// Find Y & Z axes
+					for (auto FloatMappingInner : FloatMappingsInner)
+					{
+						// Get the suffix of this key
+						FString KeyNameSuffix = (FloatMappingInner.Key.GetFName().ToString()).Right(6);
+
+						// Populate Axes Caches
+						if (KeyNameSuffix.Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+							KeyNameSuffix.Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
+							)
+						{
+							YAxisName = KeyAxisNameInner;
+						}
+						else if (KeyNameSuffix.Contains(TEXT("_Z"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+							KeyNameSuffix.Contains(TEXT("Z-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
+							)
+						{
+							ZAxisName = KeyAxisNameInner;
+						}
+					}
 				}
 
-				// Add requirement field for optionals
-				// TODO PRIORITY: Implement
-			}
-
-			TArray<TSharedPtr<FJsonValue>> DefaultBindings;
-			{
-				IFileManager& FileManager = FFileManagerGeneric::Get();
-
-				TArray<FString> FoundFiles;
-				FileManager.FindFiles(FoundFiles, *BindingsDir, TEXT("*.json"));
-				UE_LOG(LogSteamVRInputDevice, Log, TEXT("Searching for device input bindings files in %s"), *BindingsDir);
-				for (FString& File : FoundFiles)
+				if (YAxisName != NAME_None && ZAxisName == NAME_None)
 				{
-					// TODO PRIORITY: Implement
+					// [2D] There's a Y Axis but no Z, this must be a Vector2
+					FString AxisName2D = XAxisName.ToString() +
+						TEXT(",") +
+						YAxisName.ToString() +
+						TEXT(" [2D]");
+					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
+					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisName, YAxisName, FVector2D()));
 				}
-
-#if WITH_EDITOR
-				BuildDefaultActionBindings(BindingsDir, DefaultBindings, Actions, InputMappings);
-#else
-				// TODO PRIORITY: Implement
-
-#endif
-			}
-
-			TArray<TSharedPtr<FJsonValue>> ActionSets;
-			{
-				// TODO PRIORITY: Implement
-			}
-
-			DescriptionsObject->SetStringField(TEXT("language_tag"), TEXT("en"));
-			TArray<TSharedPtr<FJsonValue>> Localization;
-			{
-				Localization.Add(MakeShareable(new FJsonValueObject(DescriptionsObject)));
-			}
-
-			TSharedRef<FJsonObject> RootObject = MakeShareable(new FJsonObject());
-			// TODO PRIORITY: Implement
-
-			// TODO PRIORITY: Implement
-
-			EVRInputError Err = VRInput()->SetActionManifestPath(TCHAR_TO_ANSI(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-
-			if (Err != VRInputError_None)
-			{
-				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Failed to pass action manifest, %s, to SteamVR. Error: %d"), *ManifestPath, (int32)Err);
-			}
-
-			Err = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
-			if (Err != VRInputError_None)
-			{
-				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Couldn't get main action set handle. Error: %d"), (int32)Err);
-			}
-
-			for (auto& Action : Actions)
-			{
-				// TODO PRIORITY: Implement
-			}
-
-#if WITH_EDITOR
-			if (!ActionMappingsChangedHandle.IsValid())
-			{
-				ActionMappingsChangedHandle = FEditorDelegates::OnActionAxisMappingsChanged.AddLambda([this]()
+				else if (YAxisName !=NAME_None && ZAxisName != NAME_None)
 				{
-					UE_LOG(LogSteamVRInputDevice, Warning, TEXT("You will need to quit and restart both SteamVR and the Editor in order to use the modified input actions or axes."));
-				});
-			}
-#endif
+					// [3D] There's a Z Axis, this must be a Vector3
+					FString AxisName3D = XAxisName.ToString() +
+											TEXT(",") +
+											YAxisName.ToString() + TEXT(",") +
+											ZAxisName.ToString() +
+											TEXT(" [3D]");
+					FString ActionPath3D = FString(ACTION_PATH_IN) / AxisName3D;
+					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisName, YAxisName, ZAxisName, FVector()));
+				}
+			}		
+		}
+
+		// If we find at least one valid, then add this action to the list of SteamVR Input Actions as Vector1
+		if (!XAxisName.IsNone() && FloatMappings.Num() > 0)
+		{
+			// [1D] Populate all Vector1 actions
+			FString AxisName1D = XAxisName.ToString() + TEXT(" [1D]");
+			FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
+			Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisName, 0.0f));
 		}
 	}
 }
