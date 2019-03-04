@@ -27,7 +27,7 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	InitControllerMappings();
 	InitKnucklesControllerKeys();
 	GenerateActionManifest();
-
+	
 	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_None;
 	SteamVRSystem = VR_Init(&SteamVRInitError, VRApplication_Scene);
@@ -597,7 +597,7 @@ void FSteamVRInputDevice::GenerateActionManifest()
 	const FString ControllerBindingsPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Controller Bindings Path: %s"), *ControllerBindingsPath);
 	IFileManager& FileManager = FFileManagerGeneric::Get();
-
+	
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
 	ControllerTypes.Empty();
@@ -741,7 +741,7 @@ void FSteamVRInputDevice::GenerateActionManifest()
 						FString Optional[] = { TEXT("requirement"), TEXT("optional") };
 						ActionFields.Append(Optional, 2);
 					}
-
+					
 					if (!UniqueActions.Contains(Action.Name.ToString()))
 					{
 						// Add this action to the array of input actions
@@ -872,6 +872,9 @@ void FSteamVRInputDevice::GenerateActionManifest()
 		UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
 		return;
 	}
+
+	// Register Application to SteamVR
+	RegisterApplication(ManifestPath);
 }
 
 /* Build a JSON object made up of string fields, all entries must be paired */
@@ -1030,6 +1033,80 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 	}
 }
 
+void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
+{
+#if WITH_EDITOR
+	// Load application manifest
+	EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)), false);
+	UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Registering Application Manifest: %d"), AppError);
+#endif
+
+	// Set Action Manifest
+	EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+	//EVRInputError InputError;
+
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Registering Application Manifest: %s"), *ManifestPath);
+	//GetInputError(InputError, FString(TEXT("Setting Action Manifest Path Result")));
+
+	// Set Main Action Set
+	InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
+	GetInputError(InputError, FString(TEXT("Retrieveng Skeletal Action Set Handle Result")));
+
+	// Fill in Action handles for each registered action
+	for (auto& Action : Actions)
+	{
+		vr::VRActionHandle_t Handle;
+		InputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
+		Action.Handle = Handle;
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
+		GetInputError(InputError, FString(TEXT("Setting Action Handle Path Result")));
+	}
+
+#if WITH_EDITOR
+	// Get Project Name this plugin is used in
+	uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
+	FString AppName;
+	if (GConfig)
+	{
+		// Retrieve Project Name and Version from DefaultGame.ini
+		FString ProjectName;
+		FString ProjectVersion;
+
+		GConfig->GetString(
+			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+			TEXT("ProjectName"),
+			ProjectName,
+			GGameIni
+		);
+
+		// Add Project Name and Version to Bindings stub
+		AppName = ProjectName + TEXT(".exe");
+	}
+	else
+	{
+		AppName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
+	}
+
+	// TODO: Set Custom App Key when running in Editor
+	FString AppKey = TEXT("application.generated.ue.") + AppName;
+	char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
+
+	// Set AppKey
+	AppError = VRApplications()->IdentifyApplication(FPlatformProcess::GetCurrentProcessId(), SteamVRAppKey);
+	UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Identify Application [%d][%s] to SteamVR Result (0 = Success): %d"), AppProcessId, *AppKey, AppError);
+
+	//Check if SteamVR recognizes this app
+	//uint32 VRpid = VRApplications()->GetApplicationProcessId(SteamVRAppKey);
+	//FString StringCache = *FString(UTF8_TO_TCHAR(SteamVRAppKey));
+	//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("APPLICATION HANDLE IS: UE4 Reported ID [%d] SteamVR Reported PID [%d] AppPath {%s} %s"), 
+	//	FPlatformProcess::GetCurrentProcessId(), 
+	//	VRpid, 
+	//	*(FPlatformProcess::GetApplicationName(FPlatformProcess::GetCurrentProcessId())),
+	//	*StringCache);
+#endif
+
+}
+
 void FSteamVRInputDevice::RegisterDeviceChanges()
 {
 	// TODO PRIORITY: Implement
@@ -1130,58 +1207,58 @@ void FSteamVRInputDevice::GetInputError(EVRInputError InputError, FString InputA
 	switch (InputError)
 	{
 	case VRInputError_None:
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT ERROR] %s: Success"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] %s: Success"), *InputAction);
 		break;
 	case VRInputError_NameNotFound:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Name Not Found"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Name Not Found"), *InputAction);
 		break;
 	case VRInputError_WrongType:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Wrong Type"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Wrong Type"), *InputAction);
 		break;
 	case VRInputError_InvalidHandle:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Handle"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Handle"), *InputAction);
 		break;
 	case VRInputError_InvalidParam:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Param"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Param"), *InputAction);
 		break;
 	case VRInputError_NoSteam:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: No Steam"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: No Steam"), *InputAction);
 		break;
 	case VRInputError_MaxCapacityReached:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s:  Max Capacity Reached"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s:  Max Capacity Reached"), *InputAction);
 		break;
 	case VRInputError_IPCError:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: IPC Error"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: IPC Error"), *InputAction);
 		break;
 	case VRInputError_NoActiveActionSet:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: No Active Action Set"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: No Active Action Set"), *InputAction);
 		break;
 	case VRInputError_InvalidDevice:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Device"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Device"), *InputAction);
 		break;
 	case VRInputError_InvalidSkeleton:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Skeleton"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Skeleton"), *InputAction);
 		break;
 	case VRInputError_InvalidBoneCount:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Bone Count"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Bone Count"), *InputAction);
 		break;
 	case VRInputError_InvalidCompressedData:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Invalid Compressed Data"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Invalid Compressed Data"), *InputAction);
 		break;
 	case VRInputError_NoData:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: No Data"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: No Data"), *InputAction);
 		break;
 	case VRInputError_BufferTooSmall:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Buffer Too Small"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Buffer Too Small"), *InputAction);
 		break;
 	case VRInputError_MismatchedActionManifest:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Mismatched Action Manifest"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Mismatched Action Manifest"), *InputAction);
 		break;
 	case VRInputError_MissingSkeletonData:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Missing Skeleton Data"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Missing Skeleton Data"), *InputAction);
 		break;
 	default:
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT ERROR] %s: Unknown Error"), *InputAction);
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("[STEAMVR INPUT] %s: Unknown Error"), *InputAction);
 		break;
 	}
 

@@ -2,6 +2,7 @@
 
 #include "IInputDevice.h"
 #include "Core.h"
+#include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "SteamVRInputTypes.h"
@@ -114,6 +115,7 @@ private:
 	void ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 	void ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 
+	void RegisterApplication(FString ManifestPath);
 	void RegisterDeviceChanges();
 	bool RegisterController(uint32 DeviceIndex);
 	void DetectHandednessSwap();
