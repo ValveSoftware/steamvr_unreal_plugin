@@ -327,6 +327,7 @@ void FSteamVRInputDevice::InitControllerMappings()
 }
 
 #if WITH_EDITOR
+/* Editor Only - Generate the SteamVR Controller Binding files */
 void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping)
 {
 	// Create the bindings directory if it doesn't exist
@@ -404,7 +405,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			BindingsJsonObject->SetObjectField(TEXT(ACTION_SET), ActionSetJsonObject);
 			BindingsObject->SetObjectField(TEXT("bindings"), BindingsJsonObject);
 
-			// Set description of Bindings stub to Project Name
+			// Set description of Bindings file to the Project Name
 			if (GConfig)
 			{
 				// Retrieve Project Name and Version from DefaultGame.ini
@@ -433,110 +434,128 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			FJsonSerializer::Serialize(BindingsObject, JsonWriter);
 			FFileHelper::SaveStringToFile(OutputJsonString, *BindingsFilePath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 
-			// Add this generate bindings file to the Default Controller Bindings collections we have so far
-			DefaultBindings.Add(MakeShareable(new FJsonValueObject(BindingsObject)));
+			// Create Controller Binding Object for this binding file
+			TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
+			TArray<FString> ControllerStringFields = { "controller_type", *SupportedController.Name.ToString(),
+											 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
+			};
+			BuildJsonObject(ControllerStringFields, ControllerBindingObject);
+			DefaultBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
+
+			// Tag this controller as generated
+			SupportedController.bIsGenerated = true;
 		}
 	}
 }
 
+/* Editor Only - Utility function that generates appropriate action bindings based on UE Input Mappings */
 void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray)
 {
 	for (int i = 0; i < InInputMapping.Num(); i++)
 	{
-		// Create Action Input
-		TSharedRef<FJsonObject> ActionInputJsonObject = MakeShareable(new FJsonObject());
-		//ActionInputJsonObject->SetObjectField(TEXT("force"), ActionPathJsonObject);
-
-		// TODO: Catch curls and splays in action events
-		if (InInputMapping[i].InputKey.ToString().Contains(TEXT("Curl"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
-			InInputMapping[i].InputKey.ToString().Contains(TEXT("Splay"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
-			continue;
-
-		// TODO: Bitmask - consider button press abstractions; perhaps several enums?
-		// Set Input Type
-		bool bIsAxis;
-		bool bIsTrigger;
-		bool bIsThumbstick;
-		bool bIsTrackpad;
-		bool bIsGrip;
-		bool bIsCapSense;
-		bool bIsLeft;
-		bool bIsFaceButton1;   // TODO: Better way of abstracting buttons
-		bool bIsFaceButton2;
-
-		// Set Cache Vars
-		FName CacheMode;
-		FString CacheType;
-		FString CachePath;
-
-		if (InInputMapping[i].InputKey.ToString().Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
-			InInputMapping[i].InputKey.ToString().Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
-			InInputMapping[i].InputKey.ToString().Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
-			InInputMapping[i].InputKey.ToString().Contains(TEXT("Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+		for (int32 j = 0; j < InInputMapping[i].Actions.Num(); j++)
 		{
-			bIsAxis = true;
-		}
-		else
-		{
+			// TODO: Catch curls and splays in action events
+			if (InInputMapping[i].InputKey.ToString().Contains(TEXT("Curl"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("Splay"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+				continue;
+
+			// TODO: Bitmask - consider button press abstractions; perhaps several enums?
+			// Set Input Type
+			bool bIsAxis;
+			bool bIsTrigger;
+			bool bIsThumbstick;
+			bool bIsTrackpad;
+			bool bIsGrip;
+			bool bIsCapSense;
+			bool bIsLeft;
+			bool bIsFaceButton1;   // TODO: Better way of abstracting buttons
+			bool bIsFaceButton2;
+
+			// Set Cache Vars
+			FName CacheMode;
+			FString CacheType;
+			FString CachePath;
 			bIsAxis = false;
-		}
 
-		bIsTrigger = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsThumbstick = InInputMapping[i].InputKey.ToString().Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsTrackpad = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsGrip = InInputMapping[i].InputKey.ToString().Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsCapSense = InInputMapping[i].InputKey.ToString().Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsLeft = InInputMapping[i].InputKey.ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsFaceButton1 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-		bIsFaceButton2 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			if (InInputMapping[i].InputKey.ToString().Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("_YAxis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("_Z"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("_ZAxis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				InInputMapping[i].InputKey.ToString().Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+			{
+				bIsAxis = true;
+			}
+			else
+			{
+				// Check if any of the actions associated with this Input Key have the [XD] axis designation
+				for (auto& Action : InInputMapping[i].Actions)
+				{
+					if (Action.Right(2) == TEXT("D]"))
+					{
+						bIsAxis = true;
+						break;
+					}
+				}
+			}
 
-		// Set Cache Mode
-		CacheMode = bIsTrigger || bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
-		CacheMode = bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
-		CacheMode = bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
-		CacheMode = bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
+			bIsTrigger = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsThumbstick = InInputMapping[i].InputKey.ToString().Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsTrackpad = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsGrip = InInputMapping[i].InputKey.ToString().Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsCapSense = InInputMapping[i].InputKey.ToString().Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsLeft = InInputMapping[i].InputKey.ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsFaceButton1 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			bIsFaceButton2 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 
-		// Set Cache Path
-		if (bIsTrigger)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_TRIGGER_LEFT)) : FString(TEXT(ACTION_PATH_TRIGGER_RIGHT));
-		}
-		else if (bIsThumbstick)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_THUMBSTICK_LEFT)) : FString(TEXT(ACTION_PATH_THUMBSTICK_RIGHT));
-		}
-		else if (bIsTrackpad)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_TRACKPAD_LEFT)) : FString(TEXT(ACTION_PATH_TRACKPAD_RIGHT));
-		}
-		else if (bIsGrip)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
-		}
-		else if (bIsFaceButton1)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_BTN_A_LEFT)) : FString(TEXT(ACTION_PATH_BTN_A_RIGHT));
-		}
-		else if (bIsFaceButton2)
-		{
-			CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_BTN_B_LEFT)) : FString(TEXT(ACTION_PATH_BTN_B_RIGHT));
-		}
+			// Set Cache Mode
+			CacheMode = bIsTrigger || bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
+			CacheMode = bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
+			CacheMode = bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
+			CacheMode = bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
 
-		// Create Action Source
-		FActionSource ActionSource = FActionSource(CacheMode, CachePath);
-		TSharedRef<FJsonObject> ActionSourceJsonObject = MakeShareable(new FJsonObject());
-		ActionSourceJsonObject->SetStringField(TEXT("mode"), ActionSource.Mode.ToString());
+			// Set Cache Path
+			if (bIsTrigger)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_TRIGGER_LEFT)) : FString(TEXT(ACTION_PATH_TRIGGER_RIGHT));
+			}
+			else if (bIsThumbstick)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_THUMBSTICK_LEFT)) : FString(TEXT(ACTION_PATH_THUMBSTICK_RIGHT));
+			}
+			else if (bIsTrackpad)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_TRACKPAD_LEFT)) : FString(TEXT(ACTION_PATH_TRACKPAD_RIGHT));
+			}
+			else if (bIsGrip)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
+			}
+			else if (bIsFaceButton1)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_BTN_A_LEFT)) : FString(TEXT(ACTION_PATH_BTN_A_RIGHT));
+			}
+			else if (bIsFaceButton2)
+			{
+				CachePath = bIsLeft ? FString(TEXT(ACTION_PATH_BTN_B_LEFT)) : FString(TEXT(ACTION_PATH_BTN_B_RIGHT));
+			}
 
-		// Set Action Path
-		ActionSourceJsonObject->SetStringField(TEXT("path"), ActionSource.Path);
+			// Create Action Source
+			FActionSource ActionSource = FActionSource(CacheMode, CachePath);
+			TSharedRef<FJsonObject> ActionSourceJsonObject = MakeShareable(new FJsonObject());
+			ActionSourceJsonObject->SetStringField(TEXT("mode"), ActionSource.Mode.ToString());
 
-		// Set Key Mappings
-		for (FString Action : InInputMapping[i].Actions)
-		{
+			// Set Action Path
+			ActionSourceJsonObject->SetStringField(TEXT("path"), ActionSource.Path);
+
+			// Set Key Mappings
+			TSharedPtr<FJsonObject> ActionInputJsonObject = MakeShareable(new FJsonObject());
+
 			// Create Action Path
-			FActionPath ActionPath = FActionPath(Action);
 			TSharedRef<FJsonObject> ActionPathJsonObject = MakeShareable(new FJsonObject());
-			ActionPathJsonObject->SetStringField(TEXT("output"), ActionPath.Path);
+			ActionPathJsonObject->SetStringField(TEXT("output"), InInputMapping[i].Actions[j]);
 
 			// Set Cache Type
 			if (bIsAxis)
@@ -551,14 +570,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 
 			// Set Action Input Type
 			ActionInputJsonObject->SetObjectField(CacheType, ActionPathJsonObject);
+
+			// Set Inputs
+			ActionSourceJsonObject->SetObjectField(TEXT("inputs"), ActionInputJsonObject);
+
+			// Add to Sources Array
+			TSharedRef<FJsonValueObject> JsonValueObject = MakeShareable(new FJsonValueObject(ActionSourceJsonObject));
+			JsonValuesArray.Add(JsonValueObject);
 		}
-
-		// Set Inputs
-		ActionSourceJsonObject->SetObjectField(TEXT("inputs"), ActionInputJsonObject);
-
-		// Add to Sources Array
-		TSharedRef<FJsonValueObject> JsonValueObject = MakeShareable(new FJsonValueObject(ActionSourceJsonObject));
-		JsonValuesArray.Add(JsonValueObject);
 	}
 }
 #endif
@@ -634,18 +653,83 @@ void FSteamVRInputDevice::GenerateActionManifest()
 			// Process all actions in this project (if any)
 			TArray<TSharedPtr<FJsonValue>> InputActionsArray;
 
-			// Reorganize all Unique Inputs to Valve style Input to Actions association
+			// Setup cache for actions
+			TArray<FString> UniqueActions;
+
+			// Reorganize all unique inputs to SteamVR style Input-to-Actions association
 			for (FName UniqueInput : UniqueInputs)
 			{
 				// Create New Input Mapping from Unique Input Key
 				FInputMapping NewInputMapping = FInputMapping();
+				FInputMapping NewAxisMapping = FInputMapping();
 				NewInputMapping.InputKey = UniqueInput;
+				NewAxisMapping.InputKey = UniqueInput;
 
-				// Go through all processes key and axes actions
-				for (FSteamVRInputAction Action : Actions)
+				// Go through all the project actions
+				for (FSteamVRInputAction& Action : Actions)
 				{
-					// Setup the Action object and its fields
-					TSharedRef<FJsonObject> ActionObject = MakeShareable(new FJsonObject());
+					// Check for boolean/digital input
+					if (Action.Type == EActionType::Boolean)
+					{
+						// Set Key Actions Linked To This Input Key
+						TArray<FInputActionKeyMapping> KeyMappings;
+						InputSettings->GetActionMappingByName(Action.Name, KeyMappings);
+						for (FInputActionKeyMapping KeyMapping : KeyMappings)
+						{
+							if (UniqueInput.IsEqual(KeyMapping.Key.GetFName()))
+							{
+								NewInputMapping.Actions.AddUnique(Action.Path);
+							}
+						}
+					}
+
+					// Check for axes/analog input
+					if (Action.Type == EActionType::Vector1 || Action.Type == EActionType::Vector2 || Action.Type == EActionType::Vector3)
+					{
+						// Set Axis Actions Linked To This Input Key
+						FString ActionAxis = Action.Name.ToString().LeftChop(5); // Remove [XD] Axis indicator before doing any comparisons
+
+						// Parse comma delimited action names into an array
+						TArray<FString> ActionAxisArray;
+						ActionAxis.ParseIntoArray(ActionAxisArray, TEXT(","), true);
+
+						for (auto& ActionAxisName : ActionAxisArray)
+						{
+							TArray<FInputAxisKeyMapping> AxisMappings;
+							InputSettings->GetAxisMappingByName(FName(*ActionAxisName), AxisMappings);
+	
+							for (FInputAxisKeyMapping AxisMapping : AxisMappings)
+							{
+								if (UniqueInput.IsEqual(AxisMapping.Key.GetFName()))
+								{
+									// Check for X Axis
+									if (Action.KeyX.IsValid() && Action.KeyX.IsEqual(AxisMapping.Key.GetFName()))
+									{
+										// Add 1D Action
+										NewAxisMapping.Actions.AddUnique(Action.Path);
+	
+										FString ActionDimension = Action.Name.ToString().Right(4);
+	
+										if (ActionDimension == TEXT("[2D]"))
+										{
+											// Add 2D Action
+											FString Action2D = Action.Path.LeftChop(5) + TEXT(" [2D]");
+											NewAxisMapping.Actions.AddUnique(Action2D);
+										}
+	
+										if (ActionDimension == TEXT("[3D]"))
+										{
+											// Add 3D Action
+											FString Action3D = Action.Path.LeftChop(5) + TEXT(" [3D]");
+											NewAxisMapping.Actions.AddUnique(Action3D);
+										}
+									}
+								}
+							}
+						}
+					}
+
+					// Setup the action fields
 					TArray<FString> ActionFields = {
 													 TEXT("name"), Action.Path,
 													 TEXT("type"), Action.GetActionTypeName(),
@@ -658,16 +742,33 @@ void FSteamVRInputDevice::GenerateActionManifest()
 						ActionFields.Append(Optional, 2);
 					}
 
-					// Add this action to the array of input actions
-					BuildJsonObject(ActionFields, ActionObject);
-					InputActionsArray.Add(MakeShareable(new FJsonValueObject(ActionObject)));
+					if (!UniqueActions.Contains(Action.Name.ToString()))
+					{
+						// Add this action to the array of input actions
+						TSharedRef<FJsonObject> ActionObject = MakeShareable(new FJsonObject());
+						BuildJsonObject(ActionFields, ActionObject);
+						InputActionsArray.AddUnique(MakeShareable(new FJsonValueObject(ActionObject)));
 
-					// Set localization text for this action
-					FString LocalizationArray[] = { Action.Path, Action.Name.ToString() };
-					LocalizationFields.Append(LocalizationArray, 2);
+						// Add this action to a cache of unique actions for this project
+						UniqueActions.AddUnique(Action.Name.ToString());
+
+						// Set localization text for this action
+						FString LocalizationArray[] = { Action.Path, Action.Name.ToString() };
+						LocalizationFields.Append(LocalizationArray, 2);
+					}
 				}
 
-				InputMappings.Add(NewInputMapping);
+				// Add this Input Mapping to the main Input Mappings array
+				if (NewInputMapping.Actions.Num() > 0)
+				{
+					InputMappings.Add(NewInputMapping);
+				}
+
+				// Add this Axis Mapping to the main Input Mappings array
+				if (NewAxisMapping.Actions.Num() > 0)
+				{
+					InputMappings.Add(NewAxisMapping);
+				}
 			}
 
 			// If there are input actions, add them to the action manifest object
@@ -804,33 +905,22 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 		TArray<FInputActionKeyMapping> KeyMappings;
 		InputSettings->GetActionMappingByName(KeyActionName, KeyMappings);
 
-		// Look for a Motion Controller in the key mappings
-		FInputActionKeyMapping* KeyMapping;
-		KeyMapping = KeyMappings.FindByPredicate([](FInputActionKeyMapping& Mapping)
+		for (auto& KeyMapping : KeyMappings)
 		{
-			return Mapping.Key.GetFName().ToString().StartsWith(TEXT("MotionController"));
-		});
-
-		// If no motion controllers are found, get the next valid device input (catch all)
-		if (KeyMapping == nullptr)
-		{
-			KeyMapping = KeyMappings.FindByPredicate([](FInputActionKeyMapping& Mapping)
+			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")) ||
+				KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")) ||
+				KeyMapping.Key.GetFName().ToString().Contains(TEXT("Oculus")))
 			{
-				return Mapping.Key.IsValid();
-			});
-		}
+				// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
+				Actions.Add(FSteamVRInputAction(
+					FString(ACTION_PATH_IN) / KeyActionName.ToString(),
+					KeyActionName,
+					KeyMapping.Key.GetFName(),
+					false));
 
-		// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
-		if (KeyMapping != nullptr)
-		{
-			Actions.Add(FSteamVRInputAction(
-				FString(ACTION_PATH_IN) / KeyActionName.ToString(),
-				KeyActionName,
-				KeyMapping->Key.GetFName(),
-				false));
-
-			// Add input names here for use in the auto-generation of controller bindings
-			InOutUniqueInputs.AddUnique(KeyMapping->Key.GetFName());
+				// Add input names here for use in the auto-generation of controller bindings
+				InOutUniqueInputs.AddUnique(KeyMapping.Key.GetFName());
+			}
 		}
 	}
 }
@@ -844,26 +934,24 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 	// [1D] All Axis Mappings will have a corresponding Vector1 Action associated with them
 	for (const FName& XAxisName : KeyAxisNames)
 	{
+		// Set X Axis Key Name Cache
+		FName XAxisNameKey = NAME_None;
+
 		// Retrieve input axes associated with this action
 		TArray<FInputAxisKeyMapping> AxisMappings;
 		InputSettings->GetAxisMappingByName(XAxisName, AxisMappings);
-		
-		// Retrieve all float axes
-		TArray<FInputAxisKeyMapping> FloatMappings = AxisMappings.FilterByPredicate([](const FInputAxisKeyMapping& Mapping)
-		{
-			return Mapping.Key.IsFloatAxis();
-		});
 
-		// Add axes names here for use in the auto-generation of controller bindings
-		for (auto AxMapping : FloatMappings)
+		// Go through all axis mappings
+		for (auto& AxisMapping : AxisMappings)
 		{
-			InOutUniqueInputs.AddUnique(AxMapping.Key.GetFName());
-		}
+			// Add axes names here for use in the auto-generation of controller bindings
+			InOutUniqueInputs.AddUnique(AxisMapping.Key.GetFName());
 
-		if (FloatMappings.Num() > 0)
-		{
+			// Set Key Name
+			XAxisNameKey = AxisMapping.Key.GetFName();
+
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
-			FString KeySuffix = (FloatMappings[0].Key.GetFName().ToString()).Right(6);
+			FString KeySuffix = (AxisMapping.Key.GetFName().ToString()).Right(6);
 			if (KeySuffix.Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 				KeySuffix.Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 				)
@@ -871,6 +959,8 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				// Axes caches
 				FName YAxisName = NAME_None;
 				FName ZAxisName = NAME_None;
+				FName YAxisNameKey = NAME_None;
+				FName ZAxisNameKey = NAME_None;
 
 				// Go through all the axis names again looking for Y and Z inputs that correspond to this X input
 				for (const FName& KeyAxisNameInner : KeyAxisNames)
@@ -879,31 +969,29 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					TArray<FInputAxisKeyMapping> AxisMappingsInner;
 					InputSettings->GetAxisMappingByName(KeyAxisNameInner, AxisMappingsInner);
 
-					// Retrieve all float axes
-					TArray<FInputAxisKeyMapping> FloatMappingsInner = AxisMappingsInner.FilterByPredicate([](const FInputAxisKeyMapping& Mapping)
+					for (auto& AxisMappingInner : AxisMappingsInner)
 					{
-						return Mapping.Key.IsFloatAxis();
-					});
-
-					// Find Y & Z axes
-					for (auto FloatMappingInner : FloatMappingsInner)
-					{
-						// Get the suffix of this key
-						FString KeyNameSuffix = (FloatMappingInner.Key.GetFName().ToString()).Right(6);
-
+						// Find Y & Z axes
+						FString KeyNameSuffix = (AxisMappingInner.Key.GetFName().ToString()).Right(6);
+	
 						// Populate Axes Caches
 						if (KeyNameSuffix.Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 							KeyNameSuffix.Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 							)
 						{
 							YAxisName = KeyAxisNameInner;
+							YAxisNameKey = AxisMappingInner.Key.GetFName();
 						}
 						else if (KeyNameSuffix.Contains(TEXT("_Z"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 							KeyNameSuffix.Contains(TEXT("Z-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 							)
 						{
 							ZAxisName = KeyAxisNameInner;
+							ZAxisNameKey = AxisMappingInner.Key.GetFName();
 						}
+
+						// Add axes names here for use in the auto-generation of controller bindings
+						//InOutUniqueInputs.AddUnique(AxisMappingInner.Key.GetFName());
 					}
 				}
 
@@ -915,29 +1003,29 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						YAxisName.ToString() +
 						TEXT(" [2D]");
 					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
-					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisName, YAxisName, FVector2D()));
+					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisNameKey, YAxisNameKey, FVector2D()));
 				}
-				else if (YAxisName !=NAME_None && ZAxisName != NAME_None)
+				else if (YAxisName != NAME_None && ZAxisName != NAME_None)
 				{
 					// [3D] There's a Z Axis, this must be a Vector3
 					FString AxisName3D = XAxisName.ToString() +
-											TEXT(",") +
-											YAxisName.ToString() + TEXT(",") +
-											ZAxisName.ToString() +
-											TEXT(" [3D]");
+						TEXT(",") +
+						YAxisName.ToString() + TEXT(",") +
+						ZAxisName.ToString() +
+						TEXT(" [3D]");
 					FString ActionPath3D = FString(ACTION_PATH_IN) / AxisName3D;
-					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisName, YAxisName, ZAxisName, FVector()));
+					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisNameKey, YAxisNameKey, ZAxisNameKey, FVector()));
 				}
-			}		
-		}
+			}
 
-		// If we find at least one valid, then add this action to the list of SteamVR Input Actions as Vector1
-		if (!XAxisName.IsNone() && FloatMappings.Num() > 0)
-		{
-			// [1D] Populate all Vector1 actions
-			FString AxisName1D = XAxisName.ToString() + TEXT(" [1D]");
-			FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
-			Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisName, 0.0f));
+			// If we find at least one valid, then add this action to the list of SteamVR Input Actions as Vector1
+			if (!XAxisName.IsNone())
+			{
+				// [1D] Populate all Vector1 actions
+				FString AxisName1D = XAxisName.ToString() + TEXT(" [1D]");
+				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
+				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisNameKey, 0.0f));
+			}
 		}
 	}
 }
