@@ -327,6 +327,61 @@ void FSteamVRInputDevice::InitControllerMappings()
 }
 
 #if WITH_EDITOR
+/* Editor Only - Build an application manifest to override a system generated process when running in Editor */
+bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath)
+{
+	// Set SteamVR AppKey
+	OutAppKey = TEXT(APP_MANIFEST_PREFIX) + ProjectName;
+
+	// Set Action Manifest Path - same directory where the action manifest will be
+	OutAppManifestPath = FPaths::GeneratedConfigDir() / APP_MANIFEST_FILE;
+	IFileManager& FileManager = FFileManagerGeneric::Get();
+
+	// Create Application Manifest json objects
+	TSharedRef<FJsonObject> AppManifestObject = MakeShareable(new FJsonObject());
+	TArray<TSharedPtr<FJsonValue>> ManifestApps;
+
+	// Add current engine version being used as source
+	AppManifestObject->SetStringField("source", FString::Printf(TEXT("UE_%d.%d.%d"), ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION, ENGINE_PATCH_VERSION));
+
+	// Define the application setting that will be registered with SteamVR
+	TArray<TSharedPtr<FJsonValue>> ManifestApp;
+
+	// Create Application Object 
+	TSharedRef<FJsonObject> ApplicationObject = MakeShareable(new FJsonObject());
+	TArray<FString> AppStringFields = { "app_key",  OutAppKey,
+									    "launch_type", "url",
+										"url", "steam://launch/",
+										"action_manifest_path", *IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)
+									  };
+	BuildJsonObject(AppStringFields, ApplicationObject);
+	
+	// Create localization object
+	TSharedPtr<FJsonObject> LocStringsObject = MakeShareable(new FJsonObject());
+	TSharedRef<FJsonObject> AppNameObject = MakeShareable(new FJsonObject());	
+	AppNameObject->SetStringField("name", GameProjectName + " [UE Editor]");
+	LocStringsObject->SetObjectField("en_us", AppNameObject);
+	ApplicationObject->SetObjectField("strings", LocStringsObject);
+
+	// Assemble the json app manifest
+	ManifestApps.Add(MakeShareable(new FJsonValueObject(ApplicationObject)));
+	AppManifestObject->SetArrayField(TEXT("applications"), ManifestApps);
+
+	// Serialize json app manifest
+	FString AppManifestString;
+	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&AppManifestString);
+	FJsonSerializer::Serialize(AppManifestObject, JsonWriter);
+
+	// Save json as a UTF8 file
+	if (!FFileHelper::SaveStringToFile(AppManifestString, *OutAppManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+	{
+		UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate application manifest in: %s"), *OutAppManifestPath);
+		return false;
+	}
+
+	return true;
+}
+
 /* Editor Only - Generate the SteamVR Controller Binding files */
 void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping)
 {
@@ -406,26 +461,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			BindingsObject->SetObjectField(TEXT("bindings"), BindingsJsonObject);
 
 			// Set description of Bindings file to the Project Name
-			if (GConfig)
-			{
-				// Retrieve Project Name and Version from DefaultGame.ini
-				FString ProjectName;
-				FString ProjectVersion;
-
-				GConfig->GetString(
-					TEXT("/Script/EngineSettings.GeneralProjectSettings"),
-					TEXT("ProjectName"),
-					ProjectName,
-					GGameIni
-				);
-
-				// Add Project Name and Version to Bindings stub
-				BindingsObject->SetStringField(TEXT("description"), (TEXT("%s"), *ProjectName));
-			}
-			else
-			{
-				BindingsObject->SetStringField(TEXT("description"), TEXT("SteamVRInput UE4 Plugin Generated Bindings"));
-			}
+			BindingsObject->SetStringField(TEXT("description"), (TEXT("%s"), *GameProjectName));
 
 			// Save controller binding
 			FString BindingsFilePath = BindingsPath / SupportedController.Name.ToString() + TEXT(".json");
@@ -1035,76 +1071,63 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 {
-#if WITH_EDITOR
-	// Load application manifest
-	EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)), false);
-	UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Registering Application Manifest: %d"), AppError);
-#endif
-
-	// Set Action Manifest
-	EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-	//EVRInputError InputError;
-
-	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Registering Application Manifest: %s"), *ManifestPath);
-	//GetInputError(InputError, FString(TEXT("Setting Action Manifest Path Result")));
-
-	// Set Main Action Set
-	InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
-	GetInputError(InputError, FString(TEXT("Retrieveng Skeletal Action Set Handle Result")));
-
-	// Fill in Action handles for each registered action
-	for (auto& Action : Actions)
+	if (VRApplications() && VRInput())
 	{
-		vr::VRActionHandle_t Handle;
-		InputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
-		Action.Handle = Handle;
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
-		GetInputError(InputError, FString(TEXT("Setting Action Handle Path Result")));
+		// Get Project Name this plugin is used in
+		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
+		GameFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
+		if (GConfig)
+		{
+			GConfig->GetString(
+				TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+				TEXT("ProjectName"),
+				GameProjectName,
+				GGameIni
+			);
+
+		}
+		else
+		{
+			// Unable to retrieve project name, reverting to raw application executable name
+			GameProjectName = GameProjectName;
+		}
+
+		#if WITH_EDITOR
+		// Generate Application Manifest
+		FString AppKey, AppManifestPath;
+
+		if (GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath))
+		{
+			char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
+
+			// Load application manifest
+			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s (0 = Success): %d"), *AppManifestPath, AppError);
+
+			// Set AppKey for this Editor Session
+			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR (0 = Success): %d"), AppProcessId, *AppKey, AppError);
+		}
+		#endif
+
+		// Set Action Manifest
+		EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+		GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
+
+		// Set Main Action Set
+		InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
+		GetInputError(InputError, FString(TEXT("Setting main action set")));
+
+		// Fill in Action handles for each registered action
+		for (auto& Action : Actions)
+		{
+			VRActionHandle_t Handle;
+			InputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
+			Action.Handle = Handle;
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
+			GetInputError(InputError, FString(TEXT("Setting Action Handle Path Result")));
+		}
 	}
-
-#if WITH_EDITOR
-	// Get Project Name this plugin is used in
-	uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
-	FString AppName;
-	if (GConfig)
-	{
-		// Retrieve Project Name and Version from DefaultGame.ini
-		FString ProjectName;
-		FString ProjectVersion;
-
-		GConfig->GetString(
-			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
-			TEXT("ProjectName"),
-			ProjectName,
-			GGameIni
-		);
-
-		// Add Project Name and Version to Bindings stub
-		AppName = ProjectName + TEXT(".exe");
-	}
-	else
-	{
-		AppName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
-	}
-
-	// TODO: Set Custom App Key when running in Editor
-	FString AppKey = TEXT("application.generated.ue.") + AppName;
-	char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
-
-	// Set AppKey
-	AppError = VRApplications()->IdentifyApplication(FPlatformProcess::GetCurrentProcessId(), SteamVRAppKey);
-	UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Identify Application [%d][%s] to SteamVR Result (0 = Success): %d"), AppProcessId, *AppKey, AppError);
-
-	//Check if SteamVR recognizes this app
-	//uint32 VRpid = VRApplications()->GetApplicationProcessId(SteamVRAppKey);
-	//FString StringCache = *FString(UTF8_TO_TCHAR(SteamVRAppKey));
-	//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("APPLICATION HANDLE IS: UE4 Reported ID [%d] SteamVR Reported PID [%d] AppPath {%s} %s"), 
-	//	FPlatformProcess::GetCurrentProcessId(), 
-	//	VRpid, 
-	//	*(FPlatformProcess::GetApplicationName(FPlatformProcess::GetCurrentProcessId())),
-	//	*StringCache);
-#endif
-
 }
 
 void FSteamVRInputDevice::RegisterDeviceChanges()
@@ -1145,7 +1168,6 @@ void FSteamVRInputDevice::UnregisterDevice(uint32 DeviceIndex)
 {
 // TODO PRIORITY: Implement
 }
-#pragma endregion Kept for backwards compatibility and possible future merge back to Engine, note changes however
 
 void FSteamVRInputDevice::InitKnucklesControllerKeys()
 {

@@ -83,6 +83,11 @@ public:
 	float ButtonRepeatDelay;
 	FGamepadKeyNames::Type Buttons[vr::k_unMaxTrackedDeviceCount][ESteamVRInputButton::TotalButtonCount];
 
+	// Project Name and Version from DefaultGame.ini
+	FString GameFileName;
+	FString GameProjectName;
+	FString GameProjectVersion;
+
 private:
 	/* VR Input Error Handler */
 	void GetInputError(EVRInputError InputError, FString InputAction);
@@ -111,6 +116,7 @@ private:
 
 	// Action Manifest and Bindings Helper Functions
 	void GenerateActionManifest();
+	bool GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath);
 	bool BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject);
 	void ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 	void ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
@@ -124,29 +130,4 @@ private:
 	void UnregisterTracker(uint32 DeviceIndex);
 	void UnregisterDevice(uint32 DeviceIndex);
 
-	static bool MatchKeyNamePrefix(const FKey& Key, const TCHAR* Prefix)
-	{
-		// TODO PRIORITY: Implement
-		return true;
-	};
-
-	static bool MatchKeyNameSuffix(const FKey& Key, const TCHAR* Suffix)
-	{
-		// TODO PRIORITY: Implement
-		return true;
-	};
-
-	static FName FindAxisKeyMapping(TArray<FInputAxisKeyMapping>& Mappings, bool& bOutIsXAxis)
-	{
-		// TODO PRIORITY: Implement
-		FName temp;
-		return temp;
-	}
-
-	static FString MergeActionNames(const FString& A, const FString& B)
-	{
-		// TODO PRIORITY: Implement
-		FString temp;
-		return temp;
-	}
 };

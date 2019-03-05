@@ -20,6 +20,8 @@ using namespace vr;
 #define CONTROLLER_BINDING_PATH			"SteamVRBindings"
 #define ACTION_MANIFEST					"steamvr_manifest.json"
 #define ACTION_MANIFEST_UE				"steamvr_actions.json"
+#define APP_MANIFEST_FILE				"steamvr_ue_editor_app.json"
+#define APP_MANIFEST_PREFIX				"application.generated.ue."
 #define ACTION_SET						"/actions/main"
 #define ACTION_PATH_IN					"/actions/main/in"
 #define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"
