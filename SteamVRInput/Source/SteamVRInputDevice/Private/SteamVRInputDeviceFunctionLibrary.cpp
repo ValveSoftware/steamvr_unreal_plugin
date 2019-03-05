@@ -15,7 +15,7 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(bool Vibrate
 	if (SteamVRInitError == VRInitError_None)
 	{
 		const FString ManifestPath = FPaths::GeneratedConfigDir() / ACTION_MANIFEST;
-		EVRInputError Err = VRInput()->SetActionManifestPath(TCHAR_TO_ANSI(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+		EVRInputError Err = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
 		
 		if (Err == VRInputError_None)
 		{
@@ -33,13 +33,13 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(bool Vibrate
 
 			if (VibrateLeft)
 			{
-				Err = VRInput()->GetActionHandle(TCHAR_TO_ANSI(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &vrKnucklesVibrationLeft);
+				Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &vrKnucklesVibrationLeft);
 				Err = VRInput()->TriggerHapticVibrationAction(vrKnucklesVibrationLeft, StartSecondsFromNow,
 					DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				Err = VRInput()->GetActionHandle(TCHAR_TO_ANSI(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &vrKnucklesVibrationRight);
+				Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &vrKnucklesVibrationRight);
 				Err = VRInput()->TriggerHapticVibrationAction(vrKnucklesVibrationRight, StartSecondsFromNow,
 					DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
 			}

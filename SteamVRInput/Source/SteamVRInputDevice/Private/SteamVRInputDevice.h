@@ -62,7 +62,7 @@ public:
 	int32 NumTrackersMapped;
 	int32 DeviceToControllerMap[k_unMaxTrackedDeviceCount];
 	int32 UnrealControllerIdAndHandToDeviceIdMap[SteamVRInputDeviceConstants::MaxUnrealControllers][k_unMaxTrackedDeviceCount];
-	int32 UnrealControllerHandUsageCount[CONTROLLERS_PER_PLAYER];
+	int32 MaxUEHandCount[CONTROLLERS_PER_PLAYER];
 
 	/* Controller states */
 	FInputDeviceState ControllerStates[SteamVRInputDeviceConstants::MaxControllers];
@@ -77,11 +77,11 @@ public:
 	VRSkeletalSummaryData_t VRSkeletalSummaryDataLeft;
 	VRSkeletalSummaryData_t VRSkeletalSummaryDataRight;
 
-	EVRInputError LastInputError = vr::VRInputError_None;
+	EVRInputError LastInputError = VRInputError_None;
 
 	float InitialButtonRepeatDelay;
 	float ButtonRepeatDelay;
-	FGamepadKeyNames::Type Buttons[vr::k_unMaxTrackedDeviceCount][ESteamVRInputButton::TotalButtonCount];
+	FGamepadKeyNames::Type Buttons[k_unMaxTrackedDeviceCount][ESteamVRInputButton::TotalButtonCount];
 
 	// Project Name and Version from DefaultGame.ini
 	FString GameFileName;
@@ -99,12 +99,10 @@ private:
 	EVRInputError PrevSteamVRError = VRInputError_None;
 
 	// Motion Controller Helper Functions
-	void SetUnrealControllerIdToControllerIndex(const int32 UnrealControllerId, const EControllerHand Hand, int32 value);
 	void InitControllerMappings();
-	void InitKnucklesControllerKeys();
+	void InitSkeletalControllerKeys();
 
 	// Action event processing
-	void SendDeviceInputEvents();
 	void SendSkeletalInputEvents();
 
 	// Controller Bindings Helper Functions (Editor Only)
@@ -123,11 +121,7 @@ private:
 
 	void RegisterApplication(FString ManifestPath);
 	void RegisterDeviceChanges();
-	bool RegisterController(uint32 DeviceIndex);
-	void DetectHandednessSwap();
-	bool RegisterTracker(uint32 DeviceIndex);
-	void UnregisterController(uint32 DeviceIndex);
-	void UnregisterTracker(uint32 DeviceIndex);
-	void UnregisterDevice(uint32 DeviceIndex);
-
+	void RegisterDevice(uint32 id);
+	void UnRegisterDevice(uint32 id);
+	void CheckControllerHandSwap();
 };

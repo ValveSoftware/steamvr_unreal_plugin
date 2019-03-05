@@ -57,10 +57,10 @@ FKnucklesLiveLinkSource::FKnucklesLiveLinkSource()
 
 		// TODO: Action set path from manifest instead of a hardcode
 		// Set Action Handles for Skeletal Data - REQUIRED!
-		inputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT("/actions/main/in/SkeletonLeft"))), &SteamVRSkeletonLeft);
+		inputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT("/actions/main/in/skeletonleft"))), &SteamVRSkeletonLeft);
 		GetInputError(inputError, FString(TEXT("Retrieveng Skeletal Action Handle (Left) Result")));
 
-		inputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT("/actions/main/in/SkeletonRight"))), &SteamVRSkeletonRight);
+		inputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT("/actions/main/in/skeletonright"))), &SteamVRSkeletonRight);
 		if (inputError != vr::VRInputError_None)
 		GetInputError(inputError, FString(TEXT("Retrieveng Skeletal Action Handle (Left) Result")));
 
