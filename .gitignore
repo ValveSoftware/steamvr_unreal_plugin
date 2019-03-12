@@ -17,7 +17,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -26,7 +25,9 @@
 *.lai
 *.la
 *.a
+*.pdb
 *.lib
+*.dll
 
 # Executables
 *.exe
@@ -49,10 +50,10 @@
 */SourceArt/**/*.tga
 
 # Binary Files
-*/Binaries/*
+SteamVR/SteamVRInput/Binaries/*
 
 # Builds
-*/Build/*
+SteamVR/SteamVRInput/Build/*
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !*/Build/*/
@@ -73,7 +74,7 @@
 *_BuiltData.uasset
 
 # Compiled source files for the engine to use
-*/Intermediate/*
+SteamVR/SteamVRInput/Intermediate/*
 
 # Cache files for the editor to use
 */DerivedDataCache/*
