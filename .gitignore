@@ -63,10 +63,11 @@
 !Build/**/*.ico
 
 # Don't ignore anything under ThirdParty, including static libs
-!SteamVRInput/Source/ThirdParty/*
-!SteamVRInput/Source/ThirdParty/**/**/*.lib
-!SteamVRInput/Source/ThirdParty/**/**/*.dylib
-!SteamVRInput/Source/ThirdParty/**/**/*.so
+!SteamVR/SteamVRInput/Source/ThirdParty/*
+!SteamVR/SteamVRInput/Source/ThirdParty/**/**/*.lib
+!SteamVR/SteamVRInput/Source/ThirdParty/**/**/*.dll
+!SteamVR/SteamVRInput/Source/ThirdParty/**/**/*.dylib
+!SteamVR/SteamVRInput/Source/ThirdParty/**/**/*.so
 
 # Built data for maps
 *_BuiltData.uasset
