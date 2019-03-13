@@ -29,6 +29,14 @@
       "WhitelistPlatforms": [
         "Win64"
       ]
+    },
+		{
+			"Name": "SteamVRInputEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64"
+      ]
     }
   ]
 }
