@@ -32,6 +32,17 @@ void FSteamVRInputModule::StartupModule()
 	{
 		UE_LOG(LogSteamInput, Error, TEXT("Can't find OpenVR in %s/Source/ThirdParty/OpenVRSDK"), *BaseDir);
 	}
+
+	// Unload UE4 Stock Engine SteamVRController Module (if present)
+	FModuleManager& ModuleManager = FModuleManager::Get();
+	if (ModuleManager.UnloadModule(FName("SteamVRController")))
+	{
+		UE_LOG(LogSteamInput, Warning, TEXT("[SteamVR Input] Unloaded UE4 SteamVR Controller"));
+	}
+	else
+	{
+		UE_LOG(LogSteamInput, Error, TEXT("[SteamVR Input] Unable to unload UE4 SteamVR Controller"));
+	}
 }
 
 void FSteamVRInputModule::ShutdownModule()

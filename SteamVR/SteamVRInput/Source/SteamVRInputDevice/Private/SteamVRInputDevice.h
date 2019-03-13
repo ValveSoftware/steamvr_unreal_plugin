@@ -2,13 +2,14 @@
 
 #include "IInputDevice.h"
 #include "Core.h"
+#include "IMotionController.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "SteamVRInputTypes.h"
 #include "SteamVRKnucklesKeys.h"
 
-class FSteamVRInputDevice : public IInputDevice
+class FSteamVRInputDevice : public IInputDevice, public IMotionController
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -21,10 +22,13 @@ public:
 	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
 
 	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
+	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const;
+	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
 
 	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override;
 	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override;
 
+	
 	/* SteamVR Sytem Handler **/
 	IVRSystem* SteamVRSystem = nullptr;
 
@@ -125,9 +129,9 @@ private:
 	void UnRegisterDevice(uint32 id);
 	void CheckControllerHandSwap();
 
-	TArray<FInputActionKeyMapping> ActionMappings;
-	TArray<FInputAxisKeyMapping> AxisMappings;
+	TArray<FInputAxisKeyMapping> KeyAxisMappings;
 	TArray<FInputActionKeyMapping> KeyMappings;
-	void FindAxisMappings(const FName AxisName, TArray<FInputAxisKeyMapping>& OutMappings) const;
-	void FindActionMappings(const FName ActionName, TArray<FInputActionKeyMapping>& OutMappings) const;
+	void FindAxisMappings(const UInputSettings* InputSettings, const FName AxisName, TArray<FInputAxisKeyMapping>& OutMappings) const;
+	void FindActionMappings(const UInputSettings* InputSettings, const FName ActionName, TArray<FInputActionKeyMapping>& OutMappings) const;
+
 };

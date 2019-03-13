@@ -2,6 +2,8 @@
 #include "IInputInterface.h"
 #include "HAL/FileManagerGeneric.h"
 #include "Misc/FileHelper.h"
+#include "GameFramework/PlayerInput.h"
+#include "Kismet/GameplayStatics.h"
 #include "../../OpenVRSDK/headers/openvr.h"
 
 #if PLATFORM_WINDOWS
@@ -79,29 +81,29 @@ void FSteamVRInputDevice::Tick(float DeltaTime)
 	SendSkeletalInputEvents();
 }
 
-void FSteamVRInputDevice::FindAxisMappings(const FName InAxisName, TArray<FInputAxisKeyMapping>& OutMappings) const
+void FSteamVRInputDevice::FindAxisMappings(const UInputSettings* InputSettings, const FName InAxisName, TArray<FInputAxisKeyMapping>& OutMappings) const
 {
 	if (InAxisName.IsValid())
 	{
-		for (int32 AxisIndex = AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+		for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
 		{
-			if (AxisMappings[AxisIndex].AxisName == InAxisName)
+			if (InputSettings->AxisMappings[AxisIndex].AxisName == InAxisName)
 			{
-				OutMappings.Add(AxisMappings[AxisIndex]);
+				OutMappings.Add(InputSettings->AxisMappings[AxisIndex]);
 			}
 		}
 	}
 }
 
-void FSteamVRInputDevice::FindActionMappings(const FName InActionName, TArray<FInputActionKeyMapping>& OutMappings) const
+void FSteamVRInputDevice::FindActionMappings(const UInputSettings* InputSettings, const FName InActionName, TArray<FInputActionKeyMapping>& OutMappings) const
 {
 	if (InActionName.IsValid())
 	{
-		for (int32 ActionIndex = ActionMappings.Num() - 1; ActionIndex >= 0; --ActionIndex)
+		for (int32 ActionIndex = InputSettings->ActionMappings.Num() - 1; ActionIndex >= 0; --ActionIndex)
 		{
-			if (ActionMappings[ActionIndex].ActionName == InActionName)
+			if (InputSettings->ActionMappings[ActionIndex].ActionName == InActionName)
 			{
-				OutMappings.Add(ActionMappings[ActionIndex]);
+				OutMappings.Add(InputSettings->ActionMappings[ActionIndex]);
 			}
 		}
 	}
@@ -386,6 +388,22 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 {
 	return false;
 }
+
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
+{
+	// TODO: SteamVR Call for Controller Orientation and Position
+	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to return controller orientation and postion"));
+
+	return false;
+}
+
+ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
+{
+	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to return controller tracking status"));
+	return ETrackingStatus::NotTracked;
+
+}
+
 
 void FSteamVRInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value)
 {
@@ -741,6 +759,9 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 /* Generate the SteamVR Input Action Manifest file*/
 void FSteamVRInputDevice::GenerateActionManifest()
 {
+    // Set Input Settings
+	auto InputSettings = GetDefault<UInputSettings>();
+
 	// Set Action Manifest Path
 	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Action Manifest Path: %s"), *ManifestPath);
@@ -772,17 +793,10 @@ void FSteamVRInputDevice::GenerateActionManifest()
 		// Setup Input Mappings cache
 		TArray<FInputMapping> InputMappings;
 		TArray<FName> UniqueInputs;
-
+		
 		// Check if this project have input settings
-		auto InputSettings = GetDefault<UInputSettings>();
 		if (InputSettings->IsValidLowLevelFast())
 		{
-			// Add project's input key mappings to SteamVR's Input Actions
-			ProcessKeyInputMappings(InputSettings, UniqueInputs);
-
-			// Add project's input axis mappings to SteamVR's Input Actions
-			ProcessKeyAxisMappings(InputSettings, UniqueInputs);
-
 			// Process all actions in this project (if any)
 			TArray<TSharedPtr<FJsonValue>> InputActionsArray;
 
@@ -823,6 +837,12 @@ void FSteamVRInputDevice::GenerateActionManifest()
 				Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Right)"))));
 			}
 
+			// Add project's input key mappings to SteamVR's Input Actions
+			ProcessKeyInputMappings(InputSettings, UniqueInputs);
+
+			// Add project's input axis mappings to SteamVR's Input Actions
+			ProcessKeyAxisMappings(InputSettings, UniqueInputs);
+
 			// Reorganize all unique inputs to SteamVR style Input-to-Actions association
 			for (FName UniqueInput : UniqueInputs)
 			{
@@ -839,7 +859,7 @@ void FSteamVRInputDevice::GenerateActionManifest()
 					if (Action.Type == EActionType::Boolean)
 					{
 						// Set Key Actions Linked To This Input Key
-						FindActionMappings(Action.Name, KeyMappings);
+						FindActionMappings(InputSettings, Action.Name, KeyMappings);
 						for (FInputActionKeyMapping KeyMapping : KeyMappings)
 						{
 							if (UniqueInput.IsEqual(KeyMapping.Key.GetFName()))
@@ -861,9 +881,9 @@ void FSteamVRInputDevice::GenerateActionManifest()
 
 						for (auto& ActionAxisName : ActionAxisArray)
 						{
-							FindAxisMappings(FName(*ActionAxisName), AxisMappings);
+							FindAxisMappings(InputSettings, FName(*ActionAxisName), KeyAxisMappings);
 	
-							for (FInputAxisKeyMapping AxisMapping : AxisMappings)
+							for (FInputAxisKeyMapping AxisMapping : InputSettings->AxisMappings)
 							{
 								if (UniqueInput.IsEqual(AxisMapping.Key.GetFName()))
 								{
@@ -1099,7 +1119,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 	for (const FName& KeyActionName : KeyActionNames)
 	{
 		// Retrieve input keys associated with this action
-		FindActionMappings(KeyActionName, KeyMappings);
+		FindActionMappings(InputSettings, KeyActionName, KeyMappings);
 
 		for (auto& KeyMapping : KeyMappings)
 		{
@@ -1134,10 +1154,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 		FName XAxisNameKey = NAME_None;
 
 		// Retrieve input axes associated with this action
-		FindAxisMappings(XAxisName, AxisMappings);
+		FindAxisMappings(InputSettings, XAxisName, KeyAxisMappings);
 
 		// Go through all axis mappings
-		for (auto& AxisMapping : AxisMappings)
+		for (auto& AxisMapping : KeyAxisMappings)
 		{
 			// Add axes names here for use in the auto-generation of controller bindings
 			InOutUniqueInputs.AddUnique(AxisMapping.Key.GetFName());
@@ -1162,7 +1182,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				{
 					// Retrieve input axes associated with this action
 					TArray<FInputAxisKeyMapping> AxisMappingsInner;
-					FindAxisMappings(KeyAxisNameInner, AxisMappingsInner);
+					FindAxisMappings(InputSettings, KeyAxisNameInner, AxisMappingsInner);
 
 					for (auto& AxisMappingInner : AxisMappingsInner)
 					{
@@ -1259,11 +1279,11 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 
 			// Load application manifest
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
-			//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s (0 = Success): %i"), *AppManifestPath, AppError);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 
 			// Set AppKey for this Editor Session
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
-			//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR (0 = Success): %i"), AppProcessId, *AppKey, AppError);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 		}
 		#endif
 
