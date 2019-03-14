@@ -1,11 +1,11 @@
-#include "SteamVRInputEditor.h"
-#include "SteamVRInputEditorStyle.h"
+#include "SteamVREditor.h"
+#include "SteamVREditorStyle.h"
 #include "SlateGameResources.h"
 #include "IPluginManager.h"
 
-TSharedPtr< FSlateStyleSet > FSteamVRInputEditorStyle::StyleInstance = NULL;
+TSharedPtr< FSlateStyleSet > FSteamVREditorStyle::StyleInstance = NULL;
 
-void FSteamVRInputEditorStyle::Initialize()
+void FSteamVREditorStyle::Initialize()
 {
 	if (!StyleInstance.IsValid())
 	{
@@ -14,16 +14,16 @@ void FSteamVRInputEditorStyle::Initialize()
 	}
 }
 
-void FSteamVRInputEditorStyle::Shutdown()
+void FSteamVREditorStyle::Shutdown()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleInstance);
 	ensure(StyleInstance.IsUnique());
 	StyleInstance.Reset();
 }
 
-FName FSteamVRInputEditorStyle::GetStyleSetName()
+FName FSteamVREditorStyle::GetStyleSetName()
 {
-	static FName StyleSetName(TEXT("SteamVRInputEditorStyle"));
+	static FName StyleSetName(TEXT("SteamVREditorStyle"));
 	return StyleSetName;
 }
 
@@ -37,12 +37,12 @@ const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
 
-TSharedRef< FSlateStyleSet > FSteamVRInputEditorStyle::Create()
+TSharedRef< FSlateStyleSet > FSteamVREditorStyle::Create()
 {
-	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("SteamVRInputEditorStyle"));
+	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("SteamVREditorStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("SteamVRInput")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("SteamVRInputEditor.OpenPluginWindow", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("SteamVREditor.PluginAction", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 
 	return Style;
 }
@@ -53,7 +53,7 @@ TSharedRef< FSlateStyleSet > FSteamVRInputEditorStyle::Create()
 #undef TTF_FONT
 #undef OTF_FONT
 
-void FSteamVRInputEditorStyle::ReloadTextures()
+void FSteamVREditorStyle::ReloadTextures()
 {
 	if (FSlateApplication::IsInitialized())
 	{
@@ -61,7 +61,7 @@ void FSteamVRInputEditorStyle::ReloadTextures()
 	}
 }
 
-const ISlateStyle& FSteamVRInputEditorStyle::Get()
+const ISlateStyle& FSteamVREditorStyle::Get()
 {
 	return *StyleInstance;
 }

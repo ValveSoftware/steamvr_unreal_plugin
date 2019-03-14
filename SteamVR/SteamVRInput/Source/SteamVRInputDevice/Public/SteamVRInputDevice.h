@@ -9,7 +9,7 @@
 #include "SteamVRInputTypes.h"
 #include "SteamVRKnucklesKeys.h"
 
-class FSteamVRInputDevice : public IInputDevice, public IMotionController
+STEAMVRINPUT_API class FSteamVRInputDevice : public IInputDevice, public IMotionController
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -94,6 +94,9 @@ public:
 	FString GameProjectName;
 	FString GameProjectVersion;
 
+	void RegenerateActionManifest();
+	void RegenerateControllerBindings();
+
 private:
 	/* VR Input Error Handler */
 	void GetInputError(EVRInputError InputError, FString InputAction);
@@ -119,7 +122,7 @@ private:
 #endif
 
 	// Action Manifest and Bindings Helper Functions
-	void GenerateActionManifest();
+	void GenerateActionManifest(bool GenerateActions=true, bool GenerateBindings=true, bool RegisterApp=true);
 	bool GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath);
 	bool BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject);
 	void ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);

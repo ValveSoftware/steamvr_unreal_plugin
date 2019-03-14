@@ -3,7 +3,7 @@
 #include "SlateBasics.h"
 
 /**  */
-class FSteamVRInputEditorStyle
+class FSteamVREditorStyle
 {
 public:
 

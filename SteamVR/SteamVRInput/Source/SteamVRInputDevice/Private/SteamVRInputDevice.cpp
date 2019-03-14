@@ -516,6 +516,16 @@ void FSteamVRInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedb
 	// Empty on purpose
 }
 
+void FSteamVRInputDevice::RegenerateActionManifest()
+{
+	this->GenerateActionManifest(true, false, true);
+}
+
+void FSteamVRInputDevice::RegenerateControllerBindings()
+{
+	this->GenerateActionManifest(false, true, true);
+}
+
 void FSteamVRInputDevice::InitControllerMappings()
 {
 	for (unsigned int i = 0; i < k_unMaxTrackedDeviceCount; ++i)
@@ -881,7 +891,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 #endif
 
 /* Generate the SteamVR Input Action Manifest file*/
-void FSteamVRInputDevice::GenerateActionManifest()
+void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp)
 {
     // Set Input Settings
 	auto InputSettings = GetDefault<UInputSettings>();
@@ -1186,7 +1196,10 @@ void FSteamVRInputDevice::GenerateActionManifest()
 
 			// If we're running in the editor, build the controller bindings if they don't exist yet
 	#if WITH_EDITOR
-			GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings);
+			if (GenerateBindings)
+			{
+				GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings);
+			}
 	#endif
 
 			// Add the default bindings object to the action manifest
@@ -1217,14 +1230,20 @@ void FSteamVRInputDevice::GenerateActionManifest()
 	FJsonSerializer::Serialize(ActionManifestObject, JsonWriter);
 
 	// Save json as a UTF8 file
-	if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+	if (GenerateActions)
 	{
-		UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
-		return;
+		if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+		{
+			UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
+			return;
+		}
 	}
 
 	// Register Application to SteamVR
-	RegisterApplication(ManifestPath);
+	if (RegisterApp)
+	{
+		RegisterApplication(ManifestPath);
+	}
 }
 
 /* Build a JSON object made up of string fields, all entries must be paired */
@@ -1248,6 +1267,7 @@ bool FSteamVRInputDevice::BuildJsonObject(TArray<FString> StringFields, TSharedR
 void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs)
 {
 	// Retrieve key actions setup in this project
+	KeyMappings.Empty();
 	TArray<FName> KeyActionNames;
 	InputSettings->GetActionNames(KeyActionNames);
 
@@ -1282,6 +1302,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 	// Retrieve Key Axis names
 	TArray<FName> KeyAxisNames;
 	InputSettings->GetAxisNames(KeyAxisNames);
+	KeyAxisMappings.Empty();
 
 	// [1D] All Axis Mappings will have a corresponding Vector1 Action associated with them
 	for (const FName& XAxisName : KeyAxisNames)
@@ -1383,7 +1404,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 {
-	if (VRApplications() && VRInput())
+	if (VRApplications() != nullptr && VRInput() != nullptr)
 	{
 		// Get Project Name this plugin is used in
 		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
@@ -1420,6 +1441,16 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			// Set AppKey for this Editor Session
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+
+			// Auto-enable SteamVR Input Developer Mode 
+			if (VRSettings() != nullptr)
+			{
+				EVRSettingsError BindingFlagError = VRSettingsError_None;
+				VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
+				UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+				//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
+				//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+			}
 		}
 		#endif
 

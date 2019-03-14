@@ -4,7 +4,7 @@
 #include "Modules/ModuleManager.h"
 #include "IInputDeviceModule.h"
 
-class ISteamVRInputDeviceModule : public IInputDeviceModule
+STEAMVRINPUT_API class ISteamVRInputDeviceModule : public IInputDeviceModule
 {
 
 public:

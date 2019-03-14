@@ -1,20 +1,20 @@
 using UnrealBuildTool;
 
-public class SteamVRInputEditor : ModuleRules
+public class SteamVREditor : ModuleRules
 {
-	public SteamVRInputEditor(TargetInfo Target)
+	public SteamVREditor(TargetInfo Target)
 	{
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"SteamVRInputEditor/Public"
+				"Public"
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"SteamVRInputEditor/Private",
+				"Private",
 			}
 			);
 			
@@ -23,7 +23,12 @@ public class SteamVRInputEditor : ModuleRules
 			new string[]
 			{
 				"Core",
-			}
+                "InputCore",
+                "InputDevice",
+                "OpenVRSDK",
+                "SteamVRInput",
+                "SteamVRInputDevice",
+            }
 			);
 			
 		

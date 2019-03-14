@@ -1,7 +1,10 @@
 #pragma once
 
 #include "Core.h"
+#include "SteamVRInputDevice.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Features/IModularFeatures.h"
+#include "IMotionController.h"
 #include "SteamVRInputDeviceFunctionLibrary.generated.h"
 
 #define STEAMVRCONTROLLER_SUPPORTED_PLATFORMS (PLATFORM_MAC || (PLATFORM_LINUX && PLATFORM_CPU_X86_FAMILY && PLATFORM_64BITS) || (PLATFORM_WINDOWS && WINVER > 0x0502))
@@ -19,7 +22,12 @@ class STEAMVRINPUTDEVICE_API USteamVRInputDeviceFunctionLibrary : public UBluepr
 	GENERATED_BODY()
 
 public:
+	static FSteamVRInputDevice* GetSteamVRInputDevice();
+
 	UFUNCTION(BlueprintCallable, Category = "SteamVR")
 	static void PlaySteamVR_HapticFeedback(bool VibrateLeft, float StartSecondsFromNow, float DurationSeconds = 1.f,
 			float Frequency = 1.f, float Amplitude = 0.5f);
+
+	static void RegenActionManifest();
+	static void RegenControllerBindings();
 };

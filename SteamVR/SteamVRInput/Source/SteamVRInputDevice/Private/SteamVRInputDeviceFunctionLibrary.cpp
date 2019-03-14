@@ -47,3 +47,33 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(bool Vibrate
 	}
 #endif // STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
 }
+
+void USteamVRInputDeviceFunctionLibrary::RegenActionManifest()
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->RegenerateActionManifest();
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::RegenControllerBindings()
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->RegenerateControllerBindings();
+	}
+}
+
+FSteamVRInputDevice* USteamVRInputDeviceFunctionLibrary::GetSteamVRInputDevice()
+{
+	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
+	for (auto MotionController : MotionControllers)
+	{
+		FName DeviceName = MotionController->GetModularFeatureName();
+		return static_cast<FSteamVRInputDevice*>(MotionController);
+	}
+
+	return nullptr;
+}

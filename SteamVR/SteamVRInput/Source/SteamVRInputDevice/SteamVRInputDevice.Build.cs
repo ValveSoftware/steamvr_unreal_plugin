@@ -24,8 +24,6 @@ public class SteamVRInputDevice : ModuleRules
 				"Core",
                 "CoreUObject",
                 "Engine",
-                "InputCore",
-				"InputDevice",
                 "HeadMountedDisplay",
                 "SteamVR",
                 "Json",
@@ -37,7 +35,10 @@ public class SteamVRInputDevice : ModuleRules
     new string[]
     {
                 "OpenVRSDK",
-                "SteamVRInput"
+                "SteamVRInput",
+                "SteamVRInputDevice",
+                "InputCore",
+                "InputDevice",
     }
     );
 
