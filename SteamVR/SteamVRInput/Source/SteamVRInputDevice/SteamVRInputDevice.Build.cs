@@ -14,7 +14,8 @@ public class SteamVRInputDevice : ModuleRules
         PrivateIncludePathModuleNames.AddRange(new string[]
          {
             "TargetPlatform",
-            "SteamVRInput"
+            "SteamVRInput",
+            "SteamVR"
         });
 
         PrivateDependencyModuleNames.AddRange(
@@ -25,6 +26,8 @@ public class SteamVRInputDevice : ModuleRules
                 "Engine",
                 "InputCore",
 				"InputDevice",
+                "HeadMountedDisplay",
+                "SteamVR",
                 "Json",
                 "JsonUtilities"
 			}

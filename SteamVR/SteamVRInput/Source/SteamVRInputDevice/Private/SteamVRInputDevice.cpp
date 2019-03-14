@@ -5,6 +5,10 @@
 #include "GameFramework/PlayerInput.h"
 #include "Kismet/GameplayStatics.h"
 #include "../../OpenVRSDK/headers/openvr.h"
+#include "GameFramework/WorldSettings.h"
+#include "Features/IModularFeatures.h"
+#include "MotionControllerComponent.h"
+#include "IMotionController.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
@@ -58,17 +62,13 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 			}
 		}
 	}
+
+	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 }
 
 FSteamVRInputDevice::~FSteamVRInputDevice()
 {
-//#if WITH_EDITOR
-//	if (ActionMappingsChangedHandle.IsValid())
-//	{
-//		FEditorDelegates::OnActionAxisMappingsChanged.Remove(ActionMappingsChangedHandle);
-//		ActionMappingsChangedHandle.Reset();
-//	}
-//#endif
+	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
 }
 
 void FSteamVRInputDevice::Tick(float DeltaTime)
@@ -107,6 +107,15 @@ void FSteamVRInputDevice::FindActionMappings(const UInputSettings* InputSettings
 			}
 		}
 	}
+}
+
+FString FSteamVRInputDevice::SanitizeString(FString& InString)
+{
+	FString SanitizedString = InString.Replace(TEXT(" "), TEXT("_"));
+	SanitizedString = SanitizedString.Replace(TEXT("*"), TEXT("_"));
+	SanitizedString = SanitizedString.Replace(TEXT("."), TEXT("_"));
+
+	return SanitizedString;
 }
 
 void FSteamVRInputDevice::SendSkeletalInputEvents()
@@ -392,18 +401,110 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
 {
 	// TODO: SteamVR Call for Controller Orientation and Position
-	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to return controller orientation and postion"));
+	//bool RetVal = false;
 
-	return false;
+	int32 DeviceId = UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)DeviceHand];
+	if (VRInput() != nullptr && VRCompositor())
+	{
+		InputPoseActionData_t PoseData = {};
+		EVRInputError InputError = VRInputError_NoData;
+
+		switch (DeviceHand)
+		{
+		case EControllerHand::Left:
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), vr::k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Right:
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), vr::k_ulInvalidInputValueHandle);
+			break;
+		default:
+			break;
+		}	
+
+		if (InputError == VRInputError_None)
+		{
+			// Get SteamVR Transform Matrix for this controller
+			HmdMatrix34_t Matrix = PoseData.pose.mDeviceToAbsoluteTracking;
+
+			// Transform SteamVR Pose to Unreal Pose
+			FMatrix Pose = 	FMatrix(
+								FPlane(Matrix.m[0][0], Matrix.m[1][0], Matrix.m[2][0], 0.0f),
+								FPlane(Matrix.m[0][1], Matrix.m[1][1], Matrix.m[2][1], 0.0f),
+								FPlane(Matrix.m[0][2], Matrix.m[1][2], Matrix.m[2][2], 0.0f),
+								FPlane(Matrix.m[0][3], Matrix.m[1][3], Matrix.m[2][3], 1.0f)
+							);
+
+
+			// Transform SteamVR Rotation Quaternion to a UE FRotator
+			FQuat OrientationQuat;
+			FQuat Orientation(Pose);
+			OrientationQuat.X = -Orientation.Z;
+			OrientationQuat.Y = Orientation.X;
+			OrientationQuat.Z = Orientation.Y;
+			OrientationQuat.W = -Orientation.W;
+
+
+			FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters);
+			OutPosition = Position;
+
+			//OutOrientation = BaseOrientation.Inverse() * OutOrientation;
+			OutOrientation.Normalize();
+			OutOrientation = OrientationQuat.Rotator();
+		}
+	}
+	
+	/** Reads the state of a pose action given its handle. */
+	//virtual EVRInputError GetPoseActionData(VRActionHandle_t action, 
+	//	ETrackingUniverseOrigin eOrigin, 
+	//	float fPredictedSecondsFromNow, 
+	//	InputPoseActionData_t *pActionData, 
+	//	uint32_t unActionDataSize, 
+	//	VRInputValueHandle_t ulRestrictToDevice) = 0;
+
+;
+	//// Steam handles WorldToMetersScale when it reads the controller posrot, so we do not need to use it again here.  Debugging found that they are the same.
+	//RetVal = SteamVRHMD->GetCurrentPose(DeviceId, DeviceOrientation, OutPosition);
+
+	//DeviceOrientation.X = PoseData.pose.
+
+
+
+	////return RetVal;
+	//UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to GetControllerOrientationAndPosition"));
+	//OutOrientation.Pitch = 100.f;
+	//OutPosition.Z = 110.f;
+	return true;
 }
 
 ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
 {
-	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to return controller tracking status"));
-	return ETrackingStatus::NotTracked;
+	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
+	if ((ControllerIndex < 0) || (ControllerIndex > CONTROLLERS_PER_PLAYER) || (DeviceHand != EControllerHand::Left || DeviceHand != EControllerHand::Right))
+	{
+		return ETrackingStatus::NotTracked;
+	}
 
+	// Get the Device IDs of the assigned left and right hands
+	uint32 ControllerDeviceID = k_unTrackedDeviceIndexInvalid;
+	switch (DeviceHand)
+	{
+	case EControllerHand::Left:
+		ControllerDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_LeftHand);
+		break;
+	case EControllerHand::Right:
+		ControllerDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_RightHand);
+		break;
+	default:
+		break;
+	}
+
+	if (ControllerDeviceID != k_unTrackedDeviceIndexInvalid)
+	{
+		TrackingStatus = ETrackingStatus::Tracked;
+	}
+
+	return TrackingStatus;
 }
-
 
 void FSteamVRInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value)
 {
@@ -444,7 +545,7 @@ void FSteamVRInputDevice::InitControllerMappings()
 bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath)
 {
 	// Set SteamVR AppKey
-	OutAppKey = TEXT(APP_MANIFEST_PREFIX) + GameProjectName + TEXT(".") + ProjectName;
+	OutAppKey = TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + ProjectName;
 
 	// Set Action Manifest Path - same directory where the action manifest will be
 	OutAppManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / APP_MANIFEST_FILE;
@@ -523,6 +624,28 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Create Action Set
 			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
 			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
+
+			// Add Controller Pose Mappings
+			TArray<TSharedPtr<FJsonValue>> ControllerPoseArray;
+
+			// Add Pose: Left Controller 
+			TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
+			ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
+			ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+
+			TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
+			ControllerPoseArray.Add(ControllerLeftJsonValueObject);
+
+			// Add Pose: Right Controller
+			TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
+			ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
+			ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+
+			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
+			ControllerPoseArray.Add(ControllerRightJsonValueObject);
+
+			// Add Controller Input Array To Action Set
+			ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
 
 			// Add Skeleton Mappings
 			TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
@@ -618,6 +741,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			// Check if any of the actions associated with this Input Key have the [XD] axis designation
 			for (auto& Action : InInputMapping[i].Actions)
 			{
+
 				if (Action.Right(3) == TEXT("1D]"))
 				{
 					InputState.bIsAxis = true;
@@ -802,6 +926,18 @@ void FSteamVRInputDevice::GenerateActionManifest()
 
 			// Setup cache for actions
 			TArray<FString> UniqueActions;
+			
+			// Controller poses
+			{
+				FString ConstActionPath = FString(TEXT(ACTION_PATH_CONTROLLER_LEFT));
+				Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+					FName(TEXT("Left Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_LEFT))));
+			}
+			{
+				FString ConstActionPath = FString(TEXT(ACTION_PATH_CONTROLLER_RIGHT));
+				Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+					FName(TEXT("Right Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
+			}
 
 			// Skeletal Data
 			{
@@ -824,9 +960,6 @@ void FSteamVRInputDevice::GenerateActionManifest()
 				}
 			}
 
-			// Add base actions to the action manifest
-			ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
-
 			// Haptics
 			{
 				FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_LEFT));
@@ -836,6 +969,9 @@ void FSteamVRInputDevice::GenerateActionManifest()
 				FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_RIGHT));
 				Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Right)"))));
 			}
+
+			// Add base actions to the action manifest
+			ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
 
 			// Add project's input key mappings to SteamVR's Input Actions
 			ProcessKeyInputMappings(InputSettings, UniqueInputs);
@@ -1301,6 +1437,17 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			VRActionHandle_t Handle;
 			InputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
 			Action.Handle = Handle;
+
+			// Test if this is a pose
+			if (Action.Path == TEXT(ACTION_PATH_CONTROLLER_LEFT))
+			{
+				VRControllerHandleLeft = Action.Handle;
+			}
+			if (Action.Path == TEXT(ACTION_PATH_CONTROLLER_RIGHT))
+			{
+				VRControllerHandleRight = Action.Handle;
+			}
+
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
 			GetInputError(InputError, FString(TEXT("Setting Action Handle Path Result")));
 		}

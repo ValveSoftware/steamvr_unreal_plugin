@@ -75,6 +75,8 @@ public:
 	TArray<FControllerType> ControllerTypes;
 	VRActionSetHandle_t MainActionSet;
 
+	VRActionHandle_t VRControllerHandleLeft;
+	VRActionHandle_t VRControllerHandleRight;
 	VRActionHandle_t VRSkeletalHandleLeft;
 	VRActionHandle_t VRSkeletalHandleRight;
 
@@ -133,5 +135,5 @@ private:
 	TArray<FInputActionKeyMapping> KeyMappings;
 	void FindAxisMappings(const UInputSettings* InputSettings, const FName AxisName, TArray<FInputAxisKeyMapping>& OutMappings) const;
 	void FindActionMappings(const UInputSettings* InputSettings, const FName ActionName, TArray<FInputActionKeyMapping>& OutMappings) const;
-
+	FString SanitizeString(FString& InOutString);
 };
