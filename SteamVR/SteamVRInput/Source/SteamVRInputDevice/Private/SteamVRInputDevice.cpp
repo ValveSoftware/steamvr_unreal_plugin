@@ -518,12 +518,12 @@ void FSteamVRInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedb
 
 void FSteamVRInputDevice::RegenerateActionManifest()
 {
-	this->GenerateActionManifest(true, false, true);
+	this->GenerateActionManifest(true, false, true, true);
 }
 
 void FSteamVRInputDevice::RegenerateControllerBindings()
 {
-	this->GenerateActionManifest(false, true, true);
+	this->GenerateActionManifest(false, true, true, true);
 }
 
 void FSteamVRInputDevice::InitControllerMappings()
@@ -607,7 +607,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 }
 
 /* Editor Only - Generate the SteamVR Controller Binding files */
-void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping)
+void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping, bool bDeleteIfExists)
 {
 	// Create the bindings directory if it doesn't exist
 	IFileManager& FileManager = FFileManagerGeneric::Get();
@@ -620,7 +620,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 	for (auto& SupportedController : InOutControllerTypes)
 	{
 		// If there is no user-defined controller binding or it hasn't been auto-generated yet, generate it
-		if (!SupportedController.bIsGenerated)
+		if (!SupportedController.bIsGenerated || bDeleteIfExists)
 		{
 			// Creating bindings file
 			TSharedRef<FJsonObject> BindingsObject = MakeShareable(new FJsonObject());
@@ -891,7 +891,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 #endif
 
 /* Generate the SteamVR Input Action Manifest file*/
-void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp)
+void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
 {
     // Set Input Settings
 	auto InputSettings = GetDefault<UInputSettings>();
@@ -1198,7 +1198,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	#if WITH_EDITOR
 			if (GenerateBindings)
 			{
-				GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings);
+				GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings, DeleteIfExists);
 			}
 	#endif
 
@@ -1232,10 +1232,13 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Save json as a UTF8 file
 	if (GenerateActions)
 	{
-		if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+		if (!FileManager.FileExists(*ManifestPath) || (FileManager.FileExists(*ManifestPath) && DeleteIfExists))
 		{
-			UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
-			return;
+			if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+			{
+				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Error trying to generate action manifest in: %s"), *ManifestPath);
+				return;
+			}
 		}
 	}
 
