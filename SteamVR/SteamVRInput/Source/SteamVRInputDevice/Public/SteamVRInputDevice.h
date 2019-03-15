@@ -128,6 +128,7 @@ private:
 	void ProcessKeyInputMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 	void ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 
+	void SanitizeActions();
 	void RegisterApplication(FString ManifestPath);
 	void RegisterDeviceChanges();
 	void RegisterDevice(uint32 id);

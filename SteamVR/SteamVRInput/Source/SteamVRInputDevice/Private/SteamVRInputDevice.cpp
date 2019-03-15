@@ -319,7 +319,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 			return;
 		}
 
-		// Go through Action Sets
+		// Go through Actions
 		for (auto& Action : Actions)
 		{
 			if (Action.Type == EActionType::Boolean)
@@ -328,6 +328,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 				InputDigitalActionData_t DigitalData;
 				ActionStateError = VRInput()->GetDigitalActionData(Action.Handle, &DigitalData, sizeof(DigitalData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None &&
+					DigitalData.bActive &&
 					DigitalData.bState != Action.bState
 					)
 				{
@@ -360,7 +361,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 				// Get analog data from SteamVR
 				InputAnalogActionData_t AnalogData;
 				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
-				if (ActionStateError == VRInputError_None)
+				if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
 					// Send individual float axis value back to the Engine
 					if (!Action.KeyX.IsNone() && AnalogData.x != Action.Value.X)
@@ -819,7 +820,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			ActionSourceJsonObject->SetStringField(TEXT("mode"), ActionSource.Mode.ToString());
 
 			// Set Action Path
-			ActionSourceJsonObject->SetStringField(TEXT("path"), ActionSource.Path);
+			if (!ActionSource.Path.IsEmpty())
+			{
+				ActionSourceJsonObject->SetStringField(TEXT("path"), ActionSource.Path);
+			}
+			else
+			{
+				continue;
+			}
 
 			// Set Key Mappings
 			TSharedPtr<FJsonObject> ActionInputJsonObject = MakeShareable(new FJsonObject());
@@ -1006,10 +1014,11 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 					if (Action.Type == EActionType::Boolean)
 					{
 						// Set Key Actions Linked To This Input Key
-						FindActionMappings(InputSettings, Action.Name, KeyMappings);
-						for (FInputActionKeyMapping KeyMapping : KeyMappings)
+						TArray<FInputActionKeyMapping> ActionKeyMappings;
+						FindActionMappings(InputSettings, Action.Name, ActionKeyMappings);
+						for (FInputActionKeyMapping ActionKeyMapping : ActionKeyMappings)
 						{
-							if (UniqueInput.IsEqual(KeyMapping.Key.GetFName()))
+							if (UniqueInput.IsEqual(ActionKeyMapping.Key.GetFName()))
 							{
 								NewInputMapping.Actions.AddUnique(Action.Path);
 							}
@@ -1025,12 +1034,13 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 						// Parse comma delimited action names into an array
 						TArray<FString> ActionAxisArray;
 						ActionAxis.ParseIntoArray(ActionAxisArray, TEXT(","), true);
+						TArray<FInputAxisKeyMapping> FoundAxisMappings;
 
 						for (auto& ActionAxisName : ActionAxisArray)
 						{
-							FindAxisMappings(InputSettings, FName(*ActionAxisName), KeyAxisMappings);
+							FindAxisMappings(InputSettings, FName(*ActionAxisName), FoundAxisMappings);
 	
-							for (FInputAxisKeyMapping AxisMapping : InputSettings->AxisMappings)
+							for (FInputAxisKeyMapping AxisMapping : FoundAxisMappings)
 							{
 								if (UniqueInput.IsEqual(AxisMapping.Key.GetFName()))
 								{
@@ -1278,10 +1288,12 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 	// Process all key actions found
 	for (const FName& KeyActionName : KeyActionNames)
 	{
-		// Retrieve input keys associated with this action
-		FindActionMappings(InputSettings, KeyActionName, KeyMappings);
+		TArray<FInputActionKeyMapping> KeyInputMappings;
 
-		for (auto& KeyMapping : KeyMappings)
+		// Retrieve input keys associated with this action
+		FindActionMappings(InputSettings, KeyActionName, KeyInputMappings);
+
+		for (auto& KeyMapping : KeyInputMappings)
 		{
 			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")) ||
 				KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")) ||
@@ -1327,6 +1339,26 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			XAxisNameKey = AxisMapping.Key.GetFName();
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
+			uint32 KeyHand = 0;
+
+			// Check Hand if any, we have a third state in cases where a UE key does not signify handedness
+			if (AxisMapping.Key.GetFName().ToString().Contains(TEXT("(L)"), ESearchCase::CaseSensitive) ||
+				AxisMapping.Key.GetFName().ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive)
+				)
+			{
+				KeyHand = 1;
+			} 
+			else if (AxisMapping.Key.GetFName().ToString().Contains(TEXT("(R)")) ||
+				AxisMapping.Key.GetFName().ToString().Contains(TEXT("Right"))	
+				)
+			{
+				KeyHand = 2;
+			}
+			else
+			{
+				KeyHand = 0;
+			}
+
 			FString KeySuffix = (AxisMapping.Key.GetFName().ToString()).Right(6);
 			if (KeySuffix.Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 				KeySuffix.Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
@@ -1355,8 +1387,18 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 							KeyNameSuffix.Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 							)
 						{
-							YAxisName = KeyAxisNameInner;
-							YAxisNameKey = AxisMappingInner.Key.GetFName();
+							
+							if ( ((AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("(L)"), ESearchCase::CaseSensitive) ||
+								 AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive))						
+								 && KeyHand == 1) ||
+								((AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("(R)"), ESearchCase::CaseSensitive) ||
+									AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("Right"), ESearchCase::CaseSensitive))
+									&& KeyHand == 2)
+							   )
+							{
+								YAxisName = KeyAxisNameInner;
+								YAxisNameKey = AxisMappingInner.Key.GetFName();
+							}
 						}
 						else if (KeyNameSuffix.Contains(TEXT("_Z"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 							KeyNameSuffix.Contains(TEXT("Z-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
@@ -1374,7 +1416,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				if (YAxisName != NAME_None && ZAxisName == NAME_None)
 				{
 					// [2D] There's a Y Axis but no Z, this must be a Vector2
-					FString AxisName2D = XAxisName.ToString() +
+					FString AxisName2D = AxisMapping.AxisName.ToString() +
 						TEXT(",") +
 						YAxisName.ToString() +
 						TEXT(" [2D]");
@@ -1398,12 +1440,41 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			if (!XAxisName.IsNone())
 			{
 				// [1D] Populate all Vector1 actions
-				FString AxisName1D = XAxisName.ToString() + TEXT(" [1D]");
+				FString AxisName1D = AxisMapping.AxisName.ToString() + TEXT(" [1D]");
 				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
 				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisNameKey, 0.0f));
 			}
 		}
 	}
+
+	// Cleanup action set
+	SanitizeActions();
+}
+
+void FSteamVRInputDevice::SanitizeActions()
+{
+	for (int32 i = 0; i < Actions.Num(); i++)
+	{
+		// Check for X,Y keys validity
+		//if (!(Actions[i].KeyX.ToString().Contains(TEXT("_X")) || Actions[i].KeyX.ToString().Contains(TEXT("X-Axis"))))
+		//{
+		//	Actions.RemoveAt(i, 1, false);
+		//}
+		//else if (!(Actions[i].KeyY.ToString().Contains(TEXT("_Y")) || Actions[i].KeyY.ToString().Contains(TEXT("Y-Axis"))))
+		//{
+		//	Actions.RemoveAt(i, 1, false);
+		//}
+		if (!Actions[i].KeyX.IsNone() && !Actions[i].KeyY.IsNone() && Actions[i].KeyZ.IsNone())
+		{
+			// Check for X & Y Handedness Match for Vector2s
+			if ((Actions[i].Name.ToString().Contains(TEXT("Left")) && Actions[i].Name.ToString().Contains(TEXT("Right"))))
+			{
+				Actions.RemoveAt(i, 1, false);
+			}
+		}
+	}
+
+	Actions.Shrink();
 }
 
 void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
