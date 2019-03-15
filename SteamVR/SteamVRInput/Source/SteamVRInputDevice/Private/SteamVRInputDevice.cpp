@@ -3,6 +3,7 @@
 #include "HAL/FileManagerGeneric.h"
 #include "Misc/FileHelper.h"
 #include "GameFramework/PlayerInput.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "../../OpenVRSDK/headers/openvr.h"
 #include "GameFramework/WorldSettings.h"
@@ -558,7 +559,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	OutAppKey = TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + ProjectName;
 
 	// Set Action Manifest Path - same directory where the action manifest will be
-	OutAppManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / APP_MANIFEST_FILE;
+	OutAppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
 	// Create Application Manifest json objects

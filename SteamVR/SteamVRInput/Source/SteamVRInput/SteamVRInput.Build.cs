@@ -18,5 +18,7 @@ public class SteamVRInput : ModuleRules
                 "SteamVR"
             }
 			);
+
+        RuntimeDependencies.Add(new RuntimeDependency("$(ProjectDir)/Config/SteamVRBindings/..."));
     }
 }

@@ -34,22 +34,10 @@ public class OpenVRSDK : ModuleRules
 		string LibraryPath = Path.Combine(ModuleDirectory, "lib");
         string BinaryPath = Path.Combine(ModuleDirectory, "bin");
 
-        // Setup OpenVR Paths based on build platform
-  //      if (Target.Platform == UnrealTargetPlatform.Win64)
-		//{
-			PublicLibraryPaths.Add(Path.Combine(LibraryPath, "win64"));
-			PublicAdditionalLibraries.Add("openvr_api.lib");
-			PublicDelayLoadDLLs.Add(Path.Combine(BinaryPath, "win64", "openvr_api.dll"));
-			RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinaryPath, "win64", "openvr_api.dll")));
-            //RuntimeDependencies.Add(Path.Combine(BinaryPath, "win64", "openvr_api.dll"));
-        //}
-		//else if (Target.Platform == UnrealTargetPlatform.Linux && Target.Architecture.StartsWith("x86_64"))
-		//{
-		//	PublicLibraryPaths.Add(Path.Combine(LibraryPath, "linux64"));
-		//	PublicAdditionalLibraries.Add("libopenvr_api.so");
-  //          PublicDelayLoadDLLs.Add(Path.Combine(BinaryPath, "win64", "libopenvr_api.so"));
-  //          RuntimeDependencies.Add(Path.Combine(BinaryPath, "win64", "libopenvr_api.so"));
-  //      }
+		PublicLibraryPaths.Add(Path.Combine(LibraryPath, "win64"));
+		PublicAdditionalLibraries.Add("openvr_api.lib");
+		PublicDelayLoadDLLs.Add(Path.Combine(BinaryPath, "win64", "openvr_api.dll"));
+		RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinaryPath, "win64", "openvr_api.dll")));
 
 		// Verify if necessary OpenVR paths exists
 		if (!Directory.Exists(HeadersPath) && !Directory.Exists(LibraryPath) && !Directory.Exists(BinaryPath))

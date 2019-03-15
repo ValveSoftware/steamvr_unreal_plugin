@@ -10,7 +10,7 @@
   "DocsURL": "",
   "MarketplaceURL": "",
   "SupportURL": "",
-  "CanContainContent": true,  
+  "CanContainContent": true,
   "IsBetaVersion": true,
   "Installed": false,
   "Modules": [
@@ -40,3 +40,4 @@
     }
   ]
 }
+
