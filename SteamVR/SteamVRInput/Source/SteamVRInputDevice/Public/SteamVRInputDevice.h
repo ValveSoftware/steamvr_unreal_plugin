@@ -8,8 +8,9 @@
 #include "Serialization/JsonSerializer.h"
 #include "SteamVRInputTypes.h"
 #include "SteamVRKnucklesKeys.h"
+#include "SteamVRInputPublic.h"
 
-STEAMVRINPUT_API class FSteamVRInputDevice : public IInputDevice, public IMotionController
+class FSteamVRInputDevice : public IInputDevice, public IMotionController
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -60,6 +61,16 @@ public:
 		float RingPinkySplayAnalog;
 
 	};
+
+	// These variables will be exposed to Blueprint via the Function Library (Skeletal Input System)
+	bool bCurlsAndSplaysEnabled_L = false;
+	bool bCurlsAndSplaysEnabled_R = false;
+	bool bSkeletalTransformsEnabled_L = false;
+	bool bSkeletalTransformsEnabled_R = false;
+	bool bMotionRangeWithControllerL = false;
+	bool bMotionRangeWithControllerR = false;
+	VRBoneTransform_t SkeletonTransform_L[31];
+	VRBoneTransform_t SkeletonTransform_R[31];
 
 	/* Mappings between tracked devices and 0 indexed controllers */
 	int32 NumControllersMapped;
@@ -139,5 +150,6 @@ private:
 	TArray<FInputActionKeyMapping> KeyMappings;
 	void FindAxisMappings(const UInputSettings* InputSettings, const FName AxisName, TArray<FInputAxisKeyMapping>& OutMappings) const;
 	void FindActionMappings(const UInputSettings* InputSettings, const FName ActionName, TArray<FInputActionKeyMapping>& OutMappings) const;
+	void SendAnalogMessage(const ETrackedControllerRole TrackedControllerRole, const FGamepadKeyNames::Type AxisButton, float AnalogValue);
 	FString SanitizeString(FString& InOutString);
 };

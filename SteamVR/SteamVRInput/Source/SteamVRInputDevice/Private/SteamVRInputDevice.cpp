@@ -36,6 +36,23 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	InitSkeletalControllerKeys();
 	GenerateActionManifest();
 
+#if WITH_EDITOR
+	// Auto-enable SteamVR Input Developer Mode 
+	if (VRSettings() != nullptr)
+	{
+		EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
+		SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Overlay);
+
+		EVRSettingsError BindingFlagError = VRSettingsError_None;
+		VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+		//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
+		//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+
+		VR_ShutdownInternal();
+	}
+#endif
+
 	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
 	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Scene);
@@ -121,7 +138,7 @@ FString FSteamVRInputDevice::SanitizeString(FString& InString)
 
 void FSteamVRInputDevice::SendSkeletalInputEvents()
 {
-	if (SteamVRSystem && VRInput())
+	if (SteamVRSystem && VRInput() && (bCurlsAndSplaysEnabled_L || bCurlsAndSplaysEnabled_R || bSkeletalTransformsEnabled_L || bSkeletalTransformsEnabled_R))
 	{
 		VRActiveActionSet_t ActiveActionSets[] = {
 			{
@@ -138,6 +155,9 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 			return;
 		}
 		Err = LastInputError;
+
+		bool bIsSkeletalControllerLeftPresent = false;
+		bool bIsSkeletalControllerRightPresent = false;
 
 		// Process Skeletal Data
 		for (uint32 DeviceIndex = 0; DeviceIndex < k_unMaxTrackedDeviceCount; ++DeviceIndex)
@@ -156,8 +176,6 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 
 			FInputDeviceState& ControllerState = ControllerStates[DeviceIndex];
 			EVRSkeletalTrackingLevel vrSkeletalTrackingLevel;
-			bool bIsSkeletalControllerLeftPresent = false;
-			bool bIsSkeletalControllerRightPresent = false;
 
 			// Set Skeletal Action Handles
 			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), &VRSkeletalHandleLeft);
@@ -194,16 +212,21 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 			}
 			Err = LastInputError;
 
-			// Get Skeletal Summary Data
+			// Get Skeletal Data
 			VRActionHandle_t ActiveSkeletalHand;
 			VRSkeletalSummaryData_t ActiveSkeletalSummaryData;
+			//VRBoneTransform_t ActiveBoneTransform;
 
-			if (bIsSkeletalControllerLeftPresent && SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand)
+			if (bIsSkeletalControllerLeftPresent && 
+				(bCurlsAndSplaysEnabled_L || bSkeletalTransformsEnabled_L) &&
+				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand)
 			{
 				ActiveSkeletalHand = VRSkeletalHandleLeft;
 				ActiveSkeletalSummaryData = VRSkeletalSummaryDataLeft;
 			}
-			else if (bIsSkeletalControllerRightPresent && SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_RightHand)
+			else if (bIsSkeletalControllerRightPresent && 
+				(bCurlsAndSplaysEnabled_R || bSkeletalTransformsEnabled_R) &&
+				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_RightHand)
 			{
 				ActiveSkeletalHand = VRSkeletalHandleRight;
 				ActiveSkeletalSummaryData = VRSkeletalSummaryDataRight;
@@ -213,89 +236,134 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 				continue;
 			}
 
-			// Get Skeletal Summary Data
-			Err = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
-			if (Err != VRInputError_None && Err != LastInputError)
+			#pragma region CURLS AND SPLAYS
+			if (bCurlsAndSplaysEnabled_L || bCurlsAndSplaysEnabled_R)
 			{
-				UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to read Skeletal Summary Data: %d"), (int32)Err);
+				// Get Skeletal Summary Data
+				Err = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
+				if (Err != VRInputError_None && Err != LastInputError)
+				{
+					UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to read Skeletal Summary Data: %d"), (int32)Err);
+				}
+				LastInputError = Err;
+	
+				// Skeleton Finger Curls
+				if (ControllerState.IndexGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Index])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Index_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Index_Curl;
+					ControllerState.IndexGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Index];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.IndexGripAnalog);
+				} 
+	
+				if (ControllerState.MiddleGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Middle])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Middle_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Middle_Curl;
+					ControllerState.MiddleGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Middle];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.MiddleGripAnalog);
+				}
+	
+				if (ControllerState.RingGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Ring])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Ring_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Ring_Curl;
+					ControllerState.RingGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Ring];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.RingGripAnalog);
+				}
+	
+				if (ControllerState.PinkyGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Pinky])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Pinky_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Pinky_Curl;
+					ControllerState.PinkyGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Pinky];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.PinkyGripAnalog);
+				}
+	
+				if (ControllerState.ThumbGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Thumb])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Thumb_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Thumb_Curl;
+					ControllerState.ThumbGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Thumb];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.ThumbGripAnalog);
+				}
+	
+	
+				// Skeleton Finger Splays
+				if (ControllerState.ThumbIndexSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Thumb_Index])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_ThumbIndex_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_ThumbIndex_Splay;
+					ControllerState.ThumbIndexSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Thumb_Index];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.ThumbIndexSplayAnalog);
+				}
+	
+				if (ControllerState.IndexMiddleSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Index_Middle])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_IndexMiddle_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_IndexMiddle_Splay;
+					ControllerState.IndexMiddleSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Index_Middle];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.IndexMiddleSplayAnalog);
+				}
+	
+				if (ControllerState.MiddleRingSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Middle_Ring])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_RingPinky_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_RingPinky_Splay;
+					ControllerState.MiddleRingSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Middle_Ring];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.MiddleRingSplayAnalog);
+				}
+	
+				if (ControllerState.RingPinkySplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Ring_Pinky])
+				{
+					const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
+						SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_RingPinky_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_RingPinky_Splay;
+					ControllerState.RingPinkySplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Ring_Pinky];
+					SendAnalogMessage(SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex), AxisButton, ControllerState.RingPinkySplayAnalog);
+				}
 			}
-			LastInputError = Err;
+			#pragma endregion
 
-			// Skeleton Finger Curls
-			if (ControllerState.IndexGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Index])
+			#pragma region SKELETAL TRANSFORMS
+			// Get Bone Count
+			uint32 BoneCount = 0;
+
+			// Get Skeletal Bone Data
+			if (VRInput() != nullptr && SteamVRSystem != nullptr && 
+				bIsSkeletalControllerLeftPresent && bSkeletalTransformsEnabled_L && 
+				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand)
 			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Index_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Index_Curl;
-				ControllerState.IndexGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Index];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.IndexGripAnalog);
+				// Set Motion Range
+				EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerL ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
+				
+				VRInput()->GetBoneCount(VRSkeletalHandleLeft, &BoneCount);
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, MotionRange, SkeletonTransform_L, BoneCount);
 			}
 
-			if (ControllerState.MiddleGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Middle])
+			if (VRInput() != nullptr && SteamVRSystem != nullptr && 
+				bIsSkeletalControllerRightPresent && bSkeletalTransformsEnabled_R &&
+				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_RightHand)
 			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Middle_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Middle_Curl;
-				ControllerState.MiddleGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Middle];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.MiddleGripAnalog);
+				// Set Motion Range
+				EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerR ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, MotionRange, SkeletonTransform_R, BoneCount);
 			}
-
-			if (ControllerState.RingGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Ring])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Ring_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Ring_Curl;
-				ControllerState.RingGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Ring];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.RingGripAnalog);
-			}
-
-			if (ControllerState.PinkyGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Pinky])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Pinky_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Pinky_Curl;
-				ControllerState.PinkyGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Pinky];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.PinkyGripAnalog);
-			}
-
-			if (ControllerState.ThumbGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Thumb])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_Thumb_Curl : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_Thumb_Curl;
-				ControllerState.ThumbGripAnalog = ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Thumb];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.ThumbGripAnalog);
-			}
-
-
-			// Skeleton Finger Splays
-			if (ControllerState.ThumbIndexSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Thumb_Index])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_ThumbIndex_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_ThumbIndex_Splay;
-				ControllerState.ThumbIndexSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Thumb_Index];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.ThumbIndexSplayAnalog);
-			}
-
-			if (ControllerState.IndexMiddleSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Index_Middle])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_IndexMiddle_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_IndexMiddle_Splay;
-				ControllerState.IndexMiddleSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Index_Middle];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.IndexMiddleSplayAnalog);
-			}
-
-			if (ControllerState.MiddleRingSplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Middle_Ring])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_RingPinky_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_RingPinky_Splay;
-				ControllerState.MiddleRingSplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Middle_Ring];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.MiddleRingSplayAnalog);
-			}
-
-			if (ControllerState.RingPinkySplayAnalog != ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Ring_Pinky])
-			{
-				const FGamepadKeyNames::Type AxisButton = (SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand) ?
-					SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Left_Finger_RingPinky_Splay : SteamVRSkeletalControllerKeyNames::SteamVR_Skeleton_Right_Finger_RingPinky_Splay;
-				ControllerState.RingPinkySplayAnalog = ActiveSkeletalSummaryData.flFingerSplay[EVRFingerSplay::VRFingerSplay_Ring_Pinky];
-				MessageHandler->OnControllerAnalog(AxisButton, 0, ControllerState.RingPinkySplayAnalog);
-			}
+			#pragma endregion
 		}
+	}
+}
+
+void FSteamVRInputDevice::SendAnalogMessage(const ETrackedControllerRole TrackedControllerRole, const FGamepadKeyNames::Type AxisButton, float AnalogValue)
+{
+	if (TrackedControllerRole == ETrackedControllerRole::TrackedControllerRole_LeftHand && bCurlsAndSplaysEnabled_L)
+	{
+		MessageHandler->OnControllerAnalog(AxisButton, 0, AnalogValue);
+		//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Left Index value: %f for axis %s"), ControllerState.IndexGripAnalog, *AxisButton.ToString());
+	}
+	else if (TrackedControllerRole == ETrackedControllerRole::TrackedControllerRole_RightHand && bCurlsAndSplaysEnabled_R)
+	{
+		MessageHandler->OnControllerAnalog(AxisButton, 0, AnalogValue);
+		//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Left Index value: %f for axis %s"), ControllerState.IndexGripAnalog, *AxisButton.ToString());
 	}
 }
 
@@ -1517,15 +1585,6 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 
-			// Auto-enable SteamVR Input Developer Mode 
-			if (VRSettings() != nullptr)
-			{
-				EVRSettingsError BindingFlagError = VRSettingsError_None;
-				VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
-				UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
-				//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
-				//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
-			}
 		}
 		#endif
 
@@ -1615,7 +1674,7 @@ void FSteamVRInputDevice::RegisterDevice(uint32 id)
 			// Map the controller
 			int32 ControllerIndex = FMath::FloorToInt(NumControllersMapped / CONTROLLERS_PER_PLAYER);
 			DeviceToControllerMap[id] = ControllerIndex;
-			UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = id;
+			//UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = id;
 			++NumControllersMapped;
 		}
 	}
@@ -1680,16 +1739,18 @@ void FSteamVRInputDevice::UnRegisterDevice(uint32 id)
 {
 	ETrackedDeviceClass TrackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
 	if (TrackedDeviceClass == TrackedDeviceClass_Controller)
-		MaxUEHandCount[(int32)ControllerStates[id].Hand] -= 1;
-	
-	if ((TrackedDeviceClass == TrackedDeviceClass_Controller || TrackedDeviceClass == TrackedDeviceClass_GenericTracker) &&
-		(id < SteamVRInputDeviceConstants::MaxUnrealControllers && (int32)ControllerStates[id].Hand < k_unMaxTrackedDeviceCount))
 	{
-		UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = INDEX_NONE;
-		DeviceToControllerMap[id] = INDEX_NONE;
+		MaxUEHandCount[(int32)ControllerStates[id].Hand] -= 1;
 		NumControllersMapped--;
-		FMemory::Memzero(&ControllerStates[id], sizeof(FInputDeviceState));
 	}
+	else if (TrackedDeviceClass == TrackedDeviceClass_GenericTracker)
+	{
+		NumTrackersMapped--;
+	}
+
+	//UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = INDEX_NONE;
+	DeviceToControllerMap[id] = INDEX_NONE;
+	FMemory::Memzero(&ControllerStates[id], sizeof(FInputDeviceState));
 }
 
 void FSteamVRInputDevice::CheckControllerHandSwap()
@@ -1706,17 +1767,16 @@ void FSteamVRInputDevice::CheckControllerHandSwap()
 			)
 		{
 			// If they aren't, assign the updated device ids to the correct hand
-			int32 ControllerIndex = DeviceToControllerMap[LeftDeviceID];
-			if (ControllerIndex <= SteamVRInputDeviceConstants::MaxUnrealControllers && 
-				(int32)EControllerHand::Left < k_unMaxTrackedDeviceCount && 
-				(int32)EControllerHand::Right < k_unMaxTrackedDeviceCount 
-				)
-			{
-				UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Left] = LeftDeviceID;
-				UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Right] = RightDeviceID;
-			}
+			//int32 ControllerIndex = DeviceToControllerMap[LeftDeviceID];
+			//if (ControllerIndex <= SteamVRInputDeviceConstants::MaxUnrealControllers && 
+			//	(int32)EControllerHand::Left < k_unMaxTrackedDeviceCount && 
+			//	(int32)EControllerHand::Right < k_unMaxTrackedDeviceCount 
+			//	)
+			//{
+			//	UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Left] = LeftDeviceID;
+			//	UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Right] = RightDeviceID;
+			//}
 
-	
 			// Update the hand states for the devices
 			ControllerStates[LeftDeviceID].Hand = EControllerHand::Left;
 			ControllerStates[RightDeviceID].Hand = EControllerHand::Right;
