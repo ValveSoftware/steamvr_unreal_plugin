@@ -5,6 +5,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Features/IModularFeatures.h"
 #include "IMotionController.h"
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "SteamVRInputDeviceFunctionLibrary.generated.h"
 
 #define STEAMVRCONTROLLER_SUPPORTED_PLATFORMS (PLATFORM_MAC || (PLATFORM_LINUX && PLATFORM_CPU_X86_FAMILY && PLATFORM_64BITS) || (PLATFORM_WINDOWS && WINVER > 0x0502))
@@ -19,73 +21,77 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Root;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
 	FTransform Wrist;
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Metacarpal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Proximal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Middle;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Distal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Tip;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Thumb_Aux;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Thumb_0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Thumb_1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Thumb_2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Thumb_3;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Index_0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Index_1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Index_2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Index_3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Index_4;
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Metacarpal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Proximal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Middle;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Distal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Tip;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Index_Aux;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Middle_0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Middle_1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Middle_2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Middle_3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Middle_4;
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Metacarpal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Proximal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Middle;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Distal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Tip;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Middle_Aux;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Ring_0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Ring_1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Ring_2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Ring_3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Ring_4;
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Metacarpal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Proximal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Middle;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Distal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Tip;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Ring_Aux;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Pinky_0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Pinky_1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Pinky_2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Pinky_3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Pinky_4;
 
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Metacarpal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Proximal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Middle;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Distal;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Tip;
-	UPROPERTY(EditAnywhere, Category = "SteamVR Input")
-	FTransform Pinky_Aux;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Aux_Thumb;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Aux_Index;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Aux_Middle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Aux_Ring;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Aux_Pinky;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FTransform Bone_Count;
 };
 
 /*
