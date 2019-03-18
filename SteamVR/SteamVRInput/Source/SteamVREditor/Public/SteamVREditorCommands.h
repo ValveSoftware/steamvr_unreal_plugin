@@ -19,4 +19,5 @@ public:
 	TSharedPtr<FUICommandInfo> PluginAction;
 	TSharedPtr<FUICommandInfo> JsonActionManifest;
 	TSharedPtr<FUICommandInfo> JsonControllerBindings;
+	TSharedPtr<FUICommandInfo> LaunchBindingsURL;
 };

@@ -106,6 +106,7 @@ public:
 	FString GameFileName;
 	FString GameProjectName;
 	FString GameProjectVersion;
+	FString EditorAppKey;
 
 	void RegenerateActionManifest();
 	void RegenerateControllerBindings();

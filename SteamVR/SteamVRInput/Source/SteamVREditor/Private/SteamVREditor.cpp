@@ -38,6 +38,12 @@ void FSteamVREditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::JsonRegenerateControllerBindings),
 		FCanExecuteAction());
 
+	// Launch Bindings URL
+	PluginCommands->MapAction(
+		FSteamVREditorCommands::Get().LaunchBindingsURL,
+		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::LaunchBindingsURL),
+		FCanExecuteAction());
+	
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	
 	{
@@ -77,6 +83,11 @@ void FSteamVREditorModule::JsonRegenerateControllerBindings()
 	USteamVRInputDeviceFunctionLibrary::RegenControllerBindings();
 }
 
+void FSteamVREditorModule::LaunchBindingsURL()
+{
+	USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL();
+}
+
 void FSteamVREditorModule::AddMenuExtension(FMenuBuilder& Builder)
 {
 	Builder.AddMenuEntry(FSteamVREditorCommands::Get().PluginAction);
@@ -99,6 +110,7 @@ TSharedRef<SWidget> FSteamVREditorModule::FillComboButton(TSharedPtr<class FUICo
 
 	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest);
 	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings);
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL);
 
 	return MenuBuilder.MakeWidget();
 }

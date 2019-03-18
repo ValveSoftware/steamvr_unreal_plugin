@@ -22,6 +22,7 @@ public:
 	
 	void JsonRegenerateActionManifest();
 	void JsonRegenerateControllerBindings();
+	void LaunchBindingsURL();
 private:
 
 	void AddToolbarExtension(FToolBarBuilder& Builder);

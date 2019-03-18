@@ -4,6 +4,7 @@
 #include "SteamVRInputDevice.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Features/IModularFeatures.h"
+#include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
 #include "IMotionController.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -133,4 +134,5 @@ public:
 
 	static void RegenActionManifest();
 	static void RegenControllerBindings();
+	static void LaunchBindingsURL();
 };

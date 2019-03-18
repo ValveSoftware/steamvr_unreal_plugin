@@ -246,6 +246,17 @@ FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t 
 	//return FTransform(OrientationQuat, Position);
 }
 
+void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		FString BindingsURL = "http://localhost:8998/dashboard/controllerbinding.html?app=" + SteamVRInputDevice->EditorAppKey;
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *BindingsURL);
+		FPlatformProcess::LaunchURL(*BindingsURL, nullptr, nullptr);
+	}
+}
+
 FSteamVRInputDevice* USteamVRInputDeviceFunctionLibrary::GetSteamVRInputDevice()
 {
 	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());

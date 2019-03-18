@@ -129,9 +129,9 @@ void FSteamVRInputDevice::FindActionMappings(const UInputSettings* InputSettings
 
 FString FSteamVRInputDevice::SanitizeString(FString& InString)
 {
-	FString SanitizedString = InString.Replace(TEXT(" "), TEXT("_"));
-	SanitizedString = SanitizedString.Replace(TEXT("*"), TEXT("_"));
-	SanitizedString = SanitizedString.Replace(TEXT("."), TEXT("_"));
+	FString SanitizedString = InString.Replace(TEXT(" "), TEXT("-"));
+	SanitizedString = SanitizedString.Replace(TEXT("*"), TEXT("-"));
+	SanitizedString = SanitizedString.Replace(TEXT("."), TEXT("-"));
 
 	return SanitizedString;
 }
@@ -628,8 +628,9 @@ void FSteamVRInputDevice::InitControllerMappings()
 bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath)
 {
 	// Set SteamVR AppKey
-	OutAppKey = TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + ProjectName;
-
+	OutAppKey = (TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + ProjectName).ToLower();
+	EditorAppKey = FString(OutAppKey);
+	
 	// Set Action Manifest Path - same directory where the action manifest will be
 	OutAppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
 	IFileManager& FileManager = FFileManagerGeneric::Get();
