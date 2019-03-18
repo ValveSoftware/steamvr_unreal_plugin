@@ -71,6 +71,8 @@ public:
 	bool bMotionRangeWithControllerR = false;
 	VRBoneTransform_t SkeletonTransform_L[31];
 	VRBoneTransform_t SkeletonTransform_R[31];
+	VRBoneTransform_t SkeletonReference_L[31];
+	VRBoneTransform_t SkeletonReference_R[31];
 
 	/* Mappings between tracked devices and 0 indexed controllers */
 	int32 NumControllersMapped;
