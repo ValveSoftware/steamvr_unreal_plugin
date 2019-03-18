@@ -823,18 +823,18 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			for (auto& Action : InInputMapping[i].Actions)
 			{
 
-				if (Action.Right(3) == TEXT("1D]"))
+				if (Action.Right(6) == TEXT("X_axis"))
 				{
 					InputState.bIsAxis = true;
 					break;
 				}
-				else if (Action.Right(3) == TEXT("2D]"))
+				else if (Action.Right(7) == TEXT("_axis2d"))
 				{
 					InputState.bIsAxis = true;
 					InputState.bIsAxis2 = true;
 					break;
 				}
-				else if (Action.Right(3) == TEXT("3D]"))
+				else if (Action.Right(7) == TEXT("_axis3d"))
 				{
 					InputState.bIsAxis = true;
 					InputState.bIsAxis3 = true;
@@ -945,7 +945,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			}
 
 			if (CacheMode.IsEqual(TEXT("joystick")) 
-				&& InInputMapping[i].Actions[j].Right(3) == TEXT("1D]") 
+				&& InInputMapping[i].Actions[j].Right(6) == TEXT("X_axis") 
 				&& CacheType == TEXT("position"))
 			{
 				CacheType = "";
@@ -1119,19 +1119,19 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 										// Add 1D Action
 										NewAxisMapping.Actions.AddUnique(Action.Path);
 	
-										FString ActionDimension = Action.Name.ToString().Right(4);
+										FString ActionDimension = Action.Name.ToString().Right(7);
 	
-										if (ActionDimension == TEXT("[2D]"))
+										if (ActionDimension == TEXT("_axis2d"))
 										{
 											// Add 2D Action
-											FString Action2D = Action.Path.LeftChop(5) + TEXT(" [2D]");
+											FString Action2D = Action.Path.LeftChop(11) + TEXT(" X Y_axis2d");
 											NewAxisMapping.Actions.AddUnique(Action2D);
 										}
 	
-										if (ActionDimension == TEXT("[3D]"))
+										if (ActionDimension == TEXT("_axis3d"))
 										{
 											// Add 3D Action
-											FString Action3D = Action.Path.LeftChop(5) + TEXT(" [3D]");
+											FString Action3D = Action.Path.LeftChop(11) + TEXT(" X Y_axis3d");
 											NewAxisMapping.Actions.AddUnique(Action3D);
 										}
 									}
@@ -1488,7 +1488,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					FString AxisName2D = AxisMapping.AxisName.ToString() +
 						TEXT(",") +
 						YAxisName.ToString() +
-						TEXT(" [2D]");
+						TEXT(" X Y_axis2d");
 					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
 					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisNameKey, YAxisNameKey, FVector2D()));
 				}
@@ -1499,7 +1499,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						TEXT(",") +
 						YAxisName.ToString() + TEXT(",") +
 						ZAxisName.ToString() +
-						TEXT(" [3D]");
+						TEXT(" X Y Z_axis3d");
 					FString ActionPath3D = FString(ACTION_PATH_IN) / AxisName3D;
 					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisNameKey, YAxisNameKey, ZAxisNameKey, FVector()));
 				}
@@ -1509,7 +1509,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			if (!XAxisName.IsNone())
 			{
 				// [1D] Populate all Vector1 actions
-				FString AxisName1D = AxisMapping.AxisName.ToString() + TEXT(" [1D]");
+				FString AxisName1D = AxisMapping.AxisName.ToString() + TEXT(" X_axis");
 				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
 				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisNameKey, 0.0f));
 			}
