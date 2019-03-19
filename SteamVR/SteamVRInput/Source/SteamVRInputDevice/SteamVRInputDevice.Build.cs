@@ -32,15 +32,16 @@ public class SteamVRInputDevice : ModuleRules
 			);
 
         PublicDependencyModuleNames.AddRange(
-    new string[]
-    {
+            new string[]
+            {
                 "OpenVRSDK",
                 "SteamVRInput",
-                "SteamVRInputDevice",
                 "InputCore",
                 "InputDevice",
-    }
-    );
+                "BlueprintGraph",
+                "AnimGraph",
+            }
+            );
 
         if (UEBuildConfiguration.bBuildEditor == true)
         {
