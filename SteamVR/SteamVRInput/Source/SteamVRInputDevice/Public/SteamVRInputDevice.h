@@ -70,9 +70,11 @@ public:
 	bool bMotionRangeWithControllerL = false;
 	bool bMotionRangeWithControllerR = false;
 	VRBoneTransform_t SkeletonTransform_L[31];	// Without Controller
-	VRBoneTransform_t SkeletonTransform_R[31];
+	VRBoneTransform_t SkeletonTransform_R[31];  // Without Controller
 	VRBoneTransform_t SkeletonTransformC_L[31];	// With Controller
-	VRBoneTransform_t SkeletonTransformC_R[31];
+	VRBoneTransform_t SkeletonTransformC_R[31]; // With Controller
+	VRBoneTransform_t SkeletonReference_L[31];	// Reference Pose
+	VRBoneTransform_t SkeletonReference_R[31];  // Reference Pose
 
 	/* Mappings between tracked devices and 0 indexed controllers */
 	int32 NumControllersMapped;

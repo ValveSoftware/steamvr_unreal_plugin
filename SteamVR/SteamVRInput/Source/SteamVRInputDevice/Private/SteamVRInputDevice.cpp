@@ -339,7 +339,7 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 				VRInput()->GetBoneCount(VRSkeletalHandleLeft, &BoneCount);
 				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithoutController, SkeletonTransform_L, BoneCount);
 				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithController, SkeletonTransformC_L, BoneCount);
-				//VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonTransformC_L, BoneCount);
+				VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReference_L, BoneCount);
 			}
 
 			if (VRInput() != nullptr && SteamVRSystem != nullptr && 
@@ -352,7 +352,7 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 				VRInput()->GetBoneCount(VRSkeletalHandleRight, &BoneCount);
 				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithoutController, SkeletonTransform_R, BoneCount);
 				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithController, SkeletonTransformC_R, BoneCount);
-				//VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReferenceC_R, BoneCount);
+				VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReference_R, BoneCount);
 			}
 			#pragma endregion
 		}

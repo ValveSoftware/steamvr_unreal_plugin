@@ -85,4 +85,5 @@ public:
 	void FillHandTransforms(FSteamVRInputDevice* SteamVRInputDevice);
 	void FillHandTransformsWithController(FSteamVRInputDevice* SteamVRInputDevice);
 	FSteamVRInputDevice* GetSteamVRInputDevice();
+
 };
