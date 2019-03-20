@@ -1,26 +1,29 @@
 # Official SteamVR Unreal Plugin
 
-## I. How to add this plugin to your UE4 Project
-Pre-requisite: Your project must be a C++ enabled project. 
+## I. Setting up a new project for use with the SteamVR Input Plugin
+If you are not adding the plugin to an existing project, create a new Blueprint project using the Virtual Reality template.  Starter content is not necessary.  
 
-1. In your project's root directory, create a new folder if it doesn't exist:
+For Blueprint projects to use the plugin directly from GitHub, you need to convert it to a C++ project.  To convert it:
+* Select to File -> New C++ Class
+* In the Choose Parent Class dialog, choose Game Mode Base
+* Give the class a name and click Create.  The engine will compile the code and open the solution in Visual Studio
+* Close Visual Studio and the Unreal Editor
+* Add the SteamVR Input plugin using the steps below
+
+
+## I. How to add this plugin to your UE4 Project
+1. Download the SteamVR Input plugin from GitHub
+	* Go to https://github.com/ValveSoftware/steamvr_unreal_plugin
+	* Click the "Clone or download" and select Download Zip
+	
+2. In your project's root directory, create a new folder if it doesn't exist:
 Plugins
 
-2. Under the new Plugins directory, create a subfolder called (this name is arbitrary, and doesn't affect compilation or functioning of the plugin):
-SteamVR
+3. Unzip the downloaded file directly to the new Plugins folder.  There should now be a folder called steamvr_unreal_plugin-master; you can rename this if you'd like.  
 
-3. Add a git submodule to your project:
+5. In the root folder of your project, right-click on your .uproject file and select "Generate Visual Studio project files" (this requires the Epic Launcher to be installed on your machine)
 
-* repo link (https): https://github.com/ValveSoftware/steamvr_unreal_plugin.git
-* repo link (ssh): git@github.com:ValveSoftware/steamvr_unreal_plugin.git
-
-* Git Tower users, follow these instructions: https://www.git-tower.com/help/win/submodules/add-clone
-* SourceTree users, follow these instructions: https://confluence.atlassian.com/sourcetreekb/adding-a-submodule-subtree-with-sourcetree-785332086.html
-* Git command line users, follow instructions here: https://git-scm.com/book/en/v2/Git-Tools-Submodules
-
-4. Right-click on your .uproject file and select "Generate Visual Studio project files" (this requires the Epci Launcher to be installed on your machine)
-
-5. Open your project, UE, should ask for a recompile of all the plugin submodules, click OK.
+6. Finally, double-click the *.uproject file at the root of your project to compile and open the project.  If you are prompted to rebuild any files select yes
 
 Reminder: You need to update submodules separately from your regular Fetch/Pulls of your project to update the plugin.
 
