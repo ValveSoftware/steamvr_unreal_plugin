@@ -4,6 +4,8 @@
 #include "AnimNode_SteamVRInputAnimPose.h"
 #include "AnimGraphNode_SteamVRInputAnimPose.generated.h"
 
+using namespace vr;
+
 UCLASS(MinimalAPI)
 class UAnimGraphNode_SteamVRInputAnimPose : public UAnimGraphNode_Base
 {

@@ -63,16 +63,16 @@ public:
 	};
 
 	// These variables will be exposed to Blueprint via the Function Library (Skeletal Input System)
-	bool bCurlsAndSplaysEnabled_L = false;
-	bool bCurlsAndSplaysEnabled_R = false;
-	bool bSkeletalTransformsEnabled_L = false;
-	bool bSkeletalTransformsEnabled_R = false;
+	bool bCurlsAndSplaysEnabled_L = true;
+	bool bCurlsAndSplaysEnabled_R = true;
+	bool bSkeletalTransformsEnabled_L = true;
+	bool bSkeletalTransformsEnabled_R = true;
 	bool bMotionRangeWithControllerL = false;
 	bool bMotionRangeWithControllerR = false;
-	VRBoneTransform_t SkeletonTransform_L[31];
+	VRBoneTransform_t SkeletonTransform_L[31];	// Without Controller
 	VRBoneTransform_t SkeletonTransform_R[31];
-	VRBoneTransform_t SkeletonReference_L[31];
-	VRBoneTransform_t SkeletonReference_R[31];
+	VRBoneTransform_t SkeletonTransformC_L[31];	// With Controller
+	VRBoneTransform_t SkeletonTransformC_R[31];
 
 	/* Mappings between tracked devices and 0 indexed controllers */
 	int32 NumControllersMapped;

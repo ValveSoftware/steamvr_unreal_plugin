@@ -334,11 +334,12 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_LeftHand)
 			{
 				// Set Motion Range
-				EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerL ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
+				//EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerL ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 				
 				VRInput()->GetBoneCount(VRSkeletalHandleLeft, &BoneCount);
-				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SkeletonTransform_L, BoneCount);
-				VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReference_L, BoneCount);
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithoutController, SkeletonTransform_L, BoneCount);
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithController, SkeletonTransformC_L, BoneCount);
+				//VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonTransformC_L, BoneCount);
 			}
 
 			if (VRInput() != nullptr && SteamVRSystem != nullptr && 
@@ -346,10 +347,12 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 				SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(DeviceIndex) == ETrackedControllerRole::TrackedControllerRole_RightHand)
 			{
 				// Set Motion Range
-				EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerR ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
+				//EVRSkeletalMotionRange MotionRange = bMotionRangeWithControllerR ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
+
 				VRInput()->GetBoneCount(VRSkeletalHandleRight, &BoneCount);
-				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, MotionRange, SkeletonTransform_R, BoneCount);
-				EVRInputError err = VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReference_R, BoneCount);
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithoutController, SkeletonTransform_R, BoneCount);
+				VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, VRSkeletalMotionRange_WithController, SkeletonTransformC_R, BoneCount);
+				//VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, SkeletonReferenceC_R, BoneCount);
 			}
 			#pragma endregion
 		}
