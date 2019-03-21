@@ -49,6 +49,22 @@ enum class EMotionRange : uint8
 	VR_WithController 		UMETA(DisplayName = "With Controller")
 };
 
+UENUM(BlueprintType)
+enum class EHand : uint8
+{
+	VR_LeftHand 	UMETA(DisplayName = "Left Hand"),
+	VR_RightHand 	UMETA(DisplayName = "Right Hand")
+};
+
+UENUM(BlueprintType)
+enum class EHandSkeleton : uint8
+{
+	VR_SteamVRHandSkeleton 	UMETA(DisplayName = "SteamVR Hand Skeleton"),
+	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton"),
+	VR_CustomSkeleton 		UMETA(DisplayName = "Custom Skeleton")
+};
+
+
 USTRUCT()
 struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
@@ -61,6 +77,13 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EMotionRange MotionRange;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
+	EHand Hand;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
+	EHandSkeleton HandSkeleton;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 
@@ -71,6 +94,7 @@ public:
 	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
 	virtual void Update(const FAnimationUpdateContext & Context) override;
 	virtual void Evaluate(FPoseContext& Output) override;
+	void GetBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform);
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRInputAnimPose();
@@ -79,11 +103,11 @@ public:
 	TMap<FName, FName> BoneNameMap;
 	TArray<ESteamVRBone> BoneKeypoints;
 	TArray<FName> BoneNames;
+	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 	TArray<int32> BoneParents;
 
 	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
-	void FillHandTransforms(FSteamVRInputDevice* SteamVRInputDevice);
-	void FillHandTransformsWithController(FSteamVRInputDevice* SteamVRInputDevice);
+	void FillHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose);
 	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 };

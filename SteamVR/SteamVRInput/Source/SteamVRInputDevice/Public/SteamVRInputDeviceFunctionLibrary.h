@@ -113,23 +113,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
 	static void GetCurlsAndSplaysState(bool& LeftHandState, bool& RightHandState);
 
-	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
-	static void GetSkeletalTransformsState(bool& LeftHandState, bool& RightHandState);
-
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
 
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void SetSkeletalTransformsState(bool NewLeftHandState, bool NewRightHandState);
-
-	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void GetSkeletalMotionRange(bool& LeftHandWithController, bool& RightHandWithController);
-
-	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void SetSkeletalMotionRange(bool LeftHandWithController, bool RightHandWithController);
-
-	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand);
+	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
 	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
 
 	static void RegenActionManifest();

@@ -76,16 +76,6 @@ void USteamVRInputDeviceFunctionLibrary::GetCurlsAndSplaysState(bool& LeftHandSt
 	}
 }
 
-void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransformsState(bool& LeftHandState, bool& RightHandState)
-{
-	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr)
-	{
-		LeftHandState = SteamVRInputDevice->bSkeletalTransformsEnabled_L;
-		RightHandState = SteamVRInputDevice->bSkeletalTransformsEnabled_R;
-	}
-}
-
 void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
@@ -96,123 +86,102 @@ void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHand
 	}
 }
 
-void USteamVRInputDeviceFunctionLibrary::SetSkeletalTransformsState(bool NewLeftHandState, bool NewRightHandState)
+void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController)
 {
+	VRBoneTransform_t OutPose[STEAMVR_SKELETON_BONE_COUNT];
+	VRBoneTransform_t ReferencePose[STEAMVR_SKELETON_BONE_COUNT];
+
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
-		SteamVRInputDevice->bSkeletalTransformsEnabled_L = NewLeftHandState;
-		SteamVRInputDevice->bSkeletalTransformsEnabled_R = NewRightHandState;
-	}
-}
+		// Setup Motion Range
+		EVRSkeletalMotionRange MotionRange = bWithController ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 
-void USteamVRInputDeviceFunctionLibrary::GetSkeletalMotionRange(bool& LeftHandWithController, bool& RightHandWithController)
-{
-	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr)
-	{
-		LeftHandWithController = SteamVRInputDevice->bMotionRangeWithControllerL;
-		RightHandWithController = SteamVRInputDevice->bMotionRangeWithControllerR;
-	}
-}
+		// Left Hand - Grab Skeletal Data
+		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, ReferencePose);
 
-void USteamVRInputDeviceFunctionLibrary::SetSkeletalMotionRange(bool LeftHandWithController, bool RightHandWithController)
-{
-	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr)
-	{
-		SteamVRInputDevice->bMotionRangeWithControllerL = LeftHandWithController;
-		SteamVRInputDevice->bMotionRangeWithControllerR = RightHandWithController;
-	}
-}
+		LeftHand.Root = GetUETransform(OutPose[0], ReferencePose[0]);
+		LeftHand.Wrist = GetUETransform(OutPose[1], ReferencePose[1]);
 
-void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand)
-{
-	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr)
-	{
-		// Left Hand
-		LeftHand.Root = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[0], SteamVRInputDevice->SkeletonTransformC_L[0]);
-		LeftHand.Wrist = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[1], SteamVRInputDevice->SkeletonTransformC_L[1]);
+		LeftHand.Thumb_0 = GetUETransform(OutPose[2], ReferencePose[2]);
+		LeftHand.Thumb_1 = GetUETransform(OutPose[3], ReferencePose[3]);
+		LeftHand.Thumb_2 = GetUETransform(OutPose[4], ReferencePose[4]);
+		LeftHand.Thumb_3 = GetUETransform(OutPose[5], ReferencePose[5]);
 
-		LeftHand.Thumb_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[2], SteamVRInputDevice->SkeletonTransformC_L[2]);
-		LeftHand.Thumb_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[3], SteamVRInputDevice->SkeletonTransformC_L[3]);
-		LeftHand.Thumb_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[4], SteamVRInputDevice->SkeletonTransformC_L[4]);
-		LeftHand.Thumb_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[5], SteamVRInputDevice->SkeletonTransformC_L[5]);
+		LeftHand.Index_0 = GetUETransform(OutPose[6], ReferencePose[6]);
+		LeftHand.Index_1 = GetUETransform(OutPose[7], ReferencePose[7]);
+		LeftHand.Index_2 = GetUETransform(OutPose[8], ReferencePose[8]);
+		LeftHand.Index_3 = GetUETransform(OutPose[9], ReferencePose[9]);
+		LeftHand.Index_4 = GetUETransform(OutPose[10], ReferencePose[10]);
 
-		LeftHand.Index_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[6], SteamVRInputDevice->SkeletonTransformC_L[6]);
-		LeftHand.Index_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[7], SteamVRInputDevice->SkeletonTransformC_L[7]);
-		LeftHand.Index_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[8], SteamVRInputDevice->SkeletonTransformC_L[8]);
-		LeftHand.Index_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[9], SteamVRInputDevice->SkeletonTransformC_L[9]);
-		LeftHand.Index_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[10], SteamVRInputDevice->SkeletonTransformC_L[10]);
+		LeftHand.Middle_0 = GetUETransform(OutPose[11], ReferencePose[11]);
+		LeftHand.Middle_1 = GetUETransform(OutPose[12], ReferencePose[12]);
+		LeftHand.Middle_2 = GetUETransform(OutPose[13], ReferencePose[13]);
+		LeftHand.Middle_3 = GetUETransform(OutPose[14], ReferencePose[14]);
+		LeftHand.Middle_4 = GetUETransform(OutPose[15], ReferencePose[15]);
 
-		LeftHand.Middle_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[11], SteamVRInputDevice->SkeletonTransformC_L[11]);
-		LeftHand.Middle_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[12], SteamVRInputDevice->SkeletonTransformC_L[12]);
-		LeftHand.Middle_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[13], SteamVRInputDevice->SkeletonTransformC_L[13]);
-		LeftHand.Middle_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[14], SteamVRInputDevice->SkeletonTransformC_L[14]);
-		LeftHand.Middle_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[15], SteamVRInputDevice->SkeletonTransformC_L[15]);
+		LeftHand.Ring_0 = GetUETransform(OutPose[16], ReferencePose[16]);
+		LeftHand.Ring_1 = GetUETransform(OutPose[17], ReferencePose[17]);
+		LeftHand.Ring_2 = GetUETransform(OutPose[18], ReferencePose[18]);
+		LeftHand.Ring_3 = GetUETransform(OutPose[19], ReferencePose[19]);
+		LeftHand.Ring_4 = GetUETransform(OutPose[20], ReferencePose[20]);
 
-		LeftHand.Ring_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[16], SteamVRInputDevice->SkeletonTransformC_L[16]);
-		LeftHand.Ring_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[17], SteamVRInputDevice->SkeletonTransformC_L[17]);
-		LeftHand.Ring_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[18], SteamVRInputDevice->SkeletonTransformC_L[18]);
-		LeftHand.Ring_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[19], SteamVRInputDevice->SkeletonTransformC_L[19]);
-		LeftHand.Ring_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[20], SteamVRInputDevice->SkeletonTransformC_L[20]);
+		LeftHand.Pinky_0 = GetUETransform(OutPose[21], ReferencePose[21]);
+		LeftHand.Pinky_1 = GetUETransform(OutPose[22], ReferencePose[22]);
+		LeftHand.Pinky_2 = GetUETransform(OutPose[23], ReferencePose[23]);
+		LeftHand.Pinky_3 = GetUETransform(OutPose[24], ReferencePose[24]);
+		LeftHand.Pinky_4 = GetUETransform(OutPose[25], ReferencePose[25]);
 
-		LeftHand.Pinky_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[21], SteamVRInputDevice->SkeletonTransformC_L[21]);
-		LeftHand.Pinky_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[22], SteamVRInputDevice->SkeletonTransformC_L[22]);
-		LeftHand.Pinky_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[23], SteamVRInputDevice->SkeletonTransformC_L[23]);
-		LeftHand.Pinky_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[24], SteamVRInputDevice->SkeletonTransformC_L[24]);
-		LeftHand.Pinky_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[25], SteamVRInputDevice->SkeletonTransformC_L[25]);
+		LeftHand.Aux_Thumb = GetUETransform(OutPose[26], ReferencePose[26]);
+		LeftHand.Aux_Index = GetUETransform(OutPose[27], ReferencePose[27]);
+		LeftHand.Aux_Middle = GetUETransform(OutPose[28], ReferencePose[28]);
+		LeftHand.Aux_Ring = GetUETransform(OutPose[29], ReferencePose[29]);
+		LeftHand.Aux_Pinky = GetUETransform(OutPose[30], ReferencePose[30]);
 
-		LeftHand.Aux_Thumb = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[26], SteamVRInputDevice->SkeletonTransformC_L[26]);
-		LeftHand.Aux_Index = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[27], SteamVRInputDevice->SkeletonTransformC_L[27]);
-		LeftHand.Aux_Middle = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[28], SteamVRInputDevice->SkeletonTransformC_L[28]);
-		LeftHand.Aux_Ring = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[29], SteamVRInputDevice->SkeletonTransformC_L[29]);
-		LeftHand.Aux_Pinky = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[30], SteamVRInputDevice->SkeletonTransformC_L[30]);
+		LeftHand.Bone_Count = GetUETransform(OutPose[31], ReferencePose[31]);
 
-		LeftHand.Bone_Count = GetUETransform(SteamVRInputDevice->SkeletonTransform_L[31], SteamVRInputDevice->SkeletonTransformC_L[31]);
+		// Right Hand - Grab Skeletal Data
+		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, ReferencePose);
 
-		// Right Hand
-		RightHand.Root = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[0], SteamVRInputDevice->SkeletonTransformC_R[0]);
-		RightHand.Wrist = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[1], SteamVRInputDevice->SkeletonTransformC_R[1]);
+		RightHand.Root = GetUETransform(OutPose[0], ReferencePose[0]);
+		RightHand.Wrist = GetUETransform(OutPose[1], ReferencePose[1]);
 
-		RightHand.Thumb_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[2], SteamVRInputDevice->SkeletonTransformC_R[2]);
-		RightHand.Thumb_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[3], SteamVRInputDevice->SkeletonTransformC_R[3]);
-		RightHand.Thumb_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[4], SteamVRInputDevice->SkeletonTransformC_R[4]);
-		RightHand.Thumb_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[5], SteamVRInputDevice->SkeletonTransformC_R[5]);
+		RightHand.Thumb_0 = GetUETransform(OutPose[2], ReferencePose[2]);
+		RightHand.Thumb_1 = GetUETransform(OutPose[3], ReferencePose[3]);
+		RightHand.Thumb_2 = GetUETransform(OutPose[4], ReferencePose[4]);
+		RightHand.Thumb_3 = GetUETransform(OutPose[5], ReferencePose[5]);
 
-		RightHand.Index_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[6], SteamVRInputDevice->SkeletonTransformC_R[6]);
-		RightHand.Index_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[7], SteamVRInputDevice->SkeletonTransformC_R[7]);
-		RightHand.Index_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[8], SteamVRInputDevice->SkeletonTransformC_R[8]);
-		RightHand.Index_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[9], SteamVRInputDevice->SkeletonTransformC_R[9]);
-		RightHand.Index_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[10], SteamVRInputDevice->SkeletonTransformC_R[10]);
+		RightHand.Index_0 = GetUETransform(OutPose[6], ReferencePose[6]);
+		RightHand.Index_1 = GetUETransform(OutPose[7], ReferencePose[7]);
+		RightHand.Index_2 = GetUETransform(OutPose[8], ReferencePose[8]);
+		RightHand.Index_3 = GetUETransform(OutPose[9], ReferencePose[9]);
+		RightHand.Index_4 = GetUETransform(OutPose[10], ReferencePose[10]);
 
-		RightHand.Middle_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[11], SteamVRInputDevice->SkeletonTransformC_R[11]);
-		RightHand.Middle_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[12], SteamVRInputDevice->SkeletonTransformC_R[12]);
-		RightHand.Middle_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[13], SteamVRInputDevice->SkeletonTransformC_R[13]);
-		RightHand.Middle_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[14], SteamVRInputDevice->SkeletonTransformC_R[14]);
-		RightHand.Middle_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[15], SteamVRInputDevice->SkeletonTransformC_R[15]);
+		RightHand.Middle_0 = GetUETransform(OutPose[11], ReferencePose[11]);
+		RightHand.Middle_1 = GetUETransform(OutPose[12], ReferencePose[12]);
+		RightHand.Middle_2 = GetUETransform(OutPose[13], ReferencePose[13]);
+		RightHand.Middle_3 = GetUETransform(OutPose[14], ReferencePose[14]);
+		RightHand.Middle_4 = GetUETransform(OutPose[15], ReferencePose[15]);
 
-		RightHand.Ring_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[16], SteamVRInputDevice->SkeletonTransformC_R[16]);
-		RightHand.Ring_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[17], SteamVRInputDevice->SkeletonTransformC_R[17]);
-		RightHand.Ring_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[18], SteamVRInputDevice->SkeletonTransformC_R[18]);
-		RightHand.Ring_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[19], SteamVRInputDevice->SkeletonTransformC_R[19]);
-		RightHand.Ring_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[20], SteamVRInputDevice->SkeletonTransformC_R[20]);
+		RightHand.Ring_0 = GetUETransform(OutPose[16], ReferencePose[16]);
+		RightHand.Ring_1 = GetUETransform(OutPose[17], ReferencePose[17]);
+		RightHand.Ring_2 = GetUETransform(OutPose[18], ReferencePose[18]);
+		RightHand.Ring_3 = GetUETransform(OutPose[19], ReferencePose[19]);
+		RightHand.Ring_4 = GetUETransform(OutPose[20], ReferencePose[20]);
 
-		RightHand.Pinky_0 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[21], SteamVRInputDevice->SkeletonTransformC_R[21]);
-		RightHand.Pinky_1 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[22], SteamVRInputDevice->SkeletonTransformC_R[22]);
-		RightHand.Pinky_2 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[23], SteamVRInputDevice->SkeletonTransformC_R[23]);
-		RightHand.Pinky_3 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[24], SteamVRInputDevice->SkeletonTransformC_R[24]);
-		RightHand.Pinky_4 = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[25], SteamVRInputDevice->SkeletonTransformC_R[25]);
+		RightHand.Pinky_0 = GetUETransform(OutPose[21], ReferencePose[21]);
+		RightHand.Pinky_1 = GetUETransform(OutPose[22], ReferencePose[22]);
+		RightHand.Pinky_2 = GetUETransform(OutPose[23], ReferencePose[23]);
+		RightHand.Pinky_3 = GetUETransform(OutPose[24], ReferencePose[24]);
+		RightHand.Pinky_4 = GetUETransform(OutPose[25], ReferencePose[25]);
 
-		RightHand.Aux_Thumb = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[26], SteamVRInputDevice->SkeletonTransformC_R[26]);
-		RightHand.Aux_Index = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[27], SteamVRInputDevice->SkeletonTransformC_R[27]);
-		RightHand.Aux_Middle = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[28], SteamVRInputDevice->SkeletonTransformC_R[28]);
-		RightHand.Aux_Ring = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[29], SteamVRInputDevice->SkeletonTransformC_R[29]);
-		RightHand.Aux_Pinky = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[30], SteamVRInputDevice->SkeletonTransformC_R[30]);
+		RightHand.Aux_Thumb = GetUETransform(OutPose[26], ReferencePose[26]);
+		RightHand.Aux_Index = GetUETransform(OutPose[27], ReferencePose[27]);
+		RightHand.Aux_Middle = GetUETransform(OutPose[28], ReferencePose[28]);
+		RightHand.Aux_Ring = GetUETransform(OutPose[29], ReferencePose[29]);
+		RightHand.Aux_Pinky = GetUETransform(OutPose[30], ReferencePose[30]);
 
-		RightHand.Bone_Count = GetUETransform(SteamVRInputDevice->SkeletonTransform_R[31], SteamVRInputDevice->SkeletonTransformC_R[31]);
-
+		RightHand.Bone_Count = GetUETransform(OutPose[31], ReferencePose[31]);
 	}
 }
 
