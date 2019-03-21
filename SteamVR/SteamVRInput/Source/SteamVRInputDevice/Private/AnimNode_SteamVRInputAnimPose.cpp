@@ -4,7 +4,6 @@
 #include "AnimInstanceProxy.h"
 #include "SteamVRInputDevice.h"
 
-#define STEAMVRBONE(keyenum, name, parent) BoneKeypoints.Add(keyenum); BoneNames.Add(name); BoneParents.Add(parent);
 
 FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 {
@@ -12,91 +11,12 @@ FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 
 void FAnimNode_SteamVRInputAnimPose::Initialize(const FAnimationInitializeContext& Context)
 {
-	// Initialize Base Pose
-	//BasePose.Initialize(Context);
-
-	// Setup SteamVR Bones Hierarchy
-
-	STEAMVRBONE(ESteamVRBone::EBone_Root, FName(TEXT("Root")), -1);
-	STEAMVRBONE(ESteamVRBone::EBone_Wrist, FName(TEXT("wrist_r")), 0);
-
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb1, FName(TEXT("finger_thumb_0_r")), 1);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb2, FName(TEXT("finger_thumb_1_r")), 2);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb3, FName(TEXT("finger_thumb_2_r")), 3);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb4, FName(TEXT("finger_thumb_r_end")), 4);
-
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger0, FName(TEXT("finger_index_meta_r")), 1);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger1, FName(TEXT("finger_index_0_r")), 6);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger2, FName(TEXT("finger_index_1_r")), 7);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger3, FName(TEXT("finger_index_2_r")), 8);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger4, FName(TEXT("finger_index_r_end")), 9);
-
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger0, FName(TEXT("finger_middle_meta_r")), 1);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger1, FName(TEXT("finger_middle_0_r")), 11);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger2, FName(TEXT("finger_middle_1_r")), 12);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger3, FName(TEXT("finger_middle_2_r")), 13);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger4, FName(TEXT("finger_middle_r_end")), 14);
-
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger0, FName(TEXT("finger_ring_meta_r")), 1);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger1, FName(TEXT("finger_ring_0_r")), 16);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger2, FName(TEXT("finger_ring_1_r")), 17);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger3, FName(TEXT("finger_ring_2_r")), 18);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger4, FName(TEXT("finger_ring_r_end")), 19);
-
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger0, FName(TEXT("finger_pinky_meta_r")), 1);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger1, FName(TEXT("finger_pinky_0_r")), 21);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger2, FName(TEXT("finger_pinky_1_r")), 22);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger3, FName(TEXT("finger_pinky_2_r")), 23);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger4, FName(TEXT("finger_pinky_r_end")), 24);
-
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_Thumb, FName(TEXT("finger_thumb_r_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_IndexFinger, FName(TEXT("finger_index_r_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_MiddleFinger, FName(TEXT("finger_middle_r_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_RingFinger, FName(TEXT("finger_ring_r_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_PinkyFinger, FName(TEXT("finger_pinky_r_aux")), 0);
-
-	// Left Hand
-	STEAMVRBONE(ESteamVRBone::EBone_Wrist, FName(TEXT("wrist_l")), 0);
-
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb1, FName(TEXT("finger_thumb_0_l")), 31);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb2, FName(TEXT("finger_thumb_1_l")), 32);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb3, FName(TEXT("finger_thumb_2_l")), 33);
-	STEAMVRBONE(ESteamVRBone::EBone_Thumb4, FName(TEXT("finger_thumb_l_end")), 34);
-
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger0, FName(TEXT("finger_index_meta_l")), 31);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger1, FName(TEXT("finger_index_0_l")), 36);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger2, FName(TEXT("finger_index_1_l")), 37);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger3, FName(TEXT("finger_index_2_l")), 38);
-	STEAMVRBONE(ESteamVRBone::EBone_IndexFinger4, FName(TEXT("finger_index_l_end")), 39);
-
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger0, FName(TEXT("finger_middle_meta_l")), 31);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger1, FName(TEXT("finger_middle_0_l")), 41);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger2, FName(TEXT("finger_middle_1_l")), 42);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger3, FName(TEXT("finger_middle_2_l")), 43);
-	STEAMVRBONE(ESteamVRBone::EBone_MiddleFinger4, FName(TEXT("finger_middle_l_end")), 44);
-
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger0, FName(TEXT("finger_ring_meta_l")), 31);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger1, FName(TEXT("finger_ring_0_l")), 46);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger2, FName(TEXT("finger_ring_1_l")), 47);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger3, FName(TEXT("finger_ring_2_l")), 48);
-	STEAMVRBONE(ESteamVRBone::EBone_RingFinger4, FName(TEXT("finger_ring_l_end")), 49);
-
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger0, FName(TEXT("finger_pinky_meta_l")), 31);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger1, FName(TEXT("finger_pinky_0_l")), 51);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger2, FName(TEXT("finger_pinky_1_l")), 52);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger3, FName(TEXT("finger_pinky_2_l")), 53);
-	STEAMVRBONE(ESteamVRBone::EBone_PinkyFinger4, FName(TEXT("finger_pinky_l_end")), 54);
-
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_Thumb, FName(TEXT("finger_thumb_l_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_IndexFinger, FName(TEXT("finger_index_l_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_MiddleFinger, FName(TEXT("finger_middle_l_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_RingFinger, FName(TEXT("finger_ring_l_aux")), 0);
-	STEAMVRBONE(ESteamVRBone::EBone_Aux_PinkyFinger, FName(TEXT("finger_pinky_l_aux")), 0);
-
 	// Setup any retargetting here
-	TransformedBoneNames.Reserve(BoneNames.Num());
-	for (const FName& SrcBoneName : BoneNames)
+	TransformedBoneNames.Reserve( SteamVRSkeleton::GetBoneCount() );
+	for ( int32 boneIndex = 0; boneIndex < SteamVRSkeleton::GetBoneCount(); ++boneIndex )
 	{
+		const FName& SrcBoneName = SteamVRSkeleton::GetBoneName( boneIndex );
+
 		// Prep for retargetting to UE Hand
 		FName* TargetBoneName = BoneNameMap.Find(SrcBoneName);
 		if (TargetBoneName == nullptr)
@@ -198,7 +118,7 @@ void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FT
 {
 	if (Hand == EHand::VR_RightHand)
 	{
-		switch (BoneKeypoints[SteamVRBoneIndex])
+		switch ( (ESteamVRBone)SteamVRBoneIndex )
 		{
 		case ESteamVRBone::EBone_Root:
 			//OutTransform = RightHand.Root;
@@ -312,7 +232,7 @@ void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FT
 	}
 	else
 	{
-		switch (BoneKeypoints[SteamVRBoneIndex])
+		switch ( (ESteamVRBone)SteamVRBoneIndex )
 		{
 		case ESteamVRBone::EBone_Root:
 			//OutTransform = LeftHand.Root;
