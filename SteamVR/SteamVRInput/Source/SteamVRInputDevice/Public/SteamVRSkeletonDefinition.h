@@ -51,17 +51,17 @@ enum class ESteamVRBone : uint8
 namespace SteamVRSkeleton
 {
 	// Returns the number of bones in the skeleton
-	inline int32			GetBoneCount() { return (int32)ESteamVRBone::EBone_Count; }
+	inline int32	GetBoneCount() { return (int32)ESteamVRBone::EBone_Count; }
 
 	// Returns the name of the bone at the given index
-	const FName&			GetBoneName( int32 nBoneIndex );
+	const FName&	GetBoneName(int32 nBoneIndex);
 
 	// Returns the index of the parent bone of the given bone.  Returns -1 if the bone does not have a parent
-	int32					GetParentIndex( int32 nBoneIndex );
+	int32			GetParentIndex(int32 nBoneIndex);
 
 	// Returns the number of children of the given bone
-	int32					GetChildCount( int32 nBoneIndex );
+	int32			GetChildCount(int32 nBoneIndex);
 
 	// Returns the index of the nth child of the given bone
-	int32					GetChildIndex( int32 nBoneIndex, int32 nChildIndex );
+	int32			GetChildIndex(int32 nBoneIndex, int32 nChildIndex);
 };

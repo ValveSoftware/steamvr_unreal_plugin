@@ -11,25 +11,7 @@ FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 
 void FAnimNode_SteamVRInputAnimPose::Initialize(const FAnimationInitializeContext& Context)
 {
-	// Setup any retargetting here
-	TransformedBoneNames.Reserve( SteamVRSkeleton::GetBoneCount() );
-	for ( int32 boneIndex = 0; boneIndex < SteamVRSkeleton::GetBoneCount(); ++boneIndex )
-	{
-		const FName& SrcBoneName = SteamVRSkeleton::GetBoneName( boneIndex );
-
-		// Prep for retargetting to UE Hand
-		FName* TargetBoneName = BoneNameMap.Find(SrcBoneName);
-		if (TargetBoneName == nullptr)
-		{
-			FName NewName = SrcBoneName;		// TODO: Remap to UE4 Hand
-			TransformedBoneNames.Add(NewName);
-			BoneNameMap.Add(SrcBoneName, NewName);
-		}
-		else
-		{
-			TransformedBoneNames.Add(*TargetBoneName);
-		}
-	}
+	TransformedBoneNames.Reserve(SteamVRSkeleton::GetBoneCount());
 }
 
 void FAnimNode_SteamVRInputAnimPose::CacheBones(const FAnimationCacheBonesContext & Context)
@@ -38,26 +20,58 @@ void FAnimNode_SteamVRInputAnimPose::CacheBones(const FAnimationCacheBonesContex
 
 void FAnimNode_SteamVRInputAnimPose::Update(const FAnimationUpdateContext & Context)
 {
+	// Grab node inputs
 	EvaluateGraphExposedInputs.Execute(Context);
+
+	// Setup any retargetting here
+	TransformedBoneNames.Empty();
+	BoneNameMap.Empty();
+	for (int32 BoneIndex = 0; BoneIndex < SteamVRSkeleton::GetBoneCount(); ++BoneIndex)
+	{
+		const FName& SrcBoneName = SteamVRSkeleton::GetBoneName(BoneIndex);
+
+		ProcessBoneMap(BoneIndex, SrcBoneName);
+
+	}
 }
 
 void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 {
 	Output.ResetToRefPose();
 
+	// Set BoneCount
+	int32 BoneCount = (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton) ? SteamVRSkeleton::GetBoneCount() : Output.Pose.GetNumBones();
+	VRBoneTransform_t OutPose[STEAMVR_SKELETON_BONE_COUNT];
+	VRBoneTransform_t ReferencePose[STEAMVR_SKELETON_BONE_COUNT];
+
 	// Update Skeletal Animation
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
-		VRBoneTransform_t OutPose[STEAMVR_SKELETON_BONE_COUNT];
-		VRBoneTransform_t ReferencePose[STEAMVR_SKELETON_BONE_COUNT];
-		FillHandTransforms(SteamVRInputDevice, OutPose, ReferencePose);
+		FillSteamVRHandTransforms(SteamVRInputDevice, OutPose, ReferencePose);
 
 		for (int32 i = 0; i < TransformedBoneNames.Num(); ++i)
 		{
 			FTransform BoneTransform = FTransform();
 			FName BoneName = TransformedBoneNames[i];
-			GetBoneTransform(i, BoneTransform);
+
+			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
+			{
+				GetSteamVRBoneTransform(i, BoneTransform);
+			}
+			else
+			{
+				// Check if there's a mapping for this bone to the SteamVR skeleton
+				if (i < SteamVRSkeleton::GetBoneCount())
+				{
+					FName MappedBone = BoneNameMap.FindRef(SteamVRSkeleton::GetBoneName(i));
+
+					if (MappedBone.IsValid() && MappedBone != NAME_None)
+					{
+						GetSteamVRBoneTransform(i, BoneTransform);
+					}
+				}
+			}
 
 			int32 MeshIndex;
 			if (HandSkeleton == EHandSkeleton::VR_CustomSkeleton)
@@ -90,8 +104,7 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 					}
 
 					FVector NewTranslation;
-					if (BoneTransform.GetLocation() == FVector::ZeroVector ||
-						BoneTransform.ContainsNaN())
+					if (BoneTransform.GetLocation() == FVector::ZeroVector || BoneTransform.ContainsNaN() || HandSkeleton != EHandSkeleton::VR_SteamVRHandSkeleton)
 					{
 						NewTranslation = Output.Pose[BoneIndex].GetTranslation();
 					}
@@ -110,28 +123,54 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 				}
 			}
 		}
-
 	}
 }
 
-void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform)
+FTransform FAnimNode_SteamVRInputAnimPose::GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference)
+{
+	FTransform RetTransform;
+
+	FQuat OrientationQuat(SteamBoneTransform.orientation.x,
+		-SteamBoneTransform.orientation.y,
+		 SteamBoneTransform.orientation.z,
+		-SteamBoneTransform.orientation.w);
+	OrientationQuat.Normalize();
+	RetTransform = FTransform(OrientationQuat,
+		//FVector());
+		FVector(SteamBoneReference.position.v[0],
+				-SteamBoneReference.position.v[1],
+				SteamBoneReference.position.v[2]));
+
+	return RetTransform;
+}
+
+void FAnimNode_SteamVRInputAnimPose::GetSteamVRBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform)
 {
 	if (Hand == EHand::VR_RightHand)
 	{
-		switch ( (ESteamVRBone)SteamVRBoneIndex )
+		switch ((ESteamVRBone)SteamVRBoneIndex)
 		{
 		case ESteamVRBone::EBone_Root:
 			//OutTransform = RightHand.Root;
 			break;
 
 		case ESteamVRBone::EBone_Wrist:
-			OutTransform = RightHand.Wrist;
-			OutTransform.SetLocation(FVector::ZeroVector);
-			OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(180.f, 0.f, 45.f))));
+			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
+			{
+				OutTransform = RightHand.Wrist;
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(180.f, 0.f, 45.f))));
+			}
 			break;
 
 		case ESteamVRBone::EBone_Thumb1:
 			OutTransform = RightHand.Thumb_0;
+			if (HandSkeleton != EHandSkeleton::VR_SteamVRHandSkeleton)
+			{
+				OutTransform = RightHand.Thumb_0;
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(-15.f, -100.f, 180.f))));
+			}
 			break;
 
 		case ESteamVRBone::EBone_Thumb2:
@@ -232,7 +271,7 @@ void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FT
 	}
 	else
 	{
-		switch ( (ESteamVRBone)SteamVRBoneIndex )
+		switch ((ESteamVRBone)SteamVRBoneIndex)
 		{
 		case ESteamVRBone::EBone_Root:
 			//OutTransform = LeftHand.Root;
@@ -246,6 +285,13 @@ void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FT
 
 		case ESteamVRBone::EBone_Thumb1:
 			OutTransform = LeftHand.Thumb_0;
+			if (HandSkeleton != EHandSkeleton::VR_SteamVRHandSkeleton)
+			{
+				OutTransform = RightHand.Thumb_0;
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.GetRotation();
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(-45.f, -45.f, 90.f))));
+			}
 			break;
 
 		case ESteamVRBone::EBone_Thumb2:
@@ -344,11 +390,9 @@ void FAnimNode_SteamVRInputAnimPose::GetBoneTransform(int32 SteamVRBoneIndex, FT
 			break;
 		}
 	}
-
-	//
 }
 
-void FAnimNode_SteamVRInputAnimPose::FillHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose)
+void FAnimNode_SteamVRInputAnimPose::FillSteamVRHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose)
 {
 	if (SteamVRInputDevice != nullptr)
 	{
@@ -449,22 +493,129 @@ void FAnimNode_SteamVRInputAnimPose::FillHandTransforms(FSteamVRInputDevice* Ste
 	}
 }
 
-FTransform FAnimNode_SteamVRInputAnimPose::GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference)
+void FAnimNode_SteamVRInputAnimPose::ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName)
 {
-	FTransform RetTransform;
+	switch ((ESteamVRBone)BoneIndex)
+	{
+	case ESteamVRBone::EBone_Root:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Root);
+		break;
 
-	FQuat OrientationQuat(SteamBoneTransform.orientation.x,
-		-SteamBoneTransform.orientation.y,
-		 SteamBoneTransform.orientation.z,
-		-SteamBoneTransform.orientation.w);
-	OrientationQuat.Normalize();
-	RetTransform = FTransform(OrientationQuat,
-		//FVector());
-		FVector(SteamBoneReference.position.v[0],
-				-SteamBoneReference.position.v[1],
-				SteamBoneReference.position.v[2]));
+	case ESteamVRBone::EBone_Wrist:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Wrist);
+		break;
 
-	return RetTransform;
+	case ESteamVRBone::EBone_Thumb1:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_0);
+		break;
+
+	case ESteamVRBone::EBone_Thumb2:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_1);
+		break;
+
+	case ESteamVRBone::EBone_Thumb3:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_2);
+		break;
+
+	case ESteamVRBone::EBone_Thumb4:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_3);
+		break;
+
+	case ESteamVRBone::EBone_IndexFinger0:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_0);
+		break;
+
+	case ESteamVRBone::EBone_IndexFinger1:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_1);
+		break;
+
+	case ESteamVRBone::EBone_IndexFinger2:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_2);
+		break;
+
+	case ESteamVRBone::EBone_IndexFinger3:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_3);
+		break;
+
+	case ESteamVRBone::EBone_IndexFinger4:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_4);
+		break;
+
+	case ESteamVRBone::EBone_MiddleFinger0:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_0);
+		break;
+
+	case ESteamVRBone::EBone_MiddleFinger1:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_1);
+		break;
+
+	case ESteamVRBone::EBone_MiddleFinger2:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_2);
+		break;
+
+	case ESteamVRBone::EBone_MiddleFinger3:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_3);
+		break;
+
+	case ESteamVRBone::EBone_MiddleFinger4:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_4);
+		break;
+
+	case ESteamVRBone::EBone_RingFinger0:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_0);
+		break;
+
+	case ESteamVRBone::EBone_RingFinger1:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_1);
+		break;
+
+	case ESteamVRBone::EBone_RingFinger2:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_2);
+		break;
+
+	case ESteamVRBone::EBone_RingFinger3:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_3);
+		break;
+
+	case ESteamVRBone::EBone_RingFinger4:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_4);
+		break;
+
+	case ESteamVRBone::EBone_PinkyFinger0:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_0);
+		break;
+
+	case ESteamVRBone::EBone_PinkyFinger1:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_1);
+		break;
+
+	case ESteamVRBone::EBone_PinkyFinger2:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_2);
+		break;
+
+	case ESteamVRBone::EBone_PinkyFinger3:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_3);
+		break;
+
+	case ESteamVRBone::EBone_PinkyFinger4:
+		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_4);
+		break;
+
+	default:
+		break;
+	}
+}
+
+void FAnimNode_SteamVRInputAnimPose::UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName)
+{
+	FName NewName = NAME_None;
+	if (RetargetName != NAME_None || !RetargetName.IsEqual(""))
+	{
+		NewName = RetargetName;
+	}
+
+	TransformedBoneNames.Add(NewName);
+	BoneNameMap.Add(SrcBoneName, NewName);
 }
 
 FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice()

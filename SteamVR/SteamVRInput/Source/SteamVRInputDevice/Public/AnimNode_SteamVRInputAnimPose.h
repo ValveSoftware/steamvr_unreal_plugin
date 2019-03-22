@@ -48,6 +48,8 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
+	FSteamVRSkeletonRetarget SkeletonRetarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
@@ -59,7 +61,6 @@ public:
 	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
 	virtual void Update(const FAnimationUpdateContext & Context) override;
 	virtual void Evaluate(FPoseContext& Output) override;
-	void GetBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform);
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRInputAnimPose();
@@ -69,7 +70,10 @@ public:
 	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 
 	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
-	void FillHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose);
+	void FillSteamVRHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose);
+	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
+	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);
+	void GetSteamVRBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform);
 	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 };

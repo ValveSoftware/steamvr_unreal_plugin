@@ -95,6 +95,70 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 	FTransform Bone_Count;
 };
 
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonRetarget
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Root;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Wrist;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Thumb_0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Thumb_1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Thumb_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Thumb_3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Index_0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Index_1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Index_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Index_3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Index_4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Middle_0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Middle_1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Middle_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Middle_3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Middle_4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Ring_0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Ring_1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Ring_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Ring_3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Ring_4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Pinky_0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Pinky_1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Pinky_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Pinky_3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
+	FName Pinky_4;
+};
+
 /*
  * Helper Library for Knuckles Controllers
  */
