@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 using namespace vr;
 #endif // STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
 
-void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(bool VibrateLeft, float StartSecondsFromNow, float DurationSeconds, float Frequency, float Amplitude)
+void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand Hand, float StartSecondsFromNow, float DurationSeconds, float Frequency, float Amplitude)
 {
 #if STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
 	EVRInitError SteamVRInitError = VRInitError_None;
@@ -37,36 +37,40 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(bool Vibrate
 	if (SteamVRInitError == VRInitError_None)
 	{
 		const FString ManifestPath = FPaths::GeneratedConfigDir() / ACTION_MANIFEST;
-		EVRInputError Err = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-		
-		if (Err == VRInputError_None)
+
+		VRActionHandle_t vrVibrationLeft;
+		VRActionHandle_t vrVibrationRight;
+
+		if (Amplitude < 0.f)
 		{
-			VRActionHandle_t vrKnucklesVibrationLeft;
-			VRActionHandle_t vrKnucklesVibrationRight;
+			Amplitude = 0.f;
+		}
+		else if (Amplitude > 1.f)
+		{
+			Amplitude = 1.f;
+		}
 
-			if (Amplitude < 0.f)
-			{
-				Amplitude = 0.f;
-			}
-			else if (Amplitude > 1.f)
-			{
-				Amplitude = 1.f;
-			}
-
-			if (VibrateLeft)
-			{
-				Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &vrKnucklesVibrationLeft);
-				Err = VRInput()->TriggerHapticVibrationAction(vrKnucklesVibrationLeft, StartSecondsFromNow,
-					DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
-			}
-			else
-			{
-				Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &vrKnucklesVibrationRight);
-				Err = VRInput()->TriggerHapticVibrationAction(vrKnucklesVibrationRight, StartSecondsFromNow,
-					DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
-			}
+		EVRInputError Err;
+		if (Hand == ESteamVRHand::VR_Left)
+		{
+			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &vrVibrationLeft);
+			Err = VRInput()->TriggerHapticVibrationAction(vrVibrationLeft, StartSecondsFromNow,
+				DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+			//UE_LOG(LogTemp, Warning, TEXT("[STEAMVR INPUT] Haptic (Left): %i"), (int32)Err);
+		}
+		else
+		{
+			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &vrVibrationRight);
+			Err = VRInput()->TriggerHapticVibrationAction(vrVibrationRight, StartSecondsFromNow,
+				DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+			//UE_LOG(LogTemp, Warning, TEXT("[STEAMVR INPUT] Haptic (Right): %i"), (int32)Err);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[STEAMVR INPUT] Error initializing Steam VR during Haptic call: %i"), (int32)SteamVRInitError);
+	}
+
 #endif // STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
 }
 
@@ -85,6 +89,15 @@ void USteamVRInputDeviceFunctionLibrary::RegenControllerBindings()
 	if (SteamVRInputDevice != nullptr)
 	{
 		SteamVRInputDevice->RegenerateControllerBindings();
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::ReloadActionManifest()
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->ReloadActionManifest();
 	}
 }
 

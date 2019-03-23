@@ -44,6 +44,7 @@ public:
 	
 	void JsonRegenerateActionManifest();
 	void JsonRegenerateControllerBindings();
+	void ReloadActionManifest();
 	void LaunchBindingsURL();
 private:
 

@@ -128,6 +128,9 @@ public:
 	// Skeletal animations
 	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, VRBoneTransform_t* OutBoneTransform, VRBoneTransform_t* OutBoneTransformRef);
 
+	// Forcibly reload action manifest
+	void ReloadActionManifest();
+
 private:
 	/* VR Input Error Handler */
 	void GetInputError(EVRInputError InputError, FString InputAction);

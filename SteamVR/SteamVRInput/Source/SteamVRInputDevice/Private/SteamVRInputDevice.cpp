@@ -713,7 +713,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	OutAppKey = (TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + ProjectName).ToLower();
 	EditorAppKey = FString(OutAppKey);
 	
-	// Set Action Manifest Path - same directory where the action manifest will be
+	// Set Application Manifest Path - same directory where the action manifest will be
 	OutAppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
@@ -760,6 +760,17 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	}
 
 	return true;
+}
+
+void FSteamVRInputDevice::ReloadActionManifest()
+{
+	// Set Action Manifest Path
+	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
+
+	// Set Action Manifest
+	EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+	GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 }
 
 /* Editor Only - Generate the SteamVR Controller Binding files */
@@ -927,20 +938,42 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				}
 			}
 
-			InputState.bIsTrigger = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsThumbstick = InInputMapping[i].InputKey.ToString().Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsTrackpad = InInputMapping[i].InputKey.ToString().Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsGrip = InInputMapping[i].InputKey.ToString().Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsCapSense = InInputMapping[i].InputKey.ToString().Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsLeft = InInputMapping[i].InputKey.ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsFaceButton1 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-			InputState.bIsFaceButton2 = InInputMapping[i].InputKey.ToString().Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			// Set Input State
+			FString CurrentInputKeyName = InInputMapping[i].InputKey.ToString();
+			InputState.bIsTrigger = CurrentInputKeyName.Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsThumbstick = CurrentInputKeyName.Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsTrackpad = CurrentInputKeyName.Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsGrip = CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsLeft = CurrentInputKeyName.Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+			InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+
+			// Handle Special Actions for Knuckles Keys
+			if (CurrentInputKeyName.Contains(TEXT("Knuckles"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
+				CurrentInputKeyName.Contains(TEXT("Pinch"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
+				)
+			{
+				InputState.bIsPinchGrab = true;
+				InputState.bIsGrip = false;
+				InputState.bIsAxis = false;
+			} 
+			else if (CurrentInputKeyName.Contains(TEXT("Knuckles"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
+				CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::IgnoreCase, ESearchDir::FromEnd) &&
+				CurrentInputKeyName.Contains(TEXT("Grab"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
+				)
+			{
+				InputState.bIsGripGrab = true;
+				InputState.bIsGrip = false;
+				InputState.bIsAxis = false;
+			}
 
 			// Set Cache Mode
 			CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
 			CacheMode = InputState.bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
 			CacheMode = InputState.bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
 			CacheMode = InputState.bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
+			CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
 
 			// Set Cache Path
 			if (InputState.bIsTrigger)
@@ -966,6 +999,16 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			else if (InputState.bIsFaceButton2)
 			{
 				CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_BTN_B_LEFT)) : FString(TEXT(ACTION_PATH_BTN_B_RIGHT));
+			}
+			
+			// Handle Special Actions
+			if (InputState.bIsPinchGrab)
+			{
+				CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_PINCH_GRAB_LEFT)) : FString(TEXT(ACTION_PATH_PINCH_GRAB_RIGHT));
+			}
+			else if (InputState.bIsGripGrab)
+			{
+				CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_GRAB_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_GRAB_RIGHT));
 			}
 
 			// Create Action Source
@@ -1029,6 +1072,13 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				CacheType = "";
 			}
 
+			 // Handle special actions
+			 if (InputState.bIsPinchGrab || InputState.bIsGripGrab)
+			 {
+				 CacheType = FString(TEXT("grab"));
+			 }
+
+			// Special handling for axes
 			if (CacheMode.IsEqual(TEXT("joystick")) 
 				&& InInputMapping[i].Actions[j].Right(6) == TEXT("X_axis") 
 				&& CacheType == TEXT("position"))
@@ -1255,7 +1305,25 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 						UniqueActions.AddUnique(Action.Name.ToString());
 
 						// Set localization text for this action
-						FString LocalizationArray[] = { Action.Path, Action.Name.ToString() };
+						FString ActionName = Action.Name.ToString();
+						if (ActionName.Contains("_axis"))
+						{
+							if (ActionName.Contains(","))
+							{
+								TArray<FString> ActionNameArray;
+								ActionName.ParseIntoArray(ActionNameArray, TEXT(","), true);
+
+								if (ActionNameArray.Num() > 0)
+								{
+									ActionName = FString(ActionNameArray[0]); // Grab only the first action name
+								}
+							}
+							else
+							{
+								ActionName = ActionName.LeftChop(7); // Remove " a_axis" for the localization string
+							}
+						}
+						FString LocalizationArray[] = {Action.Path, ActionName};
 						LocalizationFields.Append(LocalizationArray, 2);
 					}
 
@@ -1343,7 +1411,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 					// Create Controller Binding Object for this binding file
 					TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
 					TArray<FString> ControllerStringFields = { "controller_type", *ControllerType,
-													 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*(ControllerBindingsPath / BindingFile))
+													 TEXT("binding_url"), *BindingFile //*FileManager.ConvertToAbsolutePathForExternalAppForRead(*(ControllerBindingsPath / BindingFile))
 					};
 					BuildJsonObject(ControllerStringFields, ControllerBindingObject);
 					ControllerBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
@@ -1659,19 +1727,17 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		// Generate Application Manifest
 		FString AppKey, AppManifestPath;
 
-		if (GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath))
-		{
-			char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
+		GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath);
 
-			// Load application manifest
-			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
-			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
 
-			// Set AppKey for this Editor Session
-			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
-			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
-
-		}
+		// Load application manifest
+		EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+			
+		// Set AppKey for this Editor Session
+		AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));			
 		#endif
 
 		// Set Action Manifest
@@ -1872,27 +1938,35 @@ void FSteamVRInputDevice::CheckControllerHandSwap()
 
 void FSteamVRInputDevice::InitSkeletalControllerKeys()
 {
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_A_CapSense, LOCTEXT("Skeleton_Left_A_CapSense", "SteamVR Skeleton (L) A CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_A_CapSense, LOCTEXT("Skeleton_Right_A_CapSense", "SteamVR Skeleton (R) A CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_B_CapSense, LOCTEXT("Skeleton_Left_B_CapSense", "SteamVR Skeleton (L) B CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_B_CapSense, LOCTEXT("Skeleton_Right_B_CapSense", "SteamVR Skeleton (R) B CapSense"), FKeyDetails::GamepadKey));
+	// Standard Keys
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_A_CapSense, LOCTEXT("Knuckles_Left_A_CapSense", "SteamVR Knuckles (L) A CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_A_CapSense, LOCTEXT("Knuckles_Right_A_CapSense", "SteamVR Knuckles (R) A CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_B_CapSense, LOCTEXT("Knuckles_Left_B_CapSense", "SteamVR Knuckles (L) B CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_B_CapSense, LOCTEXT("Knuckles_Right_B_CapSense", "SteamVR Knuckles (R) B CapSense"), FKeyDetails::GamepadKey));
 
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Trigger_CapSense, LOCTEXT("Skeleton_Left_Trigger_CapSense", "SteamVR Skeleton (L) Trigger CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Trigger_CapSense, LOCTEXT("Skeleton_Right_Trigger_CapSense", "SteamVR Skeleton (R) Trigger CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Trigger_CapSense, LOCTEXT("Knuckles_Left_Trigger_CapSense", "SteamVR Knuckles (L) Trigger CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Trigger_CapSense, LOCTEXT("Knuckles_Right_Trigger_CapSense", "SteamVR Knuckles (R) Trigger CapSense"), FKeyDetails::GamepadKey));
 
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Thumbstick_CapSense, LOCTEXT("Skeleton_Left_Thumbstick_CapSense", "SteamVR Skeleton (L) Thumbstick CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Thumbstick_CapSense, LOCTEXT("Skeleton_Right_Thumbstick_CapSense", "SteamVR Skeleton (R) Thumbstick CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Thumbstick_CapSense, LOCTEXT("Knuckles_Left_Thumbstick_CapSense", "SteamVR Knuckles (L) Thumbstick CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Thumbstick_CapSense, LOCTEXT("Knuckles_Right_Thumbstick_CapSense", "SteamVR Knuckles (R) Thumbstick CapSense"), FKeyDetails::GamepadKey));
 
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Trackpad_CapSense, LOCTEXT("Skeleton_Left_Trackpad_CapSense", "SteamVR Skeleton (L) Trackpad CapSense"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Trackpad_CapSense, LOCTEXT("Skeleton_Right_Trackpad_CapSense", "SteamVR Skeleton (R) Trackpad CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Trackpad_CapSense, LOCTEXT("Knuckles_Left_Trackpad_CapSense", "SteamVR Knuckles (L) Trackpad CapSense"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Trackpad_CapSense, LOCTEXT("Knuckles_Right_Trackpad_CapSense", "SteamVR Knuckles (R) Trackpad CapSense"), FKeyDetails::GamepadKey));
 
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Trackpad_GripForce, LOCTEXT("Skeleton_Left_Trackpad_GripForce", "SteamVR Skeleton (L) Trackpad GripForce"), FKeyDetails::FloatAxis));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Trackpad_GripForce, LOCTEXT("Skeleton_Right_Trackpad_GripForce", "SteamVR Skeleton (R) Trackpad GripForce"), FKeyDetails::FloatAxis));
+	// Special Action Keys
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Grip_Grab, LOCTEXT("Knuckles_Left_Grip_Grab", "SteamVR Knuckles (L) Grip Grab"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Grip_Grab, LOCTEXT("Knuckles_Right_Grip_Grab", "SteamVR Knuckles (R) Grip Grab"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Pinch_Grab, LOCTEXT("Knuckles_Left_Pinch_Grab", "SteamVR Knuckles (L) Pinch Grab"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Pinch_Grab, LOCTEXT("Knuckles_Right_Pinch_Grab", "SteamVR Knuckles (R) Pinch Grab"), FKeyDetails::GamepadKey));
 
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Trackpad_X, LOCTEXT("Skeleton_Left_Trackpad_X", "SteamVR Skeleton (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Trackpad_X, LOCTEXT("Skeleton_Right_Trackpad_X", "SteamVR Skeleton (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Trackpad_Y, LOCTEXT("Skeleton_Left_Trackpad_Y", "SteamVR Skeleton (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Right_Trackpad_Y, LOCTEXT("Skeleton_Right_Trackpad_Y", "SteamVR Skeleton (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+	// Grip Force
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Trackpad_GripForce, LOCTEXT("Knuckles_Left_Trackpad_GripForce", "SteamVR Knuckles (L) Trackpad GripForce"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Trackpad_GripForce, LOCTEXT("Knuckles_Right_Trackpad_GripForce", "SteamVR Knuckles (R) Trackpad GripForce"), FKeyDetails::FloatAxis));
+
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Trackpad_X, LOCTEXT("Knuckles_Left_Trackpad_X", "SteamVR Knuckles (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Trackpad_X, LOCTEXT("Knuckles_Right_Trackpad_X", "SteamVR Knuckles (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Trackpad_Y, LOCTEXT("Knuckles_Left_Trackpad_Y", "SteamVR Knuckles (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Right_Trackpad_Y, LOCTEXT("Knuckles_Right_Trackpad_Y", "SteamVR Knuckles (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 	// Skeleton Curls
 	EKeys::AddKey(FKeyDetails(SteamVRSkeletalControllerKeys::SteamVR_Skeleton_Left_Finger_Index_Curl, LOCTEXT("Skeleton_Left_Finger_Index_Curl", "SteamVR Skeleton (L) Finger Index Curl"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));

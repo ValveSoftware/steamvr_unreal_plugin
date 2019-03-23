@@ -181,6 +181,13 @@ struct STEAMVRINPUTDEVICE_API FSteamVRBoneMapping
 	FName Pinky_4;
 };
 
+UENUM(BlueprintType)	
+enum class ESteamVRHand : uint8
+{
+	VR_Left		UMETA(DisplayName = "Left"),
+	VR_Right	UMETA(DisplayName = "Right")
+};
+
 /*
  * Helper Library for Knuckles Controllers
  */
@@ -193,7 +200,7 @@ public:
 	static FSteamVRInputDevice* GetSteamVRInputDevice();
 
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
-	static void PlaySteamVR_HapticFeedback(bool VibrateLeft, float StartSecondsFromNow, float DurationSeconds = 1.f,
+	static void PlaySteamVR_HapticFeedback(ESteamVRHand Hand, float StartSecondsFromNow, float DurationSeconds = 1.f,
 			float Frequency = 1.f, float Amplitude = 0.5f);
 
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
@@ -208,5 +215,6 @@ public:
 
 	static void RegenActionManifest();
 	static void RegenControllerBindings();
+	static void ReloadActionManifest();
 	static void LaunchBindingsURL();
 };

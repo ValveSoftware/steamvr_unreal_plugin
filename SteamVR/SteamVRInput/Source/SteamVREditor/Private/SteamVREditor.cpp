@@ -60,6 +60,12 @@ void FSteamVREditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::JsonRegenerateControllerBindings),
 		FCanExecuteAction());
 
+	// Reload Action Manifest
+	PluginCommands->MapAction(
+		FSteamVREditorCommands::Get().ReloadActionManifest,
+		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::ReloadActionManifest),
+		FCanExecuteAction());
+
 	// Launch Bindings URL
 	PluginCommands->MapAction(
 		FSteamVREditorCommands::Get().LaunchBindingsURL,
@@ -105,6 +111,11 @@ void FSteamVREditorModule::JsonRegenerateControllerBindings()
 	USteamVRInputDeviceFunctionLibrary::RegenControllerBindings();
 }
 
+void FSteamVREditorModule::ReloadActionManifest()
+{
+	USteamVRInputDeviceFunctionLibrary::ReloadActionManifest();
+}
+
 void FSteamVREditorModule::LaunchBindingsURL()
 {
 	USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL();
@@ -132,6 +143,7 @@ TSharedRef<SWidget> FSteamVREditorModule::FillComboButton(TSharedPtr<class FUICo
 
 	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest);
 	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings);
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().ReloadActionManifest);
 	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL);
 
 	return MenuBuilder.MakeWidget();
