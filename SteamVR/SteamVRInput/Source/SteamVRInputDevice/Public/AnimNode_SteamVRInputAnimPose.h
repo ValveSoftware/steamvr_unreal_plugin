@@ -71,7 +71,7 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	EHandSkeleton HandSkeleton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
-	FSteamVRBoneMapping SkeletonRetarget;
+	FSteamVRBoneMapping CustomBoneMapping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;

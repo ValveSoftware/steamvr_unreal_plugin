@@ -580,107 +580,107 @@ void FAnimNode_SteamVRInputAnimPose::ProcessBoneMap(int32 BoneIndex, const FName
 	switch ((ESteamVRBone)BoneIndex)
 	{
 	case ESteamVRBone::EBone_Root:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Root);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Root);
 		break;
 
 	case ESteamVRBone::EBone_Wrist:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Wrist);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Wrist);
 		break;
 
 	case ESteamVRBone::EBone_Thumb1:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_0);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_0);
 		break;
 
 	case ESteamVRBone::EBone_Thumb2:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_1);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_1);
 		break;
 
 	case ESteamVRBone::EBone_Thumb3:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_2);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_2);
 		break;
 
 	case ESteamVRBone::EBone_Thumb4:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Thumb_3);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_3);
 		break;
 
 	case ESteamVRBone::EBone_IndexFinger0:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_0);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_0);
 		break;
 
 	case ESteamVRBone::EBone_IndexFinger1:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_1);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_1);
 		break;
 
 	case ESteamVRBone::EBone_IndexFinger2:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_2);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_2);
 		break;
 
 	case ESteamVRBone::EBone_IndexFinger3:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_3);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_3);
 		break;
 
 	case ESteamVRBone::EBone_IndexFinger4:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Index_4);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_4);
 		break;
 
 	case ESteamVRBone::EBone_MiddleFinger0:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_0);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_0);
 		break;
 
 	case ESteamVRBone::EBone_MiddleFinger1:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_1);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_1);
 		break;
 
 	case ESteamVRBone::EBone_MiddleFinger2:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_2);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_2);
 		break;
 
 	case ESteamVRBone::EBone_MiddleFinger3:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_3);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_3);
 		break;
 
 	case ESteamVRBone::EBone_MiddleFinger4:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Middle_4);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_4);
 		break;
 
 	case ESteamVRBone::EBone_RingFinger0:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_0);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_0);
 		break;
 
 	case ESteamVRBone::EBone_RingFinger1:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_1);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_1);
 		break;
 
 	case ESteamVRBone::EBone_RingFinger2:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_2);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_2);
 		break;
 
 	case ESteamVRBone::EBone_RingFinger3:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_3);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_3);
 		break;
 
 	case ESteamVRBone::EBone_RingFinger4:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Ring_4);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_4);
 		break;
 
 	case ESteamVRBone::EBone_PinkyFinger0:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_0);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_0);
 		break;
 
 	case ESteamVRBone::EBone_PinkyFinger1:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_1);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_1);
 		break;
 
 	case ESteamVRBone::EBone_PinkyFinger2:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_2);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_2);
 		break;
 
 	case ESteamVRBone::EBone_PinkyFinger3:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_3);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_3);
 		break;
 
 	case ESteamVRBone::EBone_PinkyFinger4:
-		UpdateBoneMap(SrcBoneName, SkeletonRetarget.Pinky_4);
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_4);
 		break;
 
 	default:
