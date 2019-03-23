@@ -71,7 +71,7 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	EHandSkeleton HandSkeleton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
-	FSteamVRSkeletonRetarget SkeletonRetarget;
+	FSteamVRBoneMapping SkeletonRetarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
@@ -92,6 +92,7 @@ public:
 	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 
 	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
+	int32 GetSteamVRHandIndex(int32 UE4BoneIndex);
 	void FillSteamVRHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose);
 	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
 	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);

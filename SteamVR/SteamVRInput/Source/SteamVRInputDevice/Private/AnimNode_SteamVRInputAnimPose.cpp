@@ -80,6 +80,14 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 			{
 				GetSteamVRBoneTransform(i, BoneTransform);
 			}
+			else if (HandSkeleton == EHandSkeleton::VR_UE4HandSkeleton)
+			{
+				int32 SteamVRHandIndex = GetSteamVRHandIndex(i);
+				if (SteamVRHandIndex != INDEX_NONE)
+				{
+					GetSteamVRBoneTransform(SteamVRHandIndex, BoneTransform);
+				}
+			}
 			else
 			{
 				// Check if there's a mapping for this bone to the SteamVR skeleton
@@ -98,10 +106,7 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 			if (HandSkeleton == EHandSkeleton::VR_CustomSkeleton)
 			{
 				MeshIndex = Output.Pose.GetBoneContainer().GetPoseBoneIndexForBoneName(BoneName);
-			}
-			else if (HandSkeleton == EHandSkeleton::VR_UE4HandSkeleton)
-			{
-				MeshIndex = i; // TODO: Implement
+				//UE_LOG(LogTemp, Warning, TEXT("Bone Map [%s] from SteamVR Index[%i] to MeshIndex [%i]"), *BoneName.ToString(), i, MeshIndex);
 			}
 			else
 			{
@@ -165,6 +170,49 @@ FTransform FAnimNode_SteamVRInputAnimPose::GetUETransform(VRBoneTransform_t Stea
 	return RetTransform;
 }
 
+int32 FAnimNode_SteamVRInputAnimPose::GetSteamVRHandIndex(int32 UE4BoneIndex)
+{
+	switch (UE4BoneIndex)
+	{
+	case 0:
+		return 1;
+	case 13:
+		return 2;
+	case 14:
+		return 3;
+	case 15:
+		return 4;
+	case 1:
+		return 7;
+	case 2:
+		return 8;
+	case 3:
+		return 9;
+	case 4:
+		return 12;
+	case 5:
+		return 13;
+	case 6:
+		return 14;
+	case 10:
+		return 17;
+	case 11:
+		return 18;
+	case 12:
+		return 19;
+	case 7:
+		return 22;
+	case 8:
+		return 23;
+	case 9:
+		return 24;
+	default:
+		break;
+	}
+
+	return INDEX_NONE;
+}
+
 void FAnimNode_SteamVRInputAnimPose::GetSteamVRBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform)
 {
 	if (Hand == EHand::VR_RightHand)
@@ -176,11 +224,16 @@ void FAnimNode_SteamVRInputAnimPose::GetSteamVRBoneTransform(int32 SteamVRBoneIn
 			break;
 
 		case ESteamVRBone::EBone_Wrist:
+			OutTransform = RightHand.Wrist;
 			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
 			{
-				OutTransform = RightHand.Wrist;
 				OutTransform.SetLocation(FVector::ZeroVector);
 				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(180.f, 0.f, 45.f))));
+			}
+			else if (HandSkeleton == EHandSkeleton::VR_UE4HandSkeleton)
+			{
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(0.f, 0.f, -100.f))));
 			}
 			break;
 
@@ -300,8 +353,16 @@ void FAnimNode_SteamVRInputAnimPose::GetSteamVRBoneTransform(int32 SteamVRBoneIn
 
 		case ESteamVRBone::EBone_Wrist:
 			OutTransform = LeftHand.Wrist;
-			OutTransform.SetLocation(FVector::ZeroVector);
-			OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(180.f, 0.f, 45.f))));
+			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
+			{
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(180.f, 0.f, 45.f))));
+			}
+			else if (HandSkeleton == EHandSkeleton::VR_UE4HandSkeleton)
+			{
+				OutTransform.SetLocation(FVector::ZeroVector);
+				OutTransform.SetRotation(FQuat((FRotator(OutTransform.GetRotation()).Add(0.f, 0.f, -100.f))));
+			}
 			break;
 
 		case ESteamVRBone::EBone_Thumb1:

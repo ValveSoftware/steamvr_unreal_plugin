@@ -101,13 +101,13 @@ namespace SteamVRSkeleton
 
 	//-----------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------
-	TArray< TArray<int32> > CreateChildList()
+	TArray<TArray<int32>> CreateChildList()
 	{
-		TArray< TArray<int32> > list;
+		TArray<TArray<int32>> list;
 
 		// Calculate the list of children based on the parent index array, for fast lookup later
 		int32 nBoneCount = (int32)ESteamVRBone::EBone_Count;
-		list.SetNum( nBoneCount );
+		list.SetNum(nBoneCount);
 
 		for (int32 boneIndex = 0; boneIndex < nBoneCount; ++boneIndex)
 		{

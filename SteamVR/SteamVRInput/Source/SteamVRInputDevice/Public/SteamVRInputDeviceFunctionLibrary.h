@@ -118,7 +118,7 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 };
 
 USTRUCT(BlueprintType)
-struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonRetarget
+struct STEAMVRINPUTDEVICE_API FSteamVRBoneMapping
 {
 	GENERATED_BODY()
 
