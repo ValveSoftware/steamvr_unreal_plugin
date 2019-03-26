@@ -693,7 +693,7 @@ void FSteamVRInputDevice::ReloadActionManifest()
 	// Restart SteamVR
 	if (SteamVRSystem)
 	{
-		VR_ShutdownInternal();
+		VR_Shutdown();
 	}
 	InitSteamVRSystem();
 
@@ -1682,7 +1682,7 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		// Restart SteamVR
 		if (SteamVRSystem)
 		{
-			VR_ShutdownInternal();
+			VR_Shutdown();
 		}
 		InitSteamVRSystem();
 
