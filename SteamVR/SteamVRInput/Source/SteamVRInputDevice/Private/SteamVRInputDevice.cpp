@@ -75,6 +75,17 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	}
 #endif
 
+	InitSteamVRSystem();
+	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+}
+
+FSteamVRInputDevice::~FSteamVRInputDevice()
+{
+	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
+}
+
+void FSteamVRInputDevice::InitSteamVRSystem()
+{
 	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
 	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Scene);
@@ -102,13 +113,6 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 			}
 		}
 	}
-
-	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
-}
-
-FSteamVRInputDevice::~FSteamVRInputDevice()
-{
-	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
 }
 
 void FSteamVRInputDevice::Tick(float DeltaTime)
@@ -685,6 +689,14 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 void FSteamVRInputDevice::ReloadActionManifest()
 {
 #if WITH_EDITOR
+	
+	// Restart SteamVR
+	if (SteamVRSystem)
+	{
+		VR_ShutdownInternal();
+	}
+	InitSteamVRSystem();
+
 	// Set Action Manifest Path
 	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
@@ -1666,6 +1678,13 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			// Unable to retrieve project name, reverting to raw application executable name
 			GameProjectName = GameFileName;
 		}
+
+		// Restart SteamVR
+		if (SteamVRSystem)
+		{
+			VR_ShutdownInternal();
+		}
+		InitSteamVRSystem();
 
 		#if WITH_EDITOR
 		// Generate Application Manifest

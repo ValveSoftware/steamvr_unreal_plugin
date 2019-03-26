@@ -36,7 +36,9 @@ class FSteamVRInputDevice : public IInputDevice, public IMotionController
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
+
 	~FSteamVRInputDevice();
+
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -54,6 +56,7 @@ public:
 	
 	/* SteamVR Sytem Handler **/
 	IVRSystem* SteamVRSystem = nullptr;
+	void InitSteamVRSystem();
 
 	/* Current SteamVR Error **/
 	EVRInputError SteamVRError = VRInputError_None;
