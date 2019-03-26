@@ -126,6 +126,10 @@ public:
 	void RegenerateControllerBindings();
 
 	// Skeletal animations
+	uint32 BoneCount = STEAMVR_SKELETON_BONE_COUNT;
+	bool bIsSkeletalControllerLeftPresent = false;
+	bool bIsSkeletalControllerRightPresent = false;
+	EVRSkeletalTrackingLevel vrSkeletalTrackingLevel;
 	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, VRBoneTransform_t* OutBoneTransform, VRBoneTransform_t* OutBoneTransformRef);
 
 	// Forcibly reload action manifest
@@ -167,6 +171,7 @@ private:
 	void RegisterDeviceChanges();
 	void RegisterDevice(uint32 id);
 	void UnRegisterDevice(uint32 id);
+	bool SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle);
 	void CheckControllerHandSwap();
 
 	TArray<FInputAxisKeyMapping> KeyAxisMappings;
