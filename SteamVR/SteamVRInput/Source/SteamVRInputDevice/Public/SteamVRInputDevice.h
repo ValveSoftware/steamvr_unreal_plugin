@@ -137,6 +137,8 @@ public:
 	void RegenerateControllerBindings();
 
 	// Skeletal animations
+	bool bIsSkeletalControllerLeftPresent = false;
+	bool bIsSkeletalControllerRightPresent = false;
 	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
 
 	// Forcibly reload action manifest

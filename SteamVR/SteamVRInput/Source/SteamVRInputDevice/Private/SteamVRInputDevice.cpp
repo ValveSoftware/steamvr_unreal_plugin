@@ -365,32 +365,21 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 			if ( DeviceClass != TrackedDeviceClass_Controller )
 				continue;
 
-			EVRInputError Err;
-
-			VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
-
-			// Set Skeletal Action Handles
-			if (bLeftHand && bIsSkeletalControllerLeftPresent)
+			// Get the handle for the skeletal action.  If its invalid (the necessary skeletal action is not in the manifest) then return false
+			vr::VRActionHandle_t ActionHandle = ( bLeftHand ) ? VRSkeletalHandleLeft : VRSkeletalHandleRight;
+			if ( ActionHandle == k_ulInvalidActionHandle )
 			{
-				// Get skeletal data
-				Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
-				if ( Err != VRInputError_None )
-				{
-					GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
-					return false;
-				}
+				return false;
 			}
-			else if (!bLeftHand && bIsSkeletalControllerRightPresent)
+			
+			// Get skeletal data
+			VRBoneTransform_t SteamVRBoneTransforms[ STEAMVR_SKELETON_BONE_COUNT ];
+			EVRInputError Err = VRInput()->GetSkeletalBoneData( ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
+			if ( Err != VRInputError_None )
 			{
-				// Get skeletal data
-				Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleRight, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
-				if ( Err != VRInputError_None )
-				{
-					GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
-					return false;
-				}
+				GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
+				return false;
 			}
-
 
 			// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
 			// we need to convert them to UE4's coordinate system.  
@@ -1975,15 +1964,7 @@ bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& 
 	}
 	else
 	{
-		// Check for Left Skeletal Controller
-		VRInput()->GetSkeletalTrackingLevel(SkeletalHandle, &vrSkeletalTrackingLevel);
-
-		if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial)
-		{
-			Err = LastInputError;
-			VRInput()->GetBoneCount(SkeletalHandle, &BoneCount);
-			return true;
-		}
+		return true;
 	}
 	return false;
 }

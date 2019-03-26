@@ -70,9 +70,7 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 
 	// Update Skeletal Animation
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr &&
-		((Hand == EHand::VR_LeftHand && SteamVRInputDevice->bIsSkeletalControllerLeftPresent) ||
-		(Hand == EHand::VR_RightHand && SteamVRInputDevice->bIsSkeletalControllerRightPresent)))
+	if (SteamVRInputDevice != nullptr)
 	{
 		FTransform OutPose[STEAMVR_SKELETON_BONE_COUNT];
 
