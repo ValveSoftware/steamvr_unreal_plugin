@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "CoreMinimal.h"
 
-enum class ESteamVRBone : uint8
+enum ESteamVRBone : int8
 {
 	EBone_Root = 0,
 	EBone_Wrist = 1,
@@ -69,7 +69,7 @@ enum class ESteamVRBone : uint8
 namespace SteamVRSkeleton
 {
 	// Returns the number of bones in the skeleton
-	inline int32	GetBoneCount() { return (int32)ESteamVRBone::EBone_Count; }
+	inline int32	GetBoneCount() { return ESteamVRBone::EBone_Count; }
 
 	// Returns the name of the bone at the given index
 	const FName&	GetBoneName(int32 nBoneIndex);

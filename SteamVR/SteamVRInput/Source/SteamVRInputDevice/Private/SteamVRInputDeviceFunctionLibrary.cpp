@@ -123,8 +123,7 @@ void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHand
 
 void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController)
 {
-	VRBoneTransform_t OutPose[STEAMVR_SKELETON_BONE_COUNT];
-	VRBoneTransform_t ReferencePose[STEAMVR_SKELETON_BONE_COUNT];
+	FTransform OutPose[STEAMVR_SKELETON_BONE_COUNT];
 
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
@@ -133,94 +132,94 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		EVRSkeletalMotionRange MotionRange = bWithController ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 
 		// Left Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, ReferencePose);
+		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
-		LeftHand.Root = GetUETransform(OutPose[0], ReferencePose[0]);
-		LeftHand.Wrist = GetUETransform(OutPose[1], ReferencePose[1]);
+		LeftHand.Root = OutPose[0];
+		LeftHand.Wrist = OutPose[1];
 
-		LeftHand.Thumb_0 = GetUETransform(OutPose[2], ReferencePose[2]);
-		LeftHand.Thumb_1 = GetUETransform(OutPose[3], ReferencePose[3]);
-		LeftHand.Thumb_2 = GetUETransform(OutPose[4], ReferencePose[4]);
-		LeftHand.Thumb_3 = GetUETransform(OutPose[5], ReferencePose[5]);
+		LeftHand.Thumb_0 = OutPose[ 2 ];
+		LeftHand.Thumb_1 = OutPose[ 3 ];
+		LeftHand.Thumb_2 = OutPose[ 4 ];
+		LeftHand.Thumb_3 = OutPose[ 5 ];
 
-		LeftHand.Index_0 = GetUETransform(OutPose[6], ReferencePose[6]);
-		LeftHand.Index_1 = GetUETransform(OutPose[7], ReferencePose[7]);
-		LeftHand.Index_2 = GetUETransform(OutPose[8], ReferencePose[8]);
-		LeftHand.Index_3 = GetUETransform(OutPose[9], ReferencePose[9]);
-		LeftHand.Index_4 = GetUETransform(OutPose[10], ReferencePose[10]);
+		LeftHand.Index_0 = OutPose[ 6 ];
+		LeftHand.Index_1 = OutPose[ 7 ];
+		LeftHand.Index_2 = OutPose[ 8 ];
+		LeftHand.Index_3 = OutPose[ 9 ];
+		LeftHand.Index_4 = OutPose[10];
 
-		LeftHand.Middle_0 = GetUETransform(OutPose[11], ReferencePose[11]);
-		LeftHand.Middle_1 = GetUETransform(OutPose[12], ReferencePose[12]);
-		LeftHand.Middle_2 = GetUETransform(OutPose[13], ReferencePose[13]);
-		LeftHand.Middle_3 = GetUETransform(OutPose[14], ReferencePose[14]);
-		LeftHand.Middle_4 = GetUETransform(OutPose[15], ReferencePose[15]);
+		LeftHand.Middle_0 = OutPose[11];
+		LeftHand.Middle_1 = OutPose[12];
+		LeftHand.Middle_2 = OutPose[13];
+		LeftHand.Middle_3 = OutPose[14];
+		LeftHand.Middle_4 = OutPose[15];
 
-		LeftHand.Ring_0 = GetUETransform(OutPose[16], ReferencePose[16]);
-		LeftHand.Ring_1 = GetUETransform(OutPose[17], ReferencePose[17]);
-		LeftHand.Ring_2 = GetUETransform(OutPose[18], ReferencePose[18]);
-		LeftHand.Ring_3 = GetUETransform(OutPose[19], ReferencePose[19]);
-		LeftHand.Ring_4 = GetUETransform(OutPose[20], ReferencePose[20]);
+		LeftHand.Ring_0 = OutPose[16];
+		LeftHand.Ring_1 = OutPose[17];
+		LeftHand.Ring_2 = OutPose[18];
+		LeftHand.Ring_3 = OutPose[19];
+		LeftHand.Ring_4 = OutPose[20];
 
-		LeftHand.Pinky_0 = GetUETransform(OutPose[21], ReferencePose[21]);
-		LeftHand.Pinky_1 = GetUETransform(OutPose[22], ReferencePose[22]);
-		LeftHand.Pinky_2 = GetUETransform(OutPose[23], ReferencePose[23]);
-		LeftHand.Pinky_3 = GetUETransform(OutPose[24], ReferencePose[24]);
-		LeftHand.Pinky_4 = GetUETransform(OutPose[25], ReferencePose[25]);
+		LeftHand.Pinky_0 = OutPose[21];
+		LeftHand.Pinky_1 = OutPose[22];
+		LeftHand.Pinky_2 = OutPose[23];
+		LeftHand.Pinky_3 = OutPose[24];
+		LeftHand.Pinky_4 = OutPose[25];
 
-		LeftHand.Aux_Thumb = GetUETransform(OutPose[26], ReferencePose[26]);
-		LeftHand.Aux_Index = GetUETransform(OutPose[27], ReferencePose[27]);
-		LeftHand.Aux_Middle = GetUETransform(OutPose[28], ReferencePose[28]);
-		LeftHand.Aux_Ring = GetUETransform(OutPose[29], ReferencePose[29]);
-		LeftHand.Aux_Pinky = GetUETransform(OutPose[30], ReferencePose[30]);
+		LeftHand.Aux_Thumb = OutPose[26];
+		LeftHand.Aux_Index = OutPose[27];
+		LeftHand.Aux_Middle = OutPose[28];
+		LeftHand.Aux_Ring = OutPose[29];
+		LeftHand.Aux_Pinky = OutPose[30];
 
-		LeftHand.Bone_Count = GetUETransform(OutPose[31], ReferencePose[31]);
+		LeftHand.Bone_Count = OutPose[31];
 
 		// Right Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, ReferencePose);
+		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
-		RightHand.Root = GetUETransform(OutPose[0], ReferencePose[0]);
-		RightHand.Wrist = GetUETransform(OutPose[1], ReferencePose[1]);
+		RightHand.Root = OutPose[0];
+		RightHand.Wrist = OutPose[1];
 
-		RightHand.Thumb_0 = GetUETransform(OutPose[2], ReferencePose[2]);
-		RightHand.Thumb_1 = GetUETransform(OutPose[3], ReferencePose[3]);
-		RightHand.Thumb_2 = GetUETransform(OutPose[4], ReferencePose[4]);
-		RightHand.Thumb_3 = GetUETransform(OutPose[5], ReferencePose[5]);
+		RightHand.Thumb_0 = OutPose[2];
+		RightHand.Thumb_1 = OutPose[3];
+		RightHand.Thumb_2 = OutPose[4];
+		RightHand.Thumb_3 = OutPose[5];
 
-		RightHand.Index_0 = GetUETransform(OutPose[6], ReferencePose[6]);
-		RightHand.Index_1 = GetUETransform(OutPose[7], ReferencePose[7]);
-		RightHand.Index_2 = GetUETransform(OutPose[8], ReferencePose[8]);
-		RightHand.Index_3 = GetUETransform(OutPose[9], ReferencePose[9]);
-		RightHand.Index_4 = GetUETransform(OutPose[10], ReferencePose[10]);
+		RightHand.Index_0 =  OutPose[ 6 ];
+		RightHand.Index_1 =  OutPose[ 7 ];
+		RightHand.Index_2 =  OutPose[ 8 ];
+		RightHand.Index_3 =  OutPose[ 9 ];
+		RightHand.Index_4 = OutPose[10];
 
-		RightHand.Middle_0 = GetUETransform(OutPose[11], ReferencePose[11]);
-		RightHand.Middle_1 = GetUETransform(OutPose[12], ReferencePose[12]);
-		RightHand.Middle_2 = GetUETransform(OutPose[13], ReferencePose[13]);
-		RightHand.Middle_3 = GetUETransform(OutPose[14], ReferencePose[14]);
-		RightHand.Middle_4 = GetUETransform(OutPose[15], ReferencePose[15]);
+		RightHand.Middle_0 = OutPose[11];
+		RightHand.Middle_1 = OutPose[12];
+		RightHand.Middle_2 = OutPose[13];
+		RightHand.Middle_3 = OutPose[14];
+		RightHand.Middle_4 = OutPose[15];
 
-		RightHand.Ring_0 = GetUETransform(OutPose[16], ReferencePose[16]);
-		RightHand.Ring_1 = GetUETransform(OutPose[17], ReferencePose[17]);
-		RightHand.Ring_2 = GetUETransform(OutPose[18], ReferencePose[18]);
-		RightHand.Ring_3 = GetUETransform(OutPose[19], ReferencePose[19]);
-		RightHand.Ring_4 = GetUETransform(OutPose[20], ReferencePose[20]);
+		RightHand.Ring_0 = OutPose[16];
+		RightHand.Ring_1 = OutPose[17];
+		RightHand.Ring_2 = OutPose[18];
+		RightHand.Ring_3 = OutPose[19];
+		RightHand.Ring_4 = OutPose[20];
 
-		RightHand.Pinky_0 = GetUETransform(OutPose[21], ReferencePose[21]);
-		RightHand.Pinky_1 = GetUETransform(OutPose[22], ReferencePose[22]);
-		RightHand.Pinky_2 = GetUETransform(OutPose[23], ReferencePose[23]);
-		RightHand.Pinky_3 = GetUETransform(OutPose[24], ReferencePose[24]);
-		RightHand.Pinky_4 = GetUETransform(OutPose[25], ReferencePose[25]);
+		RightHand.Pinky_0 = OutPose[21];
+		RightHand.Pinky_1 = OutPose[22];
+		RightHand.Pinky_2 = OutPose[23];
+		RightHand.Pinky_3 = OutPose[24];
+		RightHand.Pinky_4 = OutPose[25];
 
-		RightHand.Aux_Thumb = GetUETransform(OutPose[26], ReferencePose[26]);
-		RightHand.Aux_Index = GetUETransform(OutPose[27], ReferencePose[27]);
-		RightHand.Aux_Middle = GetUETransform(OutPose[28], ReferencePose[28]);
-		RightHand.Aux_Ring = GetUETransform(OutPose[29], ReferencePose[29]);
-		RightHand.Aux_Pinky = GetUETransform(OutPose[30], ReferencePose[30]);
+		RightHand.Aux_Thumb =  OutPose[ 26 ];
+		RightHand.Aux_Index =  OutPose[ 27 ];
+		RightHand.Aux_Middle = OutPose[28];
+		RightHand.Aux_Ring = OutPose[29];
+		RightHand.Aux_Pinky = OutPose[30];
 
-		RightHand.Bone_Count = GetUETransform(OutPose[31], ReferencePose[31]);
+		RightHand.Bone_Count = OutPose[31];
 	}
 }
 
-FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference)
+FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
 {
 	FTransform RetTransform;
 
@@ -231,9 +230,9 @@ FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t 
 		-SteamBoneTransform.orientation.w);
 	OrientationQuat.Normalize();
 	RetTransform = FTransform(OrientationQuat,
-		FVector(SteamBoneReference.position.v[2] * -1.f,
-			SteamBoneReference.position.v[0],
-			SteamBoneReference.position.v[1]) * 0.1f);
+		FVector(SteamBoneTransform.position.v[2] * -1.f,
+			SteamBoneTransform.position.v[0],
+			SteamBoneTransform.position.v[1]) * 0.1f);
 	return RetTransform;
 
 	// Transform SteamVR Rotation Quaternion to a UE FRotator

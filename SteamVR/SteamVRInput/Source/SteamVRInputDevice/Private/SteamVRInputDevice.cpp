@@ -32,6 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Features/IModularFeatures.h"
 #include "MotionControllerComponent.h"
 #include "IMotionController.h"
+#include "SteamVRSkeletonDefinition.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
@@ -349,94 +350,148 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 	}
 }
 
-bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, VRBoneTransform_t* OutBoneTransform, VRBoneTransform_t* OutBoneTransformRef)
+FTransform CalcModelSpaceTransform( const FTransform* OutBoneTransform, int32 BoneIndex )
 {
-	// Set Skeletal Controller flags for left and right hands
-	bool bIsSkeletalControllerRightPresent = false;
-	bool bIsSkeletalControllerLeftPresent = false;
+	FTransform BoneTransformMS = OutBoneTransform[BoneIndex];
 
-	// Check tracked devices - this check needs to happen each time this function is called to ensure engine doesn't crash when controllers are turned on/off
-	for (uint32 DeviceIndex = 0; DeviceIndex < k_unMaxTrackedDeviceCount; ++DeviceIndex)
+	while (BoneIndex != -1)
 	{
-		// see what kind of hardware this is
-		ETrackedDeviceClass DeviceClass = SteamVRSystem->GetTrackedDeviceClass(DeviceIndex);
-	
-		// skip non-controller devices
-		if (DeviceClass != TrackedDeviceClass_Controller)
-			continue;
-
-		// Check if the controller supports skeletal input
-		//char buf[32];
-		//uint32 StringBytes = SteamVRSystem->GetStringTrackedDeviceProperty(DeviceIndex, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
-		//FString stringCache = *FString(UTF8_TO_TCHAR(buf));
-
-		// Setup device tracking and capabilities
-		FInputDeviceState& ControllerState = ControllerStates[DeviceIndex];
-		EVRSkeletalTrackingLevel vrSkeletalTrackingLevel;
-
-		// Set Skeletal Action Handles
-		if (bLeftHand)
+		int32 parentIndex = SteamVRSkeleton::GetParentIndex( BoneIndex );
+		if ( parentIndex != -1 )
 		{
-			EVRInputError Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), &VRSkeletalHandleLeft);
-			if ((Err != VRInputError_None || !VRSkeletalHandleLeft) && Err != LastInputError)
-			{
-				GetInputError(Err, TEXT("Couldn't get skeletal action handle for Left Skeleton."));
-				return false;
-			}
-			else
-			{
-				// Check for Left Skeletal Controller
-				VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &vrSkeletalTrackingLevel);
-
-				if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial) 
-				{
-					// Get Skeletal Bone Data
-					if (VRInput() != nullptr && SteamVRSystem != nullptr)
-					{
-						// Get skeletal data
-						uint32 BoneCount;
-						VRInput()->GetBoneCount(VRSkeletalHandleLeft, &BoneCount);
-						VRInput()->GetSkeletalBoneData(VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, OutBoneTransform, BoneCount);
-						VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleLeft, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, OutBoneTransformRef, BoneCount);
-						return true;
-					}
-				}
-			}
-			Err = LastInputError;
+			BoneTransformMS = BoneTransformMS * OutBoneTransform[ parentIndex ];
+			BoneIndex = parentIndex;
 		}
 		else
 		{
-			EVRInputError Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), &VRSkeletalHandleRight);
-			if ((Err != VRInputError_None || !VRSkeletalHandleRight) && Err != LastInputError)
+			break;
+		}
+	}
+
+	return BoneTransformMS;
+}
+
+
+bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
+{
+	// Check that the size of the buffer we will be writing into is big enough to hold all the bone transforms
+	if ( OutBoneTransformCount < STEAMVR_SKELETON_BONE_COUNT )
+	{
+		return false;
+	}
+
+	if ( VRInput() != nullptr && SteamVRSystem != nullptr )
+	{
+		// Check tracked devices - this check needs to happen each time this function is called to ensure engine doesn't crash when controllers are turned on/off
+		for ( uint32 DeviceIndex = 0; DeviceIndex < k_unMaxTrackedDeviceCount; ++DeviceIndex )
+		{
+			// see what kind of hardware this is
+			ETrackedDeviceClass DeviceClass = SteamVRSystem->GetTrackedDeviceClass( DeviceIndex );
+
+			// skip non-controller devices
+			if ( DeviceClass != TrackedDeviceClass_Controller )
+				continue;
+
+			EVRInputError Err;
+
+			VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
+
+			// Set Skeletal Action Handles
+			if ( bLeftHand )
 			{
-				GetInputError(Err, TEXT("Couldn't get skeletal action handle for Right Skeleton."));
-				return false;
+				Err = VRInput()->GetActionHandle( TCHAR_TO_UTF8( *FString( TEXT( ACTION_PATH_SKELETON_LEFT ) ) ), &VRSkeletalHandleLeft );
+				if ( Err != VRInputError_None || VRSkeletalHandleLeft == k_ulInvalidActionHandle )
+				{
+					GetInputError( Err, TEXT( "Couldn't get skeletal action handle for Left Skeleton." ) );
+					return false;
+				}
+
+				// Get skeletal data
+				Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
+				if ( Err != VRInputError_None )
+				{
+					GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
+					return false;
+				}
 			}
 			else
 			{
-				// Check for Right Skeletal Controller
-				VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleRight, &vrSkeletalTrackingLevel);
-
-				if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial) 
+				Err = VRInput()->GetActionHandle( TCHAR_TO_UTF8( *FString( TEXT( ACTION_PATH_SKELETON_RIGHT ) ) ), &VRSkeletalHandleRight );
+				if ( Err != VRInputError_None || VRSkeletalHandleRight == k_ulInvalidActionHandle )
 				{
-					// Get Skeletal Bone Data
-					if (VRInput() != nullptr && SteamVRSystem != nullptr)
+					GetInputError( Err, TEXT( "Couldn't get skeletal action handle for Right Skeleton." ) );
+					return false;
+				}
+				else
+				{
+					Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleRight, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
+					if ( Err != VRInputError_None )
 					{
-						// Get skeletal data
-						uint32 BoneCount;
-						VRInput()->GetBoneCount(VRSkeletalHandleRight, &BoneCount);
-						VRInput()->GetSkeletalBoneData(VRSkeletalHandleRight, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, OutBoneTransform, BoneCount);
-						VRInput()->GetSkeletalReferenceTransforms(VRSkeletalHandleRight, VRSkeletalTransformSpace_Parent, EVRSkeletalReferencePose::VRSkeletalReferencePose_BindPose, OutBoneTransformRef, BoneCount);
-						return true;
+						GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
+						return false;
 					}
 				}
 			}
-			Err = LastInputError;
+
+
+			// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
+			// we need to convert them to UE4's coordinate system.  
+			// SteamVR coords:	X=right,	Y=up,		Z=backwards,	right-handed,	scale is meters
+			// UE4 coords:		X=forward,	Y=right,	Z=up,			left-handed,	scale is centimeters
+			
+			// The root is positioned at the controller's anchor position with zero rotation.  
+			// However because of the conversion from SteamVR coordinates to Unreal coordinates the root bone is scaled
+			// to the new coordinate system
+			FTransform& RootTransform = OutBoneTransform[ESteamVRBone::EBone_Root];
+			RootTransform.SetComponents( FQuat::Identity, FVector::ZeroVector, FVector( 100.f, 100.f, 100.f ) );
+
+			// Transform all the non-root bones to the new coordinate system
+			for ( int32 BoneIndex = ESteamVRBone::EBone_Root + 1; BoneIndex < STEAMVR_SKELETON_BONE_COUNT; ++BoneIndex )
+			{
+				const VRBoneTransform_t& SrcTransform	= SteamVRBoneTransforms[ BoneIndex ];
+				
+				FQuat NewRotation( 
+					SrcTransform.orientation.z,
+					-SrcTransform.orientation.x,
+					SrcTransform.orientation.y,
+					-SrcTransform.orientation.w 
+				);
+
+				FVector NewTranslation(
+					SrcTransform.position.v[ 2 ],
+					-SrcTransform.position.v[ 0 ],
+					SrcTransform.position.v[ 1 ]
+				);
+
+				FTransform& DstTransform = OutBoneTransform[BoneIndex];
+				DstTransform.SetRotation( NewRotation );
+				DstTransform.SetTranslation( NewTranslation );
+			}
+
+			// Apply an extra transformation to the children of the root bone to compensate for the changes made to the root
+			// to make it fit the new coordinate system even though it has zero rotation
+			FQuat FixupRotation( FVector( 0.f, 0.f, 1.f ), PI );
+
+			for ( int32 ChildIndex = 0; ChildIndex < SteamVRSkeleton::GetChildCount( ESteamVRBone::EBone_Root ); ++ChildIndex )
+			{
+				int32 BoneIndex = SteamVRSkeleton::GetChildIndex( ESteamVRBone::EBone_Root, ChildIndex );
+
+				FTransform& DstTransform = OutBoneTransform[ BoneIndex ];
+
+				FVector NewTranslation = DstTransform.GetTranslation() * FVector( -1.f, -1.f, 1.f );
+				FQuat NewRotation = FixupRotation * DstTransform.GetRotation();
+
+				DstTransform.SetRotation( NewRotation );
+				DstTransform.SetTranslation( NewTranslation );
+			}
+
+			return true;
 		}
 	}
 
 	return false;
 }
+
 
 void FSteamVRInputDevice::SendAnalogMessage(const ETrackedControllerRole TrackedControllerRole, const FGamepadKeyNames::Type AxisButton, float AnalogValue)
 {

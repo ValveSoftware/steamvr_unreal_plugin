@@ -126,7 +126,7 @@ public:
 	void RegenerateControllerBindings();
 
 	// Skeletal animations
-	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, VRBoneTransform_t* OutBoneTransform, VRBoneTransform_t* OutBoneTransformRef);
+	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
 
 	// Forcibly reload action manifest
 	void ReloadActionManifest();

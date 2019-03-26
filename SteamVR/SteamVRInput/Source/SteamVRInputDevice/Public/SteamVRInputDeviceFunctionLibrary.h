@@ -211,7 +211,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
-	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
+	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 
 	static void RegenActionManifest();
 	static void RegenControllerBindings();

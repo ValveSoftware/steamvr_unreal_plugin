@@ -86,17 +86,14 @@ public:
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRInputAnimPose();
-	FSteamVRSkeletonTransform LeftHand;
-	FSteamVRSkeletonTransform RightHand;
+
 	TMap<FName, FName> BoneNameMap;
 	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 
-	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform, VRBoneTransform_t SteamBoneReference);
+	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 	int32 GetSteamVRHandIndex(int32 UE4BoneIndex);
-	void FillSteamVRHandTransforms(FSteamVRInputDevice* SteamVRInputDevice, VRBoneTransform_t* OutPose, VRBoneTransform_t* ReferencePose);
 	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
 	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);
-	void GetSteamVRBoneTransform(int32 SteamVRBoneIndex, FTransform& OutTransform);
 	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 };
