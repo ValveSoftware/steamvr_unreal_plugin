@@ -1,22 +1,30 @@
 /*
-Copyright 2019 Valve Corporation
+Copyright 2019 Valve Corporation under https://opensource.org/licenses/BSD-3-Clause
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files(the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions :
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 */
 
 
@@ -76,6 +84,17 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	}
 #endif
 
+	InitSteamVRSystem();
+	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+}
+
+FSteamVRInputDevice::~FSteamVRInputDevice()
+{
+	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
+}
+
+void FSteamVRInputDevice::InitSteamVRSystem()
+{
 	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
 	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Scene);
@@ -103,13 +122,6 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 			}
 		}
 	}
-
-	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
-}
-
-FSteamVRInputDevice::~FSteamVRInputDevice()
-{
-	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
 }
 
 void FSteamVRInputDevice::Tick(float DeltaTime)
@@ -179,9 +191,6 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 		}
 		Err = LastInputError;
 
-		bool bIsSkeletalControllerLeftPresent = false;
-		bool bIsSkeletalControllerRightPresent = false;
-
 		// Process Skeletal Data
 		for (uint32 DeviceIndex = 0; DeviceIndex < k_unMaxTrackedDeviceCount; ++DeviceIndex)
 		{
@@ -198,42 +207,6 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 			//UE_LOG(LogSteamVRInputDevice, Display, TEXT("Found the following device: [%i] %s"), DeviceIndex, *stringCache);
 
 			FInputDeviceState& ControllerState = ControllerStates[DeviceIndex];
-			EVRSkeletalTrackingLevel vrSkeletalTrackingLevel;
-
-			// Set Skeletal Action Handles
-			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), &VRSkeletalHandleLeft);
-			if ((Err != VRInputError_None || !VRSkeletalHandleLeft) && Err != LastInputError)
-			{
-				GetInputError(Err, TEXT("Couldn't get skeletal action handle for Left Skeleton."));
-			}
-			else
-			{
-				// Check for Left Skeletal Controller
-				VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &vrSkeletalTrackingLevel);
-
-				if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial || stringCache.Contains("Knuckles"))
-				{
-					bIsSkeletalControllerLeftPresent = true;
-				}
-			}
-			Err = LastInputError;
-
-			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), &VRSkeletalHandleRight);
-			if ((Err != VRInputError_None || !VRSkeletalHandleRight) && Err != LastInputError)
-			{
-				UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Couldn't get skeletal action handle for Right Skeleton. Error: %d"), (int32)Err);
-			}
-			else
-			{
-				// Check for Right Skeletal Controller
-				VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleRight, &vrSkeletalTrackingLevel);
-
-				if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial || stringCache.Contains("Knuckles"))
-				{
-					bIsSkeletalControllerRightPresent = true;
-				}
-			}
-			Err = LastInputError;
 
 			// Get Skeletal Data
 			VRActionHandle_t ActiveSkeletalHand;
@@ -397,15 +370,8 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 			VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
 
 			// Set Skeletal Action Handles
-			if ( bLeftHand )
+			if (bLeftHand && bIsSkeletalControllerLeftPresent)
 			{
-				Err = VRInput()->GetActionHandle( TCHAR_TO_UTF8( *FString( TEXT( ACTION_PATH_SKELETON_LEFT ) ) ), &VRSkeletalHandleLeft );
-				if ( Err != VRInputError_None || VRSkeletalHandleLeft == k_ulInvalidActionHandle )
-				{
-					GetInputError( Err, TEXT( "Couldn't get skeletal action handle for Left Skeleton." ) );
-					return false;
-				}
-
 				// Get skeletal data
 				Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleLeft, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
 				if ( Err != VRInputError_None )
@@ -414,22 +380,14 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 					return false;
 				}
 			}
-			else
+			else if (!bLeftHand && bIsSkeletalControllerRightPresent)
 			{
-				Err = VRInput()->GetActionHandle( TCHAR_TO_UTF8( *FString( TEXT( ACTION_PATH_SKELETON_RIGHT ) ) ), &VRSkeletalHandleRight );
-				if ( Err != VRInputError_None || VRSkeletalHandleRight == k_ulInvalidActionHandle )
+				// Get skeletal data
+				Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleRight, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
+				if ( Err != VRInputError_None )
 				{
-					GetInputError( Err, TEXT( "Couldn't get skeletal action handle for Right Skeleton." ) );
+					GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
 					return false;
-				}
-				else
-				{
-					Err = VRInput()->GetSkeletalBoneData( VRSkeletalHandleRight, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT );
-					if ( Err != VRInputError_None )
-					{
-						GetInputError( Err, TEXT( "GetSkeletalBoneData Failed." ) );
-						return false;
-					}
 				}
 			}
 
@@ -777,7 +735,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	TArray<TSharedPtr<FJsonValue>> ManifestApps;
 
 	// Add current engine version being used as source
-	AppManifestObject->SetStringField("source", FString::Printf(TEXT("UE_4.15.3")));
+	AppManifestObject->SetStringField("source", FString::Printf(TEXT("UE")));
 
 	// Define the application setting that will be registered with SteamVR
 	TArray<TSharedPtr<FJsonValue>> ManifestApp;
@@ -795,7 +753,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	TSharedPtr<FJsonObject> LocStringsObject = MakeShareable(new FJsonObject());
 	TSharedRef<FJsonObject> AppNameObject = MakeShareable(new FJsonObject());	
 	AppNameObject->SetStringField("name", GameProjectName + " [UE Editor]");
-	LocStringsObject->SetObjectField("en_us", AppNameObject);
+	LocStringsObject->SetObjectField("en_US", AppNameObject);
 	ApplicationObject->SetObjectField("strings", LocStringsObject);
 
 	// Assemble the json app manifest
@@ -819,6 +777,15 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 void FSteamVRInputDevice::ReloadActionManifest()
 {
+#if WITH_EDITOR
+	
+	// Restart SteamVR
+	if (SteamVRSystem)
+	{
+		VR_Shutdown();
+	}
+	InitSteamVRSystem();
+
 	// Set Action Manifest Path
 	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
@@ -826,6 +793,23 @@ void FSteamVRInputDevice::ReloadActionManifest()
 	// Set Action Manifest
 	EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
 	GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
+
+	// Load application manifest
+	FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+	EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+
+	// Get the App Process Id
+	uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
+
+	// Set SteamVR AppKey
+	FString AppFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
+	FString SteamVRAppKey = (TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + AppFileName).ToLower();
+
+	// Set AppKey for this Editor Session
+	AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
+	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+#endif
 }
 
 /* Editor Only - Generate the SteamVR Controller Binding files */
@@ -1022,6 +1006,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				InputState.bIsGrip = false;
 				InputState.bIsAxis = false;
 			}
+			else
+			{
+				InputState.bIsPinchGrab = false;
+				InputState.bIsGripGrab = false;
+			}
 
 			// Set Cache Mode
 			CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
@@ -1170,7 +1159,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 	// Create Action Manifest json object
 	TSharedRef<FJsonObject> ActionManifestObject = MakeShareable(new FJsonObject());
-	TArray<FString> LocalizationFields = { "language_tag", "en"  };
+	TArray<FString> LocalizationFields = { "language_tag", "en_US"  };
 
 	// Set where to look for controller binding files and prepare file manager
 	const FString ControllerBindingsPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH;
@@ -1574,6 +1563,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 		{
 			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")) ||
 				KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")) ||
+				KeyMapping.Key.GetFName().ToString().Contains(TEXT("Knuckles")) ||
 				KeyMapping.Key.GetFName().ToString().Contains(TEXT("Oculus")))
 			{
 				// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
@@ -1778,6 +1768,13 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			GameProjectName = GameFileName;
 		}
 
+		// Restart SteamVR
+		if (SteamVRSystem)
+		{
+			VR_Shutdown();
+		}
+		InitSteamVRSystem();
+
 		#if WITH_EDITOR
 		// Generate Application Manifest
 		FString AppKey, AppManifestPath;
@@ -1870,9 +1867,16 @@ void FSteamVRInputDevice::RegisterDevice(uint32 id)
 			ETrackedControllerRole Role = SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(id);
 			EControllerHand HandRole = EControllerHand::Special_9;
 			if (Role == TrackedControllerRole_LeftHand)
+			{ 
 				HandRole = EControllerHand::Left;
+				bIsSkeletalControllerLeftPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), VRSkeletalHandleLeft);
+			}
+
 			else if (Role == TrackedControllerRole_RightHand)
+			{
 				HandRole = EControllerHand::Right;
+				bIsSkeletalControllerRightPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), VRSkeletalHandleRight);
+			}
 
 			// Update the hand roles and states
 			ControllerStates[id].Hand = HandRole;
@@ -1958,6 +1962,30 @@ void FSteamVRInputDevice::UnRegisterDevice(uint32 id)
 	//UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = INDEX_NONE;
 	DeviceToControllerMap[id] = INDEX_NONE;
 	FMemory::Memzero(&ControllerStates[id], sizeof(FInputDeviceState));
+}
+
+bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle)
+{
+	// Get Skeletal Handle
+	EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
+	if ((Err != VRInputError_None || !SkeletalHandle) && Err != LastInputError)
+	{
+		GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
+		Err = LastInputError;
+	}
+	else
+	{
+		// Check for Left Skeletal Controller
+		VRInput()->GetSkeletalTrackingLevel(SkeletalHandle, &vrSkeletalTrackingLevel);
+
+		if (vrSkeletalTrackingLevel >= VRSkeletalTracking_Partial)
+		{
+			Err = LastInputError;
+			VRInput()->GetBoneCount(SkeletalHandle, &BoneCount);
+			return true;
+		}
+	}
+	return false;
 }
 
 void FSteamVRInputDevice::CheckControllerHandSwap()
