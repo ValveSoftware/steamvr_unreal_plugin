@@ -1087,7 +1087,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			}
 			else if (InputState.bIsAxis && !InputState.bIsAxis2)
 			{
-				if (!InputState.bIsThumbstick && !InputState.bIsTrackpad)
+				if (InputState.bIsGrip)
+				{
+					CacheType = FString(TEXT("force"));
+				}
+				else if (!InputState.bIsThumbstick && !InputState.bIsTrackpad)
 				{
 					CacheType = FString(TEXT("pull"));
 				}
@@ -1148,7 +1152,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 	// Create Action Manifest json object
 	TSharedRef<FJsonObject> ActionManifestObject = MakeShareable(new FJsonObject());
-	TArray<FString> LocalizationFields = { "language_tag", "en_US" };
+	TArray<FString> LocalizationFields = {"language_tag", "en_US"};
 
 	// Set where to look for controller binding files and prepare file manager
 	const FString ControllerBindingsPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH;
@@ -1266,7 +1270,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				if (Action.Type == EActionType::Vector1 || Action.Type == EActionType::Vector2 || Action.Type == EActionType::Vector3)
 				{
 					// Set Axis Actions Linked To This Input Key
-					FString ActionAxis = Action.Name.ToString().LeftChop(5); // Remove [XD] Axis indicator before doing any comparisons
+					FString ActionAxis = Action.Name.ToString().LeftChop(7); // Remove [XD] Axis indicator before doing any comparisons
 
 					// Parse comma delimited action names into an array
 					TArray<FString> ActionAxisArray;
