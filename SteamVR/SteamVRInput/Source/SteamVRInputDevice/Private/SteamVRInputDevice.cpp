@@ -610,26 +610,6 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		}
 	}
 
-	/** Reads the state of a pose action given its handle. */
-	//virtual EVRInputError GetPoseActionData(VRActionHandle_t action, 
-	//	ETrackingUniverseOrigin eOrigin, 
-	//	float fPredictedSecondsFromNow, 
-	//	InputPoseActionData_t *pActionData, 
-	//	uint32_t unActionDataSize, 
-	//	VRInputValueHandle_t ulRestrictToDevice) = 0;
-
-	;
-	//// Steam handles WorldToMetersScale when it reads the controller posrot, so we do not need to use it again here.  Debugging found that they are the same.
-	//RetVal = SteamVRHMD->GetCurrentPose(DeviceId, DeviceOrientation, OutPosition);
-
-	//DeviceOrientation.X = PoseData.pose.
-
-
-
-	////return RetVal;
-	//UE_LOG(LogSteamVRInputDevice, Error, TEXT("Call to GetControllerOrientationAndPosition"));
-	//OutOrientation.Pitch = 100.f;
-	//OutPosition.Z = 110.f;
 	return true;
 }
 
@@ -1270,7 +1250,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				if (Action.Type == EActionType::Vector1 || Action.Type == EActionType::Vector2 || Action.Type == EActionType::Vector3)
 				{
 					// Set Axis Actions Linked To This Input Key
-					FString ActionAxis = Action.Name.ToString().LeftChop(7); // Remove [XD] Axis indicator before doing any comparisons
+					FString ActionAxis = Action.Name.ToString().LeftChop(7); // Remove " a_axis"  Axis indicator before doing any comparisons
 
 					// Parse comma delimited action names into an array
 					TArray<FString> ActionAxisArray;

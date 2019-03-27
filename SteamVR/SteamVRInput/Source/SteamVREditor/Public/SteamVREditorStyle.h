@@ -43,7 +43,7 @@ public:
 	/** reloads textures used by slate renderer */
 	static void ReloadTextures();
 
-	/** @return The Slate style set for the Shooter game */
+	/** @return The Slate style set */
 	static const ISlateStyle& Get();
 
 	static FName GetStyleSetName();
