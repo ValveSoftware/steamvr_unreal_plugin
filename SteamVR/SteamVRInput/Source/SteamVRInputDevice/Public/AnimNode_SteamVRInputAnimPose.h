@@ -65,10 +65,6 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
 
-	/** Base Pose 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Links)
-	FPoseLink BasePose;*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EMotionRange MotionRange;
 
@@ -85,7 +81,7 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 
 public:
-	
+
 	// FAnimNode_Base interface
 	virtual void Initialize(const FAnimationInitializeContext& Context) override;
 	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
