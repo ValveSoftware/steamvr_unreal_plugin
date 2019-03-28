@@ -237,11 +237,6 @@ void FSteamVRInputDevice::SendSkeletalInputEvents()
 			{
 				// Get Skeletal Summary Data
 				Err = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
-				if (Err != VRInputError_None && Err != LastInputError)
-				{
-					UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to read Skeletal Summary Data: %d"), (int32)Err);
-				}
-				LastInputError = Err;
 
 				// Skeleton Finger Curls
 				if (ControllerState.IndexGripAnalog != ActiveSkeletalSummaryData.flFingerCurl[EVRFinger::VRFinger_Index])
@@ -1275,6 +1270,48 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_CONTROLLER_RIGHT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
 				FName(TEXT("Right Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
+		}
+
+		// Other poses
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_L));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 1 Back Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_R));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 2 Back Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_L));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 3 Front Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_R));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 4 Front Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 5 Front Roll Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 6 Front Roll Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 7 Pistol Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+				FName(TEXT("Special 8 Pistol Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
 		}
 
 		// Skeletal Data
