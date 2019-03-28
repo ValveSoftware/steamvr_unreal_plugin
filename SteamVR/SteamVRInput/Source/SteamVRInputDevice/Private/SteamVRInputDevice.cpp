@@ -345,7 +345,7 @@ FTransform CalcModelSpaceTransform(const FTransform* OutBoneTransform, int32 Bon
 }
 
 
-bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
+bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bXAxisForward, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
 {
 	// Check that the size of the buffer we will be writing into is big enough to hold all the bone transforms
 	if (OutBoneTransformCount < STEAMVR_SKELETON_BONE_COUNT)
@@ -355,16 +355,6 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 
 	if (VRInput() != nullptr && SteamVRSystem != nullptr)
 	{
-		// Check tracked devices - this check needs to happen each time this function is called to ensure engine doesn't crash when controllers are turned on/off
-		for (uint32 DeviceIndex = 0; DeviceIndex < k_unMaxTrackedDeviceCount; ++DeviceIndex)
-		{
-			// see what kind of hardware this is
-			ETrackedDeviceClass DeviceClass = SteamVRSystem->GetTrackedDeviceClass(DeviceIndex);
-
-			// skip non-controller devices
-			if (DeviceClass != TrackedDeviceClass_Controller)
-				continue;
-
 			// Get the handle for the skeletal action.  If its invalid (the necessary skeletal action is not in the manifest) then return false
 			vr::VRActionHandle_t ActionHandle = (bLeftHand) ? VRSkeletalHandleLeft : VRSkeletalHandleRight;
 			if (ActionHandle == k_ulInvalidActionHandle)
@@ -380,6 +370,8 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 				GetInputError(Err, TEXT("GetSkeletalBoneData Failed."));
 				return false;
 			}
+
+			// TODO: [JoeV] bXAxisForward for skeletons imported with "Force X Axis Forward"
 
 			// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
 			// we need to convert them to UE4's coordinate system.  
@@ -433,12 +425,10 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 			}
 
 			return true;
-		}
 	}
 
 	return false;
 }
-
 
 void FSteamVRInputDevice::SendAnalogMessage(const ETrackedControllerRole TrackedControllerRole, const FGamepadKeyNames::Type AxisButton, float AnalogValue)
 {

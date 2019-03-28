@@ -59,6 +59,12 @@ enum class EHandSkeleton : uint8
 	VR_CustomSkeleton 		UMETA(DisplayName = "Custom Skeleton")
 };
 
+UENUM(BlueprintType)
+enum class ESkeletonForwardAxis : uint8
+{
+	VR_SkeletonAxisX 	UMETA(DisplayName = "X Axis"),
+	VR_SkeletonAxisY	UMETA(DisplayName = "Y Axis")
+};
 
 USTRUCT()
 struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
@@ -73,6 +79,9 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
+	ESkeletonForwardAxis SkeletonForwardAxis;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
 	FSteamVRBoneMapping CustomBoneMapping;
@@ -94,7 +103,6 @@ public:
 	TMap<FName, FName> BoneNameMap;
 	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 
-	FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 	int32 GetSteamVRHandIndex(int32 UE4BoneIndex);
 	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
 	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);

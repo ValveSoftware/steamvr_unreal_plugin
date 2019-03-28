@@ -129,7 +129,7 @@ void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHand
 	}
 }
 
-void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController)
+void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController, bool bXAxisForward)
 {
 	FTransform OutPose[STEAMVR_SKELETON_BONE_COUNT];
 
@@ -140,20 +140,20 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		EVRSkeletalMotionRange MotionRange = bWithController ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 
 		// Left Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
+		SteamVRInputDevice->GetSkeletalData(true, bXAxisForward, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
 		LeftHand.Root = OutPose[0];
 		LeftHand.Wrist = OutPose[1];
 
-		LeftHand.Thumb_0 = OutPose[ 2 ];
-		LeftHand.Thumb_1 = OutPose[ 3 ];
-		LeftHand.Thumb_2 = OutPose[ 4 ];
-		LeftHand.Thumb_3 = OutPose[ 5 ];
+		LeftHand.Thumb_0 = OutPose[2];
+		LeftHand.Thumb_1 = OutPose[3];
+		LeftHand.Thumb_2 = OutPose[4];
+		LeftHand.Thumb_3 = OutPose[5];
 
-		LeftHand.Index_0 = OutPose[ 6 ];
-		LeftHand.Index_1 = OutPose[ 7 ];
-		LeftHand.Index_2 = OutPose[ 8 ];
-		LeftHand.Index_3 = OutPose[ 9 ];
+		LeftHand.Index_0 = OutPose[6];
+		LeftHand.Index_1 = OutPose[7];
+		LeftHand.Index_2 = OutPose[8];
+		LeftHand.Index_3 = OutPose[9];
 		LeftHand.Index_4 = OutPose[10];
 
 		LeftHand.Middle_0 = OutPose[11];
@@ -183,7 +183,7 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		LeftHand.Bone_Count = OutPose[31];
 
 		// Right Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
+		SteamVRInputDevice->GetSkeletalData(false, bXAxisForward, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
 		RightHand.Root = OutPose[0];
 		RightHand.Wrist = OutPose[1];

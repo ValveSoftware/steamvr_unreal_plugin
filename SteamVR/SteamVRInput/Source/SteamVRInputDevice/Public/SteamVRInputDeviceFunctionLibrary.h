@@ -218,7 +218,7 @@ public:
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
 
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
+	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false, bool bXAxisForward=true);
 	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 
 	static void RegenActionManifest();

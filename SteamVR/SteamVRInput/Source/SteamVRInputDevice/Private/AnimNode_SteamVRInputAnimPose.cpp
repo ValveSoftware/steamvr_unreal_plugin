@@ -77,9 +77,10 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 		EVRSkeletalMotionRange SteamVRMotionRange = (MotionRange == EMotionRange::VR_WithController) ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 
 		bool bIsLeftHand = (Hand == EHand::VR_LeftHand);
+		bool bIsXAxisForward = (SkeletonForwardAxis == ESkeletonForwardAxis::VR_SkeletonAxisX);
 
 		// Attempt to read the current skeletal pose from SteamVR
-		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, SteamVRMotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT))
+		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, bIsXAxisForward, SteamVRMotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT))
 		{
 			for (int32 i = 0; i < TransformedBoneNames.Num(); ++i)
 			{
@@ -163,26 +164,6 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 			}
 		}
 	}
-}
-
-FTransform FAnimNode_SteamVRInputAnimPose::GetUETransform(VRBoneTransform_t SteamBoneTransform)
-{
-	FTransform RetTransform;
-
-	FQuat OrientationQuat(
-		SteamBoneTransform.orientation.x,
-		-SteamBoneTransform.orientation.y,
-		SteamBoneTransform.orientation.z,
-		-SteamBoneTransform.orientation.w);
-	OrientationQuat.Normalize();
-
-	RetTransform = FTransform(OrientationQuat,
-
-		FVector(SteamBoneTransform.position.v[0],
-			-SteamBoneTransform.position.v[1],
-			SteamBoneTransform.position.v[2]));
-
-	return RetTransform;
 }
 
 int32 FAnimNode_SteamVRInputAnimPose::GetSteamVRHandIndex(int32 UE4BoneIndex)
