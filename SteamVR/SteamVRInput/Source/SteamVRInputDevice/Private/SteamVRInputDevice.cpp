@@ -360,11 +360,6 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bXAxisForward, EV
 			// Get skeletal data
 			VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
 			EVRInputError Err = VRInput()->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
-			if (Err != VRInputError_None)
-			{
-				GetInputError(Err, TEXT("GetSkeletalBoneData Failed."));
-				return false;
-			}
 
 			// TODO: [JoeV] bXAxisForward for skeletons imported with "Force X Axis Forward"
 

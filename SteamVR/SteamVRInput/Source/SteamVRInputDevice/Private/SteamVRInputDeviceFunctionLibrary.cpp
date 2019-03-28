@@ -242,19 +242,6 @@ FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t 
 			SteamBoneTransform.position.v[0],
 			SteamBoneTransform.position.v[1]) * 0.1f);
 	return RetTransform;
-
-	// Transform SteamVR Rotation Quaternion to a UE FRotator
-	//FQuat OrientationQuat;
-	//OrientationQuat.X = -SteamBoneTransform.orientation.z;
-	//OrientationQuat.Y = SteamBoneTransform.orientation.x;
-	//OrientationQuat.Z = SteamBoneTransform.orientation.y;
-	//OrientationQuat.W = -SteamBoneTransform.orientation.w;
-	//OrientationQuat.Normalize();
-
-	//// Transform Position
-	//FVector Position = FVector((-SteamBoneTransform.position.v[2], SteamBoneTransform.position.v[0], SteamBoneTransform.position.v[1]))* GWorld->GetWorldSettings()->WorldToMeters;
-	//
-	//return FTransform(OrientationQuat, Position);
 }
 
 void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()

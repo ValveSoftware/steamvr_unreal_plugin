@@ -41,11 +41,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRInputDeviceFunctionLibrary.generated.h"
 
 #define STEAMVRCONTROLLER_SUPPORTED_PLATFORMS (PLATFORM_MAC || (PLATFORM_LINUX && PLATFORM_CPU_X86_FAMILY && PLATFORM_64BITS) || (PLATFORM_WINDOWS && WINVER > 0x0502))
-
-//#define ACTION_MANIFEST					"steamvr_manifest.json"
 #define ACTION_PATH_VIBRATE_LEFT		"/actions/main/out/vibrateleft"
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
-
 
 USTRUCT(BlueprintType)
 struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
@@ -208,7 +205,7 @@ enum class ESteamVRHand : uint8
 };
 
 /*
- * Helper Library for Knuckles Controllers
+ * SteamVR Input Extended Functions
  */
 UCLASS()
 class STEAMVRINPUTDEVICE_API USteamVRInputDeviceFunctionLibrary : public UBlueprintFunctionLibrary
