@@ -67,6 +67,10 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	InitSkeletalControllerKeys();
 	GenerateActionManifest();
 
+	// Set Skeletal Handles
+	bIsSkeletalControllerLeftPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), VRSkeletalHandleLeft);
+	bIsSkeletalControllerRightPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), VRSkeletalHandleRight);
+
 #if WITH_EDITOR
 	// Auto-enable SteamVR Input Developer Mode 
 	if (VRSettings() != nullptr)
@@ -126,10 +130,6 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 
 void FSteamVRInputDevice::Tick(float DeltaTime)
 {
-	// Check for changes in active controller
-	RegisterDeviceChanges();
-	CheckControllerHandSwap();
-
 	// Send Skeletal data
 	SendSkeletalInputEvents();
 }
@@ -557,10 +557,6 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 
 bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
 {
-	// TODO: SteamVR Call for Controller Orientation and Position
-	//bool RetVal = false;
-
-	int32 DeviceId = UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)DeviceHand];
 	if (VRInput() != nullptr && VRCompositor())
 	{
 		InputPoseActionData_t PoseData = {};
@@ -569,10 +565,34 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		switch (DeviceHand)
 		{
 		case EControllerHand::Left:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), vr::k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Right:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), vr::k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_1:
+			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_2:
+			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_3:
+			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_4:
+			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_5:
+			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_6:
+			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_7:
+			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_8:
+			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		default:
 			break;
@@ -616,28 +636,52 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
-	if ((ControllerIndex < 0) || (ControllerIndex > CONTROLLERS_PER_PLAYER) || (DeviceHand != EControllerHand::Left || DeviceHand != EControllerHand::Right))
-	{
-		return ETrackingStatus::NotTracked;
-	}
 
-	// Get the Device IDs of the assigned left and right hands
-	uint32 ControllerDeviceID = k_unTrackedDeviceIndexInvalid;
-	switch (DeviceHand)
+	if (VRInput() != nullptr && VRCompositor())
 	{
-	case EControllerHand::Left:
-		ControllerDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_LeftHand);
-		break;
-	case EControllerHand::Right:
-		ControllerDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_RightHand);
-		break;
-	default:
-		break;
-	}
+		InputPoseActionData_t PoseData = {};
+		EVRInputError InputError = VRInputError_NoData;
 
-	if (ControllerDeviceID != k_unTrackedDeviceIndexInvalid)
-	{
-		TrackingStatus = ETrackingStatus::Tracked;
+		switch (DeviceHand)
+		{
+		case EControllerHand::Left:
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Right:
+			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_1:
+			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_2:
+			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_3:
+			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_4:
+			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_5:
+			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_6:
+			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_7:
+			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		case EControllerHand::Special_8:
+			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			break;
+		default:
+			break;
+		}
+
+		if (InputError == VRInputError_None && PoseData.pose.bDeviceIsConnected)
+		{
+			TrackingStatus = ETrackingStatus::Tracked;
+		}
 	}
 
 	return TrackingStatus;
@@ -828,6 +872,70 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
 			ControllerPoseArray.Add(ControllerRightJsonValueObject);
+
+			// Add Pose: Special 1
+			TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
+			Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
+			Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
+
+			TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
+			ControllerPoseArray.Add(Special1JsonValueObject);
+
+			// Add Pose: Special 2
+			TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
+			Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
+			Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
+
+			TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
+			ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
+
+			// Add Pose: Special 3
+			TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
+			Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
+			Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
+
+			TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
+			ControllerPoseArray.Add(Special3JsonValueObject);
+
+			// Add Pose: Special 4
+			TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
+			Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
+			Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
+
+			TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
+			ControllerPoseArray.Add(Special4JsonValueObject);
+
+			// Add Pose: Special 5
+			TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
+			Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
+			Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
+
+			TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
+			ControllerPoseArray.Add(Special5JsonValueObject);
+
+			// Add Pose: Special 6
+			TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
+			Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
+			Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
+
+			TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
+			ControllerPoseArray.Add(Special6JsonValueObject);
+
+			// Add Pose: Special 7
+			TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
+			Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
+			Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
+
+			TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
+			ControllerPoseArray.Add(Special7JsonValueObject);
+
+			// Add Pose: Special 8
+			TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
+			Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
+			Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+
+			TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
+			ControllerPoseArray.Add(Special8JsonValueObject);
 
 			// Add Controller Input Array To Action Set
 			ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
@@ -1785,156 +1893,47 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			{
 				VRControllerHandleLeft = Action.Handle;
 			}
-			if (Action.Path == TEXT(ACTION_PATH_CONTROLLER_RIGHT))
+			else if (Action.Path == TEXT(ACTION_PATH_CONTROLLER_RIGHT))
 			{
 				VRControllerHandleRight = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_BACK_L))
+			{
+				VRSpecial1 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_BACK_R))
+			{
+				VRSpecial2 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONT_L))
+			{
+				VRSpecial3 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONT_R))
+			{
+				VRSpecial4 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONTR_L))
+			{
+				VRSpecial5 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONTR_R))
+			{
+				VRSpecial6 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_PISTOL_L))
+			{
+				VRSpecial7 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_PISTOL_R))
+			{
+				VRSpecial8 = Action.Handle;
 			}
 
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
 			GetInputError(InputError, FString(TEXT("Setting Action Handle Path Result")));
 		}
 	}
-}
-
-void FSteamVRInputDevice::RegisterDeviceChanges()
-{
-	if (SteamVRSystem && VRInput())
-	{
-		for (unsigned int id = 0; id < k_unMaxTrackedDeviceCount; ++id)
-		{
-			// Check all valid tracking devices connected to the system
-			ETrackedDeviceClass TrackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
-			if (TrackedDeviceClass != ETrackedDeviceClass::TrackedDeviceClass_Invalid)
-			{
-				// Check if this device is connected
-				if (SteamVRSystem->IsTrackedDeviceConnected(id)
-					&& DeviceToControllerMap[id] == INDEX_NONE)
-				{
-					RegisterDevice(id);
-				}
-				else
-				{
-					UnRegisterDevice(id);
-				}
-			}
-		}
-	}
-}
-
-void FSteamVRInputDevice::RegisterDevice(uint32 id)
-{
-	ETrackedDeviceClass TrackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
-
-	// Check what type of device we are registering to the system
-	switch (TrackedDeviceClass)
-	{
-	case TrackedDeviceClass_Controller:
-	{
-		// Register this controller if we haven't reached the SteamVR API max
-		if (NumControllersMapped < SteamVRInputDeviceConstants::MaxControllers &&
-			DeviceToControllerMap[id] < SteamVRInputDeviceConstants::MaxUnrealControllers &&
-			(int32)ControllerStates[id].Hand < k_unMaxTrackedDeviceCount
-			)
-		{
-			// Check which hand this controller is associated with
-			ETrackedControllerRole Role = SteamVRSystem->GetControllerRoleForTrackedDeviceIndex(id);
-			EControllerHand HandRole = EControllerHand::Special_9;
-			if (Role == TrackedControllerRole_LeftHand)
-			{
-				HandRole = EControllerHand::Left;
-				bIsSkeletalControllerLeftPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_LEFT))), VRSkeletalHandleLeft);
-			}
-
-			else if (Role == TrackedControllerRole_RightHand)
-			{
-				HandRole = EControllerHand::Right;
-				bIsSkeletalControllerRightPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), VRSkeletalHandleRight);
-			}
-
-			// Update the hand roles and states
-			ControllerStates[id].Hand = HandRole;
-			MaxUEHandCount[(int32)HandRole] += 1;
-
-			// Map the controller
-			int32 ControllerIndex = FMath::FloorToInt(NumControllersMapped / CONTROLLERS_PER_PLAYER);
-			DeviceToControllerMap[id] = ControllerIndex;
-			//UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = id;
-			++NumControllersMapped;
-		}
-	}
-	break;
-	case TrackedDeviceClass_GenericTracker:
-	{
-		// Skip if there are no more available "Special" controller slots in the Engine
-		if (NumTrackersMapped >= SteamVRInputDeviceConstants::MaxSpecialDesignations)
-			break;
-
-		// Add this tracker to the default player
-		DeviceToControllerMap[id] = GENERIC_TRACKER_PLAYER_NUM;
-
-		// Map this tracker to an engine "Special" controller slot
-		switch (NumTrackersMapped)
-		{
-		case 0:
-			ControllerStates[id].Hand = EControllerHand::Special_1;
-			break;
-		case 1:
-			ControllerStates[id].Hand = EControllerHand::Special_2;
-			break;
-		case 2:
-			ControllerStates[id].Hand = EControllerHand::Special_3;
-			break;
-		case 3:
-			ControllerStates[id].Hand = EControllerHand::Special_4;
-			break;
-		case 4:
-			ControllerStates[id].Hand = EControllerHand::Special_5;
-			break;
-		case 5:
-			ControllerStates[id].Hand = EControllerHand::Special_6;
-			break;
-		case 6:
-			ControllerStates[id].Hand = EControllerHand::Special_7;
-			break;
-		case 7:
-			ControllerStates[id].Hand = EControllerHand::Special_8;
-			break;
-		case 8:
-			ControllerStates[id].Hand = EControllerHand::Special_9;
-			break;
-		default:
-			break;
-		}
-
-		// Update Device Mappings
-		if (id < SteamVRInputDeviceConstants::MaxUnrealControllers && (int32)ControllerStates[id].Hand < k_unMaxTrackedDeviceCount)
-		{
-			UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = id;
-		}
-		++NumTrackersMapped;
-	}
-	break;
-	default:
-		break;
-	}
-}
-
-void FSteamVRInputDevice::UnRegisterDevice(uint32 id)
-{
-	ETrackedDeviceClass TrackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
-	if (TrackedDeviceClass == TrackedDeviceClass_Controller)
-	{
-		MaxUEHandCount[(int32)ControllerStates[id].Hand] -= 1;
-		NumControllersMapped--;
-	}
-	else if (TrackedDeviceClass == TrackedDeviceClass_GenericTracker)
-	{
-		NumTrackersMapped--;
-	}
-
-	//UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][(int32)ControllerStates[id].Hand] = INDEX_NONE;
-	DeviceToControllerMap[id] = INDEX_NONE;
-	FMemory::Memzero(&ControllerStates[id], sizeof(FInputDeviceState));
 }
 
 bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle)
@@ -1951,37 +1950,6 @@ bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& 
 		return true;
 	}
 	return false;
-}
-
-void FSteamVRInputDevice::CheckControllerHandSwap()
-{
-	if (SteamVRSystem && VRInput())
-	{
-		// Get the Device IDs of the assigned left and right hands
-		const uint32 LeftDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_LeftHand);
-		const uint32 RightDeviceID = SteamVRSystem->GetTrackedDeviceIndexForControllerRole(TrackedControllerRole_RightHand);
-
-		// Check if both hands have been assigned and that they are still mapped to the correct hand
-		if ((LeftDeviceID != k_unTrackedDeviceIndexInvalid && RightDeviceID != k_unTrackedDeviceIndexInvalid) &&
-			(ControllerStates[LeftDeviceID].Hand != EControllerHand::Left || ControllerStates[RightDeviceID].Hand != EControllerHand::Right)
-			)
-		{
-			// If they aren't, assign the updated device ids to the correct hand
-			//int32 ControllerIndex = DeviceToControllerMap[LeftDeviceID];
-			//if (ControllerIndex <= SteamVRInputDeviceConstants::MaxUnrealControllers && 
-			//	(int32)EControllerHand::Left < k_unMaxTrackedDeviceCount && 
-			//	(int32)EControllerHand::Right < k_unMaxTrackedDeviceCount 
-			//	)
-			//{
-			//	UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Left] = LeftDeviceID;
-			//	UnrealControllerIdAndHandToDeviceIdMap[ControllerIndex][(int32)EControllerHand::Right] = RightDeviceID;
-			//}
-
-			// Update the hand states for the devices
-			ControllerStates[LeftDeviceID].Hand = EControllerHand::Left;
-			ControllerStates[RightDeviceID].Hand = EControllerHand::Right;
-		}
-	}
 }
 
 void FSteamVRInputDevice::InitSkeletalControllerKeys()

@@ -47,25 +47,45 @@ using namespace vr;
 #define DOT_45DEG						0.707f
 #define TOUCHPAD_DEADZONE				0.0f
 
-/* SteamVR Input System Constants */
+// Manifest constants
 #define CONTROLLER_BINDING_PATH			"SteamVRBindings"
 #define ACTION_MANIFEST					"steamvr_manifest.json"
 #define ACTION_MANIFEST_UE				"steamvr_actions.json"
 #define APP_MANIFEST_FILE				"steamvr_ue_editor_app.json"
 #define APP_MANIFEST_PREFIX				"application.generated.ue."
+
+// Action paths
 #define ACTION_SET						"/actions/main"
 #define ACTION_PATH_IN					"/actions/main/in"
 #define ACTION_PATH_CONTROLLER_LEFT		"/actions/main/in/controllerleft"
 #define ACTION_PATH_CONTROLLER_RIGHT	"/actions/main/in/controllerright"
-#define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"
+#define ACTION_PATH_SPECIAL_BACK_L		"/actions/main/in/special1_backleft"
+#define ACTION_PATH_SPECIAL_BACK_R		"/actions/main/in/special2_backright"
+#define ACTION_PATH_SPECIAL_FRONT_L		"/actions/main/in/special3_frontleft"
+#define ACTION_PATH_SPECIAL_FRONT_R		"/actions/main/in/special4_frontright"
+#define ACTION_PATH_SPECIAL_FRONTR_L	"/actions/main/in/special5_frontrollleft"
+#define ACTION_PATH_SPECIAL_FRONTR_R	"/actions/main/in/special6_frontrollright"
+#define ACTION_PATH_SPECIAL_PISTOL_L	"/actions/main/in/special7_pistolleft"
+#define ACTION_PATH_SPECIAL_PISTOL_R	"/actions/main/in/special8_pistolright"
+#define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"		
 #define ACTION_PATH_SKELETON_RIGHT		"/actions/main/in/skeletonright"
-#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"
-#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"
 #define ACTION_PATH_SKEL_HAND_LEFT		"/skeleton/hand/left"
 #define ACTION_PATH_SKEL_HAND_RIGHT		"/skeleton/hand/right"
 #define ACTION_PATH_OPEN_CONSOLE		"/actions/main/in/open_console"
 #define ACTION_PATH_VIBRATE_LEFT		"/actions/main/out/vibrateleft"
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
+
+// Input paths
+#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"
+#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"
+#define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"					// Special 1
+#define ACTION_PATH_SPCL_BACK_RIGHT		"/user/hand/right/pose/back"				// Special 2
+#define ACTION_PATH_SPCL_FRONT_LEFT		"/user/hand/left/pose/front"				// Special 3
+#define ACTION_PATH_SPCL_FRONT_RIGHT	"/user/hand/right/pose/front"				// Special 4
+#define ACTION_PATH_SPCL_FRONTR_LEFT	"/user/hand/left/pose/frontandrolled"		// Special 5
+#define ACTION_PATH_SPCL_FRONTR_RIGHT	"/user/hand/right/pose/frontandrolled"		// Special 6
+#define ACTION_PATH_SPCL_PISTOL_LEFT	"/user/hand/left/pose/pistolgrip"			// Special 7
+#define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistolgrip"			// Special 8
 #define ACTION_PATH_TRIGGER_LEFT		"/user/hand/left/input/trigger"
 #define ACTION_PATH_TRIGGER_RIGHT		"/user/hand/right/input/trigger"
 #define ACTION_PATH_THUMBSTICK_LEFT		"/user/hand/left/input/thumbstick"
@@ -86,6 +106,7 @@ using namespace vr;
 #define ACTION_PATH_PINCH_GRAB_RIGHT	"/user/hand/right/input/pinch"
 #define ACTION_PATH_GRIP_GRAB_LEFT		"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_GRAB_RIGHT		"/user/hand/right/input/grip"
+
 
 namespace SteamVRInputDeviceConstants 
 {

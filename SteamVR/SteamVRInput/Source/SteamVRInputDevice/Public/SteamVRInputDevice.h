@@ -47,21 +47,20 @@ public:
 
 	~FSteamVRInputDevice();
 
-
+	// IInput Device Interface
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SendControllerEvents() override;
-
 	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
-
-	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
-	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const;
-	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
-
 	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override;
 	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override;
+	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
+	// End of IInput Device Interface
 
-	
+	// IMotionController Interface
+	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const;
+	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
+	// End of IMotionController Interface
+
 	/* SteamVR Sytem Handler **/
 	IVRSystem* SteamVRSystem = nullptr;
 	void InitSteamVRSystem();
@@ -115,6 +114,14 @@ public:
 
 	VRActionHandle_t VRControllerHandleLeft;
 	VRActionHandle_t VRControllerHandleRight;
+	VRActionHandle_t VRSpecial1;
+	VRActionHandle_t VRSpecial2;
+	VRActionHandle_t VRSpecial3;
+	VRActionHandle_t VRSpecial4;
+	VRActionHandle_t VRSpecial5;
+	VRActionHandle_t VRSpecial6;
+	VRActionHandle_t VRSpecial7;
+	VRActionHandle_t VRSpecial8;
 	VRActionHandle_t VRSkeletalHandleLeft;
 	VRActionHandle_t VRSkeletalHandleRight;
 
@@ -177,11 +184,7 @@ private:
 
 	void SanitizeActions();
 	void RegisterApplication(FString ManifestPath);
-	void RegisterDeviceChanges();
-	void RegisterDevice(uint32 id);
-	void UnRegisterDevice(uint32 id);
 	bool SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle);
-	void CheckControllerHandSwap();
 
 	TArray<FInputAxisKeyMapping> KeyAxisMappings;
 	TArray<FInputActionKeyMapping> KeyMappings;
