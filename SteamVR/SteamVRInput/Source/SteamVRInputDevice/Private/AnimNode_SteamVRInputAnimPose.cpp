@@ -60,7 +60,6 @@ void FAnimNode_SteamVRInputAnimPose::Update(const FAnimationUpdateContext & Cont
 		const FName& SrcBoneName = SteamVRSkeleton::GetBoneName(BoneIndex);
 
 		ProcessBoneMap(BoneIndex, SrcBoneName);
-
 	}
 }
 
@@ -315,6 +314,26 @@ void FAnimNode_SteamVRInputAnimPose::ProcessBoneMap(int32 BoneIndex, const FName
 
 	case ESteamVRBone::EBone_PinkyFinger4:
 		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_4);
+		break;
+
+	case ESteamVRBone::EBone_Aux_Thumb:
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Thumb);
+		break;
+
+	case ESteamVRBone::EBone_Aux_IndexFinger:
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Index);
+		break;
+
+	case ESteamVRBone::EBone_Aux_MiddleFinger:
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Middle);
+		break;
+
+	case ESteamVRBone::EBone_Aux_RingFinger:
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Ring);
+		break;
+
+	case ESteamVRBone::EBone_Aux_PinkyFinger:
+		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Pinky);
 		break;
 
 	default:

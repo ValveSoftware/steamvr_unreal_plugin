@@ -187,6 +187,17 @@ struct STEAMVRINPUTDEVICE_API FSteamVRBoneMapping
 	FName Pinky_3;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
 	FName Pinky_4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName Aux_Thumb;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName Aux_Index;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName Aux_Middle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName Aux_Ring;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName Aux_Pinky;
 };
 
 UENUM(BlueprintType)	
