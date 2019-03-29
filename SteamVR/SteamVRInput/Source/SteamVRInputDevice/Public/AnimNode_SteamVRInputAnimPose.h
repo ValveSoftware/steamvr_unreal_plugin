@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRSkeletonDefinition.h"
 #include "AnimNode_SteamVRInputAnimPose.generated.h"
 
-
+/** Valid range of motion for a skeletal animation */
 UENUM(BlueprintType)
 enum class EMotionRange : uint8
 {
@@ -44,6 +44,7 @@ enum class EMotionRange : uint8
 	VR_WithController 		UMETA(DisplayName = "With Controller")
 };
 
+/** Valid values for hands thats used for the Skeletal Input System calls */
 UENUM(BlueprintType)
 enum class EHand : uint8
 {
@@ -51,6 +52,7 @@ enum class EHand : uint8
 	VR_RightHand 	UMETA(DisplayName = "Right Hand")
 };
 
+/** Types of known skeletons that this animation node can handle */
 UENUM(BlueprintType)
 enum class EHandSkeleton : uint8
 {
@@ -59,6 +61,7 @@ enum class EHandSkeleton : uint8
 	VR_CustomSkeleton 		UMETA(DisplayName = "Custom Skeleton")
 };
 
+/** Axis where the skeleton faces forward from the fbx import */
 UENUM(BlueprintType)
 enum class ESkeletonForwardAxis : uint8
 {
@@ -66,26 +69,35 @@ enum class ESkeletonForwardAxis : uint8
 	VR_SkeletonAxisY	UMETA(DisplayName = "Y Axis")
 };
 
+/** 
+* Custom animation node to retrieve poses from the Skeletal Input System
+*/
 USTRUCT()
 struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
 
+	/** Range of motion for the skeletal input values */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EMotionRange MotionRange;
 
+	/** Which hand should the animation node retrieve skeletal input values for */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHand Hand;
 
+	/** What kind of skeleton are we dealing with */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
 
+	/** Which axis is this skeleton facing forward to */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	ESkeletonForwardAxis SkeletonForwardAxis;
 
+	/** A simple bone map SteamVR stock skeleton to this active skeleton */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
 	FSteamVRBoneMapping CustomBoneMapping;
 
+	/** The UE4 euivalent of the SteamVR Transform values per bone */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 
@@ -100,12 +112,33 @@ public:
 
 	FAnimNode_SteamVRInputAnimPose();
 
+	/** Simple bone map for the current active skeleton to a stock SteamVR hand skeleton */
 	TMap<FName, FName> BoneNameMap;
+
+	/** A list of names that will be processed by this animation node */
 	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
 
+	/**
+	* Retrieve the SteamVR bone index mapped to the given UE4 hand bone
+	* @param UE4BoneIndex - The SteamVR Bone Transform value to get the UE coordinates for
+	*/
 	int32 GetSteamVRHandIndex(int32 UE4BoneIndex);
+
+	/**
+	* Do any custom mapping (if any) of bones for currently playing animation
+	* @param BoneIndex - The mesh bone index to handle
+	* @param SrcBoneName - The name of the bone
+	*/
 	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
+
+	/**
+	* Live retargetting of bones from bone names
+	* @param SrcBoneName - The name of the bone from the SteamVR skeleton
+	* @param RetargetName - The name of the bone for the active target skeleton
+	*/
 	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);
+
+	/** Retrieve the first active SteamVRInput device present in this game */
 	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 };
