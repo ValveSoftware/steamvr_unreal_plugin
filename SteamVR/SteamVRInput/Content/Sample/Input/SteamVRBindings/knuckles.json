@@ -1,0 +1,153 @@
+{
+	"name": "Default bindings for Knuckles Controllers",
+	"controller_type": "knuckles",
+	"bindings":
+	{
+		"/actions/main":
+		{
+			"sources": [
+				{
+					"mode": "button",
+					"path": "/user/hand/right/input/a",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/TeleportRight"
+						}
+					}
+				},
+				{
+					"mode": "joystick",
+					"path": "/user/hand/right/input/thumbstick",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/TeleportRight"
+						}
+					}
+				},
+				{
+					"mode": "trigger",
+					"path": "/user/hand/left/input/trigger",
+					"inputs":
+					{
+						"pull":
+						{
+							"output": "/actions/main/in/GrabLeft"
+						}
+					}
+				},
+				{
+					"mode": "trigger",
+					"path": "/user/hand/right/input/trigger",
+					"inputs":
+					{
+						"pull":
+						{
+							"output": "/actions/main/in/GrabRight"
+						}
+					}
+				},
+				{
+					"mode": "button",
+					"path": "/user/hand/left/input/a",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/TeleportLeft"
+						}
+					}
+				},
+				{
+					"mode": "joystick",
+					"path": "/user/hand/left/input/thumbstick",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/TeleportLeft"
+						}
+					}
+				},
+				{
+					"mode": "joystick",
+					"path": "/user/hand/left/input/thumbstick",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/MotionControllerThumbLeft_X,MotionControllerThumbLeft_Y X Y_axis2d"
+						}
+					}
+				},
+				{
+					"mode": "joystick",
+					"path": "/user/hand/right/input/thumbstick",
+					"inputs":
+					{
+						"position":
+						{
+							"output": "/actions/main/in/MotionControllerThumbRight_X,MotionControllerThumbRight_Y X Y_axis2d"
+						}
+					}
+				},
+				{
+					"mode": "force_sensor",
+					"path": "/user/hand/left/input/trackpad",
+					"inputs":
+					{
+						"force":
+						{
+							"output": "/actions/main/in/SqueezeLeft X_axis"
+						}
+					}
+				},
+				{
+					"mode": "force_sensor",
+					"path": "/user/hand/right/input/trackpad",
+					"inputs":
+					{
+						"force":
+						{
+							"output": "/actions/main/in/SqueezeRight X_axis"
+						}
+					}
+				}
+			],
+			"poses": [
+				{
+					"output": "/actions/main/in/controllerleft",
+					"path": "/user/hand/left/pose/raw"
+				},
+				{
+					"output": "/actions/main/in/controllerright",
+					"path": "/user/hand/right/pose/raw"
+				}
+			],
+			"skeleton": [
+				{
+					"output": "/actions/main/in/skeletonleft",
+					"path": "/user/hand/left/input/skeleton/left"
+				},
+				{
+					"output": "/actions/main/in/skeletonright",
+					"path": "/user/hand/right/input/skeleton/right"
+				}
+			],
+			"haptics": [
+				{
+					"output": "/actions/main/out/vibrateleft",
+					"path": "/user/hand/left/output/haptic"
+				},
+				{
+					"output": "/actions/main/out/vibrateright",
+					"path": "/user/hand/right/output/haptic"
+				}
+			]
+		}
+	},
+	"description": ""
+}
