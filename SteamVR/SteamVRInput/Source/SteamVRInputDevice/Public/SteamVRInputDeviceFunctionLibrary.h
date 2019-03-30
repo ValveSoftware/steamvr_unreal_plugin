@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define ACTION_PATH_VIBRATE_LEFT		"/actions/main/out/vibrateleft"
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
 
+/** UE4 Bone definition of the SteamVR Skeleton */
 USTRUCT(BlueprintType)
 struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 {
@@ -131,6 +132,7 @@ enum class ESteamVRHand : uint8
 
 /*
  * SteamVR Input Extended Functions
+ * Functions and properties defined here are safe for developer use
  */
 UCLASS()
 class STEAMVRINPUTDEVICE_API USteamVRInputDeviceFunctionLibrary : public UBlueprintFunctionLibrary
@@ -138,24 +140,62 @@ class STEAMVRINPUTDEVICE_API USteamVRInputDeviceFunctionLibrary : public UBluepr
 	GENERATED_BODY()
 
 public:
+	/** Retrieve the first available SteamVR Input device currently active in a game */
 	static FSteamVRInputDevice* GetSteamVRInputDevice();
 
+	/**
+	* Generate haptic feedback in the requested controller
+	* @param Hand - Which hand to send the controller feedback to
+	* @param StartSecondsFromNow - hen to start the haptic feedback
+	* @param DurationSeconds - How long to have the haptic feedback active
+	* @param Frequency - Frequency used in the haptic feedback
+	* @param Amplitude - Amplitude used in the haptic feedback
+	*/
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
 	static void PlaySteamVR_HapticFeedback(ESteamVRHand Hand, float StartSecondsFromNow, float DurationSeconds = 1.f,
 			float Frequency = 1.f, float Amplitude = 0.5f);
 
+	/**
+	* Check wether or not Curls and Splay values are being retrieved per frame from the SteamVR Input System
+	* @return LeftHandState - Wether or not curls and splay values are being retrieved from the left hand
+	* @return RightHandState -  Wether or not curls and splay values are being retrieved from the right hand
+	*/
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
 	static void GetCurlsAndSplaysState(bool& LeftHandState, bool& RightHandState);
 
+	/**
+	* Tell SteamVR wether or not to retrieve Curls and Splay values per frame
+	* @param NewLeftHandState - Wether or not curls and splay values will be retrieved for the left hand
+	* @param NewRightHandState -  Wether or not curls and splay values will be retrieved for the right hand
+	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
 
+	/**
+	* Retrieve the live skeletal input bone values from SteamVR
+	* @return LeftHand - Per bone transform values for the left hand skeleton
+	* @return RightHand - Per bone transform values for the right hand skeleton
+	* @param bWithController - Wether or not retrieve skeletal input values with controller
+	* @param bXAxisForward - Wether or not the Skeleton has the X axis facing forward
+	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
+	
+	/**
+	* Get the SteamVR Bone Transform value in UE coordinates
+	* @param SteamBoneTransform - The SteamVR Bone Transform value to get the UE coordinates for
+	*/
 	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 
+	/** Regenerate the action manifest used by SteamVR Input System */
 	static void RegenActionManifest();
+	
+	/** Regenerate Controller Bindings for supported SteamVR Controller types */
 	static void RegenControllerBindings();
+	
+	/** Live reload the action manifest and register it to the SteamVR Input System */
 	static void ReloadActionManifest();
+	
+	/** Open the SteamVR Controller Input Dashboard in the user#s default browser */
 	static void LaunchBindingsURL();
 };

@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRSkeletonDefinition.h"
 #include "AnimNode_SteamVRInputAnimPose.generated.h"
 
-
+/** Valid range of motion for a skeletal animation */
 UENUM(BlueprintType)
 enum class EMotionRange : uint8
 {
@@ -44,6 +44,7 @@ enum class EMotionRange : uint8
 	VR_WithController 		UMETA(DisplayName = "With Controller")
 };
 
+/** Valid values for hands thats used for the Skeletal Input System calls */
 UENUM(BlueprintType)
 enum class EHand : uint8
 {
@@ -51,6 +52,7 @@ enum class EHand : uint8
 	VR_RightHand 	UMETA(DisplayName = "Right Hand")
 };
 
+/** Types of known skeletons that this animation node can handle */
 UENUM(BlueprintType)
 enum class EHandSkeleton : uint8
 {
@@ -58,20 +60,27 @@ enum class EHandSkeleton : uint8
 	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton")
 };
 
+/**
+* Custom animation node to retrieve poses from the Skeletal Input System
+*/
 USTRUCT()
 struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
 
+	/** Range of motion for the skeletal input values */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EMotionRange MotionRange;
 
+	/** Which hand should the animation node retrieve skeletal input values for */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHand Hand;
 
+	/** What kind of skeleton are we dealing with */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
 
+	/** The UE4 euivalent of the SteamVR Transform values per bone */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 
@@ -92,6 +101,7 @@ public:
 	*/
 	void PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const;
 
+	/** Retrieve the first active SteamVRInput device present in this game */
 	FSteamVRInputDevice* GetSteamVRInputDevice() const;
 
 	/** Recursively calculate the model-space transform of the given bone from the local-space transforms on the given pose */
