@@ -37,9 +37,7 @@ public class SteamVRInputDevice : ModuleRules
                 "OpenVRSDK",
                 "SteamVRInput",
                 "InputCore",
-                "InputDevice",
-                "BlueprintGraph",
-                "AnimGraph",
+                "InputDevice"
             }
             );
 

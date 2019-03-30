@@ -675,16 +675,6 @@ void FSteamVRInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedb
 	// Empty on purpose
 }
 
-void FSteamVRInputDevice::RegenerateActionManifest()
-{
-	this->GenerateActionManifest(true, false, true, true);
-}
-
-void FSteamVRInputDevice::RegenerateControllerBindings()
-{
-	this->GenerateActionManifest(false, true, true, true);
-}
-
 void FSteamVRInputDevice::InitControllerMappings()
 {
 	for (unsigned int i = 0; i < k_unMaxTrackedDeviceCount; ++i)
@@ -710,7 +700,16 @@ void FSteamVRInputDevice::InitControllerMappings()
 }
 
 #if WITH_EDITOR
-/* Editor Only - Build an application manifest to override a system generated process when running in Editor */
+void FSteamVRInputDevice::RegenerateActionManifest()
+{
+	this->GenerateActionManifest(true, false, true, true);
+}
+
+void FSteamVRInputDevice::RegenerateControllerBindings()
+{
+	this->GenerateActionManifest(false, true, true, true);
+}
+
 bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath)
 {
 	// Set SteamVR AppKey
@@ -809,7 +808,6 @@ void FSteamVRInputDevice::ReloadActionManifest()
 #endif
 }
 
-/* Editor Only - Generate the SteamVR Controller Binding files */
 void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping, bool bDeleteIfExists)
 {
 	// Create the bindings directory if it doesn't exist
@@ -1000,7 +998,6 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 	}
 }
 
-/* Editor Only - Utility function that generates appropriate action bindings based on UE Input Mappings */
 void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray)
 {
 	for (int i = 0; i < InInputMapping.Num(); i++)
@@ -1215,7 +1212,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 }
 #endif
 
-/* Generate the SteamVR Input Action Manifest file*/
 void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
 {
 	// Set Input Settings
@@ -1636,7 +1632,6 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	}
 }
 
-/* Build a JSON object made up of string fields, all entries must be paired */
 bool FSteamVRInputDevice::BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject)
 {
 	// Check if StringFields array is even

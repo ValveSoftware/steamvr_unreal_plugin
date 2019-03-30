@@ -84,29 +84,35 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand
 
 void USteamVRInputDeviceFunctionLibrary::RegenActionManifest()
 {
+#if WITH_EDITOR
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
 		SteamVRInputDevice->RegenerateActionManifest();
 	}
+#endif
 }
 
 void USteamVRInputDeviceFunctionLibrary::RegenControllerBindings()
 {
+#if WITH_EDITOR
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
 		SteamVRInputDevice->RegenerateControllerBindings();
 	}
+#endif
 }
 
 void USteamVRInputDeviceFunctionLibrary::ReloadActionManifest()
 {
+#if WITH_EDITOR
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
 		SteamVRInputDevice->ReloadActionManifest();
 	}
+#endif
 }
 
 void USteamVRInputDeviceFunctionLibrary::GetCurlsAndSplaysState(bool& LeftHandState, bool& RightHandState)

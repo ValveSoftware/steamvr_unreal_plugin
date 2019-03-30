@@ -40,7 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRKnucklesKeys.h"
 #include "SteamVRInputPublic.h"
 
-class FSteamVRInputDevice : public IInputDevice, public IMotionController
+class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public IMotionController
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -190,12 +190,6 @@ public:
 	/** The unique app key used by SteamVR to distinguish an Editor Session  */
 	FString EditorAppKey;
 
-	/** Have the action manifest regenerated. Used by the plugin Eidtor UI */
-	void RegenerateActionManifest();
-
-	/** Have the controller bindings regenerated. Used by the plugin Eidtor UI  */
-	void RegenerateControllerBindings();
-
 	/** Wether or not skeletal input is supported and present in the controller in the player's left hand  */
 	bool bIsSkeletalControllerLeftPresent = false;
 
@@ -211,8 +205,16 @@ public:
 	*/
 	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
 
+#if WITH_EDITOR
+	/** Have the action manifest regenerated. Used by the plugin Eidtor UI */
+	void RegenerateActionManifest();
+
+	/** Have the controller bindings regenerated. Used by the plugin Eidtor UI  */
+	void RegenerateControllerBindings();
+
 	/** Reload the action manifest to the SteamVR system. Use if you changed the action manifest manually */
 	void ReloadActionManifest();
+#endif
 
 private:
 	/** Provides a user-friendly version of the results of a SteamVR Input call in English to the Output Log */

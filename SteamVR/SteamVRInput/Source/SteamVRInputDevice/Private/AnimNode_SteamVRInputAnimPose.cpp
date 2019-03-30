@@ -82,7 +82,6 @@ FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 
 void FAnimNode_SteamVRInputAnimPose::Initialize(const FAnimationInitializeContext& Context)
 {
-
 }
 
 void FAnimNode_SteamVRInputAnimPose::CacheBones(const FAnimationCacheBonesContext & Context)

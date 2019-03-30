@@ -28,6 +28,8 @@ public class SteamVREditor : ModuleRules
                 "OpenVRSDK",
                 "SteamVRInput",
                 "SteamVRInputDevice",
+                "BlueprintGraph",
+                "AnimGraph"
             }
 			);
 			
@@ -42,8 +44,8 @@ public class SteamVREditor : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
-			}
+				"SlateCore"
+            }
 			);
 		
 		

@@ -64,7 +64,7 @@ enum class EHandSkeleton : uint8
 * Custom animation node to retrieve poses from the Skeletal Input System
 */
 USTRUCT()
-struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
+struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
 
