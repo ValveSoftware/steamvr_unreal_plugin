@@ -851,66 +851,69 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
 			ControllerPoseArray.Add(ControllerRightJsonValueObject);
 
-			// Add Pose: Special 1
-			TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
-			Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
-			Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
-
-			TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
-			ControllerPoseArray.Add(Special1JsonValueObject);
-
-			// Add Pose: Special 2
-			TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
-			Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
-			Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
-
-			TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
-			ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
-
-			// Add Pose: Special 3
-			TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
-			Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
-			Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
-
-			TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
-			ControllerPoseArray.Add(Special3JsonValueObject);
-
-			// Add Pose: Special 4
-			TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
-			Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
-			Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
-
-			TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
-			ControllerPoseArray.Add(Special4JsonValueObject);
-
-			// Add Pose: Special 5
-			TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
-			Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
-			Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
-
-			TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
-			ControllerPoseArray.Add(Special5JsonValueObject);
-
-			// Add Pose: Special 6
-			TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
-			Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
-			Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
-
-			TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
-			ControllerPoseArray.Add(Special6JsonValueObject);
-
-			// Add Pose: Special 7
-			TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
-			Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
-			Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
-
-			TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
-			ControllerPoseArray.Add(Special7JsonValueObject);
-
-			// Add Pose: Special 8
-			TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
-			Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
-			Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+			if (SupportedController.Name.ToString().Equals(TEXT("tracker")))
+			{
+				// Add Pose: Special 1
+				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
+				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
+				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
+	
+				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
+				ControllerPoseArray.Add(Special1JsonValueObject);
+	
+				// Add Pose: Special 2
+				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
+				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
+				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
+	
+				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
+				ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
+	
+				// Add Pose: Special 3
+				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
+				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
+				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
+	
+				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
+				ControllerPoseArray.Add(Special3JsonValueObject);
+	
+				// Add Pose: Special 4
+				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
+				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
+				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
+	
+				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
+				ControllerPoseArray.Add(Special4JsonValueObject);
+	
+				// Add Pose: Special 5
+				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
+				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
+				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
+	
+				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
+				ControllerPoseArray.Add(Special5JsonValueObject);
+	
+				// Add Pose: Special 6
+				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
+				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
+				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
+	
+				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
+				ControllerPoseArray.Add(Special6JsonValueObject);
+	
+				// Add Pose: Special 7
+				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
+				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
+				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
+	
+				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
+				ControllerPoseArray.Add(Special7JsonValueObject);
+	
+				// Add Pose: Special 8
+				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
+				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
+				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+			}
 
 			TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
 			ControllerPoseArray.Add(Special8JsonValueObject);
@@ -1269,42 +1272,42 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_L));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 1 Back Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
+				FName(TEXT("Special 1 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_R));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 2 Back Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
+				FName(TEXT("Special 2 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_L));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 3 Front Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
+				FName(TEXT("Special 3 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_R));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 4 Front Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
+				FName(TEXT("Special 4 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 5 Front Roll Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+				FName(TEXT("Special 5 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 6 Front Roll Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+				FName(TEXT("Special 6 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 7 Pistol Left [Pose]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+				FName(TEXT("Special 7 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
-				FName(TEXT("Special 8 Pistol Right [Pose]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
+				FName(TEXT("Special 8 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
 		}
 
 		// Skeletal Data
