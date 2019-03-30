@@ -122,81 +122,6 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 	FTransform Bone_Count;
 };
 
-USTRUCT(BlueprintType)
-struct STEAMVRINPUTDEVICE_API FSteamVRBoneMapping
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Root;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Wrist;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Thumb_0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Thumb_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Thumb_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Thumb_3;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Index_0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Index_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Index_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Index_3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Index_4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Middle_0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Middle_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Middle_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Middle_3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Middle_4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Ring_0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Ring_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Ring_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Ring_3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Ring_4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Pinky_0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Pinky_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Pinky_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Pinky_3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SteamVR Input")
-	FName Pinky_4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName Aux_Thumb;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName Aux_Index;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName Aux_Middle;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName Aux_Ring;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName Aux_Pinky;
-};
-
 UENUM(BlueprintType)	
 enum class ESteamVRHand : uint8
 {
@@ -226,7 +151,7 @@ public:
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
 
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false, bool bXAxisForward=true);
+	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
 	static FTransform GetUETransform(VRBoneTransform_t SteamBoneTransform);
 
 	static void RegenActionManifest();

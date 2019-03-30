@@ -33,6 +33,48 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "AnimationRuntime.h"
 #include "AnimInstanceProxy.h"
 #include "SteamVRInputDevice.h"
+#include "UE4HandSkeletonDefinition.h"
+
+// Lookup table that maps each bone in the UE4 hand skeleton to the corresponding
+// bone in the SteamVR hand skeleton
+static const int32 kUE4BoneToSteamVRBone[] = {
+	ESteamVRBone_Wrist,			// EUE4HandBone_Wrist
+	ESteamVRBone_IndexFinger0,	// EUE4HandBone_Index_01
+	ESteamVRBone_IndexFinger1,	// EUE4HandBone_Index_02
+	ESteamVRBone_IndexFinger2,	// EUE4HandBone_Index_03
+	ESteamVRBone_MiddleFinger0, // EUE4HandBone_Middle_01
+	ESteamVRBone_MiddleFinger1, // EUE4HandBone_Middle_02
+	ESteamVRBone_MiddleFinger2, // EUE4HandBone_Middle_03
+	ESteamVRBone_PinkyFinger0,	// EUE4HandBone_Pinky_01
+	ESteamVRBone_PinkyFinger1,	// EUE4HandBone_Pinky_02
+	ESteamVRBone_PinkyFinger2,	// EUE4HandBone_Pinky_03
+	ESteamVRBone_RingFinger0,	// EUE4HandBone_Ring_01
+	ESteamVRBone_RingFinger1,	// EUE4HandBone_Ring_02
+	ESteamVRBone_RingFinger2,	// EUE4HandBone_Ring_03
+	ESteamVRBone_Thumb0,		// EUE4HandBone_Thumb_01
+	ESteamVRBone_Thumb1,		// EUE4HandBone_Thumb_02
+	ESteamVRBone_Thumb2			// EUE4HandBone_Thumb_03
+};
+static_assert( sizeof(kUE4BoneToSteamVRBone) / sizeof(kUE4BoneToSteamVRBone[0]) == EUE4HandBone_Count, "Mapping from UE4 hand bones to their corresponding SteamVR hand bones is the wrong size" );
+
+// List of the knuckle bones of the SteamVR hand skeleton
+static const int32 kSteamVRKnuckleBones[] = {
+	ESteamVRBone_IndexFinger0,
+	ESteamVRBone_MiddleFinger0,
+	ESteamVRBone_RingFinger0,
+	ESteamVRBone_PinkyFinger0
+};
+static_assert( sizeof(kSteamVRKnuckleBones) / sizeof(kSteamVRKnuckleBones[0]) == 4, "List of SteamVR knuckle bones should only have 4 entries" );
+
+// List of the knuckle bones of the UE4 hand skeleton
+static const int32 kUE4KnuckleBones[] = {
+	EUE4HandBone_Index_01,
+	EUE4HandBone_Middle_01,
+	EUE4HandBone_Ring_01,
+	EUE4HandBone_Pinky_01
+};
+static_assert( sizeof(kUE4KnuckleBones) / sizeof(kUE4KnuckleBones[0]) == 4, "List of UE4 knuckle bones should only have 4 entries" );
+
 
 FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 {
@@ -40,7 +82,7 @@ FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 
 void FAnimNode_SteamVRInputAnimPose::Initialize(const FAnimationInitializeContext& Context)
 {
-	TransformedBoneNames.Reserve(SteamVRSkeleton::GetBoneCount());
+
 }
 
 void FAnimNode_SteamVRInputAnimPose::CacheBones(const FAnimationCacheBonesContext & Context)
@@ -51,16 +93,6 @@ void FAnimNode_SteamVRInputAnimPose::Update(const FAnimationUpdateContext & Cont
 {
 	// Grab node inputs
 	EvaluateGraphExposedInputs.Execute(Context);
-
-	// Setup any retargetting here
-	TransformedBoneNames.Empty();
-	BoneNameMap.Empty();
-	for (int32 BoneIndex = 0; BoneIndex < SteamVRSkeleton::GetBoneCount(); ++BoneIndex)
-	{
-		const FName& SrcBoneName = SteamVRSkeleton::GetBoneName(BoneIndex);
-
-		ProcessBoneMap(BoneIndex, SrcBoneName);
-	}
 }
 
 void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
@@ -71,289 +103,201 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr)
 	{
-		FTransform OutPose[STEAMVR_SKELETON_BONE_COUNT];
+		// Attempt to read the current skeletal pose from SteamVR.  The data returned will be the bone transforms of the SteamVR hand skeleton,
+		// transformed into the UE4 coordinate system
 
+		FTransform BoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
 		EVRSkeletalMotionRange SteamVRMotionRange = (MotionRange == EMotionRange::VR_WithController) ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
-
 		bool bIsLeftHand = (Hand == EHand::VR_LeftHand);
-		bool bIsXAxisForward = (SkeletonForwardAxis == ESkeletonForwardAxis::VR_SkeletonAxisX);
-
-		// Attempt to read the current skeletal pose from SteamVR
-		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, bIsXAxisForward, SteamVRMotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT))
+		
+		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, SteamVRMotionRange, BoneTransforms, STEAMVR_SKELETON_BONE_COUNT))
 		{
-			for (int32 i = 0; i < TransformedBoneNames.Num(); ++i)
+			// If the target hand skeleton is the SteamVR skeleton, then we can just copy the transforms directly into the pose
+			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
 			{
-				FTransform BoneTransform = FTransform();
-				FName BoneName = TransformedBoneNames[i];
-
-				if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
+				for (int32 SrcBoneindex = 0; SrcBoneindex < STEAMVR_SKELETON_BONE_COUNT; ++SrcBoneindex)
 				{
-					BoneTransform = OutPose[i];
-				}
-				else if (HandSkeleton == EHandSkeleton::VR_UE4HandSkeleton)
-				{
-					int32 SteamVRHandIndex = GetSteamVRHandIndex(i);
-					if (SteamVRHandIndex != INDEX_NONE)
+					FCompactPoseBoneIndex TargetBoneIndex = Output.Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(SrcBoneindex));
+					if (TargetBoneIndex != INDEX_NONE)
 					{
-						BoneTransform = OutPose[SteamVRHandIndex];
+						Output.Pose[TargetBoneIndex] = BoneTransforms[SrcBoneindex];
 					}
 				}
-				else
-				{
-					// Check if there's a mapping for this bone to the SteamVR skeleton
-					if (i < SteamVRSkeleton::GetBoneCount())
-					{
-						FName MappedBone = BoneNameMap.FindRef(SteamVRSkeleton::GetBoneName(i));
-
-						if (MappedBone.IsValid() && MappedBone != NAME_None)
-						{
-							BoneTransform = OutPose[i];
-						}
-					}
-				}
-
-				int32 MeshIndex;
-				if (HandSkeleton == EHandSkeleton::VR_CustomSkeleton)
-				{
-					MeshIndex = Output.Pose.GetBoneContainer().GetPoseBoneIndexForBoneName(BoneName);
-					//UE_LOG(LogTemp, Warning, TEXT("Bone Map [%s] from SteamVR Index[%i] to MeshIndex [%i]"), *BoneName.ToString(), i, MeshIndex);
-				}
-				else
-				{
-					MeshIndex = i;
-				}
-
-				if (MeshIndex != INDEX_NONE)
-				{
-					FCompactPoseBoneIndex BoneIndex = Output.Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(MeshIndex));
-					if (BoneIndex != INDEX_NONE)
-					{
-						FQuat NewRotation;
-						if (BoneTransform.GetRotation().Equals(FQuat()) ||
-							BoneTransform.GetRotation().ContainsNaN())
-						{
-							NewRotation = Output.Pose[BoneIndex].GetRotation();
-						}
-						else
-						{
-							NewRotation = BoneTransform.GetRotation();
-						}
-
-						FVector NewTranslation;
-						if (BoneTransform.GetLocation() == FVector::ZeroVector || BoneTransform.ContainsNaN() || HandSkeleton != EHandSkeleton::VR_SteamVRHandSkeleton)
-						{
-							NewTranslation = Output.Pose[BoneIndex].GetTranslation();
-						}
-						else
-						{
-							NewTranslation = BoneTransform.GetLocation();
-						}
-						//UE_LOG(LogTemp, Warning, TEXT("[Current Translate %s] [Bone Translate %s]"), *Output.Pose[BoneIndex].GetTranslation().ToString(), *(BoneTransform.GetLocation()).ToString());
-
-						FTransform OutTransform = FTransform(Output.Pose[BoneIndex].GetRotation(), Output.Pose[BoneIndex].GetTranslation(), Output.Pose[BoneIndex].GetScale3D());
-						OutTransform.SetLocation(NewTranslation);
-						OutTransform.SetRotation(NewRotation);
-
-						// Set new bone transform
-						FTransform oldTransform = Output.Pose[BoneIndex];
-						(void)oldTransform;
-						Output.Pose[BoneIndex] = OutTransform;
-					}
-				}
+			}
+			else
+			{
+				// If the target hand skeleton is the UE4 reference VR hand skeleton, we need to retarget the transforms
+				// we read from SteamVR to fit it.  
+				PoseUE4HandSkeleton(Output.Pose, BoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
 			}
 		}
 	}
 }
 
-int32 FAnimNode_SteamVRInputAnimPose::GetSteamVRHandIndex(int32 UE4BoneIndex)
-{
-	switch (UE4BoneIndex)
-	{
-	case 0:
-		return 1;
-	case 13:
-		return 2;
-	case 14:
-		return 3;
-	case 15:
-		return 4;
-	case 1:
-		return 7;
-	case 2:
-		return 8;
-	case 3:
-		return 9;
-	case 4:
-		return 12;
-	case 5:
-		return 13;
-	case 6:
-		return 14;
-	case 10:
-		return 17;
-	case 11:
-		return 18;
-	case 12:
-		return 19;
-	case 7:
-		return 22;
-	case 8:
-		return 23;
-	case 9:
-		return 24;
-	default:
-		break;
-	}
 
-	return INDEX_NONE;
+FQuat CalcRotationAboutAxis(const FVector& FromDirection, const FVector& ToDirection, const FVector& Axis)
+{
+	FVector FromDirectionCp = FVector::CrossProduct(Axis, FromDirection);
+	FVector ToDirectionCp = FVector::CrossProduct(Axis, ToDirection);
+
+	return FQuat::FindBetweenVectors(FromDirectionCp, ToDirectionCp);
 }
 
-void FAnimNode_SteamVRInputAnimPose::ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName)
+
+void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const
 {
-	switch ((ESteamVRBone)BoneIndex)
+	check(BoneTransformsLS != nullptr);
+	check(BoneTransformCount == SteamVRSkeleton::GetBoneCount());
+	check(Pose.GetNumBones() == UE4HandSkeleton::GetBoneCount());
+
+	// It is easier to do the retargeting in model space, so calculate the model space transforms for the SteamVR skeleton
+	// from the given local space transforms
+	FTransform BoneTransformsMS[STEAMVR_SKELETON_BONE_COUNT];
+	for ( int32 BoneIndex = 0; BoneIndex < SteamVRSkeleton::GetBoneCount(); ++BoneIndex)
 	{
-	case ESteamVRBone::EBone_Root:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Root);
-		break;
+		int32 ParentIndex = SteamVRSkeleton::GetParentIndex(BoneIndex);
+		if (ParentIndex != -1)
+		{
+			BoneTransformsMS[BoneIndex] = BoneTransformsLS[BoneIndex] * BoneTransformsMS[ParentIndex];
+		}
+		else
+		{
+			BoneTransformsMS[BoneIndex] = BoneTransformsLS[BoneIndex];
+		}
+	}
 
-	case ESteamVRBone::EBone_Wrist:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Wrist);
-		break;
+	// Remove any scale, as its now baked into the position
+	for (int32 BoneIndex = 0; BoneIndex < SteamVRSkeleton::GetBoneCount(); ++BoneIndex)
+	{
+		BoneTransformsMS[BoneIndex].SetScale3D(FVector::ZeroVector);
+	}
 
-	case ESteamVRBone::EBone_Thumb1:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_0);
-		break;
+	FQuat TargetBoneRotationsMS[EUE4HandBone_Count];
 
-	case ESteamVRBone::EBone_Thumb2:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_1);
-		break;
+	// Calculate the rotation to make the target wrist bone match the orientation of the source wrist bone
+	// TODO: a bunch of this can be calculated once at init time and cached.  Rune, can we calculate it during the animgraph compile?
+	{
+		// Calculate the average position of the knuckles bones for each hand, then rotate the wrist of the target skeleton
+		// so that its knuckle-average coincides with the knuckle-average of the source pose
+		FVector KnuckleAverageMS_SteamVR = FVector::ZeroVector;
+		FVector KnuckleAverageMS_UE4 = FVector::ZeroVector;
 
-	case ESteamVRBone::EBone_Thumb3:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_2);
-		break;
+		for (int32 KnuckleIndex = 0; KnuckleIndex < 4; ++KnuckleIndex)
+		{
+			const int32 BoneIndex_SteamVR = kSteamVRKnuckleBones[KnuckleIndex];
+			const FCompactPoseBoneIndex BoneIndex_UE4 = FCompactPoseBoneIndex(kUE4KnuckleBones[KnuckleIndex]);
 
-	case ESteamVRBone::EBone_Thumb4:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Thumb_3);
-		break;
+			KnuckleAverageMS_SteamVR	+= BoneTransformsMS[BoneIndex_SteamVR].GetTranslation();
+			KnuckleAverageMS_UE4		+= CalcModelSpaceTransform(Pose, BoneIndex_UE4).GetTranslation();
+		}
 
-	case ESteamVRBone::EBone_IndexFinger0:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_0);
-		break;
+		KnuckleAverageMS_SteamVR /= 4.f;
+		KnuckleAverageMS_UE4 /= 4.f;
 
-	case ESteamVRBone::EBone_IndexFinger1:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_1);
-		break;
+		FVector ToKnuckleAverageMS_SteamVR = KnuckleAverageMS_SteamVR - BoneTransformsMS[ESteamVRBone_Wrist].GetTranslation();
+		ToKnuckleAverageMS_SteamVR.Normalize();
+		FVector WristForwardLS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation().UnrotateVector(ToKnuckleAverageMS_SteamVR);
 
-	case ESteamVRBone::EBone_IndexFinger2:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_2);
-		break;
+		FCompactPoseBoneIndex WristBoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(EUE4HandBone_Wrist));
+		FTransform WristTransform_UE4 = Pose[WristBoneIndexCompact];
+		FVector ToKnuckleAverageMS_UE4 = KnuckleAverageMS_UE4 - WristTransform_UE4.GetTranslation();
+		ToKnuckleAverageMS_UE4.Normalize();
+		FVector WristForwardLS_UE4 = WristTransform_UE4.GetRotation().UnrotateVector(ToKnuckleAverageMS_UE4);
 
-	case ESteamVRBone::EBone_IndexFinger3:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_3);
-		break;
+		// Get the axis that most closely matches the direction the palm of the hand is facing
+		FVector WristSideDirectionLS_SteamVR = ( Hand == EHand::VR_RightHand ) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
+		FVector WristSideDirectionLS_UE4 = ( Hand == EHand::VR_RightHand ) ? FVector(0.f, 1.f, 0.f) : FVector(0.f, 1.f, 0.f);
 
-	case ESteamVRBone::EBone_IndexFinger4:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Index_4);
-		break;
+		// Take the cross product with the forward vector for each hand to ensure that the side vector is perpendicular to the forward vector
+		WristSideDirectionLS_SteamVR = FVector::CrossProduct(WristForwardLS_SteamVR, WristSideDirectionLS_SteamVR);
+		WristSideDirectionLS_UE4 = FVector::CrossProduct(WristForwardLS_UE4, WristSideDirectionLS_UE4);
 
-	case ESteamVRBone::EBone_MiddleFinger0:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_0);
-		break;
+		// Find the model-space directions of the forward and side vectors based on the current pose
+		const FVector WristForwardMS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation() * WristForwardLS_SteamVR;
+		const FVector WristSideDirectionMS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation() * WristSideDirectionLS_SteamVR;
 
-	case ESteamVRBone::EBone_MiddleFinger1:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_1);
-		break;
+		// Calculate the rotation that will align the UE4 hand's forward vector with the SteamVR hand's forward
+		FQuat AlignmentRot = FQuat::FindBetweenNormals(WristForwardLS_UE4, WristForwardMS_SteamVR);
 
-	case ESteamVRBone::EBone_MiddleFinger2:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_2);
-		break;
+		// Rotate about the aligned forward direction to make the side directions align
+		FVector WristSideDirectionMS_UE4 = AlignmentRot * WristSideDirectionLS_UE4;
+		FQuat TwistRotation = CalcRotationAboutAxis(WristSideDirectionMS_UE4, WristSideDirectionMS_SteamVR, WristForwardMS_SteamVR);
 
-	case ESteamVRBone::EBone_MiddleFinger3:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_3);
-		break;
+		// Apply the rotation to the hand
+		TargetBoneRotationsMS[EUE4HandBone_Wrist] = TwistRotation * AlignmentRot;
+	}
 
-	case ESteamVRBone::EBone_MiddleFinger4:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Middle_4);
-		break;
+	// For all the remaining bones, use their child bone as a reference to calculate their orientation
+	const FVector FingerForwardDefault_SteamVR(-1.f, 0.f, 0.f);
+	const FVector FingerForwardDefault_UE4(-1.f, 0.f, 0.f);
+	for ( int32 BoneIndex = EUE4HandBone_Wrist+1; BoneIndex < Pose.GetNumBones(); ++BoneIndex)
+	{
+		// Determine which direction is "forward" in the bone's local space by looking at the direction
+		// to its child
+		FVector FingerForwardLS_UE4 = FingerForwardDefault_UE4;
+		if (UE4HandSkeleton::GetChildCount(BoneIndex) > 0)
+		{
+			int32 ChildBoneIndex = UE4HandSkeleton::GetChildIndex(BoneIndex, 0);
+			FCompactPoseBoneIndex ChildBoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(ChildBoneIndex));
+			FingerForwardLS_UE4 = Pose[ChildBoneIndexCompact].GetTranslation();
+			FingerForwardLS_UE4.Normalize();
+		}
 
-	case ESteamVRBone::EBone_RingFinger0:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_0);
-		break;
+		int32 ParentBoneIndex = UE4HandSkeleton::GetParentIndex(BoneIndex);
+		check(ParentBoneIndex != -1);
 
-	case ESteamVRBone::EBone_RingFinger1:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_1);
-		break;
+		FQuat StartingTransformMS = TargetBoneRotationsMS[ParentBoneIndex];
 
-	case ESteamVRBone::EBone_RingFinger2:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_2);
-		break;
+		// Include the default orientation of the bone, so that it is used as the starting point for the adjustment rotation
+		FCompactPoseBoneIndex BoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(BoneIndex));
+		StartingTransformMS = StartingTransformMS * Pose[BoneIndexCompact].GetRotation();
 
-	case ESteamVRBone::EBone_RingFinger3:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_3);
-		break;
+		// Convert the bone's forward direction to model space
+		FVector FingerForwardMS_UE4 = StartingTransformMS.RotateVector(FingerForwardLS_UE4);
+		
+		// Calculate the direction that the bone's forward vector should be pointing
+		const int32 BoneIndex_SteamVR = kUE4BoneToSteamVRBone[BoneIndex];
+		FVector FingerForwardMS_SteamVR = FingerForwardDefault_SteamVR;
+		if (SteamVRSkeleton::GetChildCount(BoneIndex_SteamVR) > 0)
+		{
+			int32 ChildIndex = SteamVRSkeleton::GetChildIndex(BoneIndex_SteamVR, 0);
+			FingerForwardMS_SteamVR = BoneTransformsMS[ChildIndex].GetTranslation() - BoneTransformsMS[BoneIndex_SteamVR].GetTranslation();
+			FingerForwardMS_SteamVR.Normalize();
+		}
 
-	case ESteamVRBone::EBone_RingFinger4:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Ring_4);
-		break;
+		// Find the rotation between the current forward vector and the desired forward vector, in model space
+		FQuat AdjustmentRot = FQuat::FindBetweenVectors(FingerForwardMS_UE4, FingerForwardMS_SteamVR);
 
-	case ESteamVRBone::EBone_PinkyFinger0:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_0);
-		break;
+		TargetBoneRotationsMS[BoneIndex] = AdjustmentRot * StartingTransformMS;
+	}
 
-	case ESteamVRBone::EBone_PinkyFinger1:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_1);
-		break;
+	// Convert the target rotations from model-space to local-space and apply them on the output pose
+	for (int32 BoneIndex = 0; BoneIndex < Pose.GetNumBones(); ++BoneIndex)
+	{
+		FCompactPoseBoneIndex TargetBoneIndex = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(BoneIndex));
+		if (TargetBoneIndex != INDEX_NONE)
+		{
+			FQuat BoneRotation = TargetBoneRotationsMS[BoneIndex];
 
-	case ESteamVRBone::EBone_PinkyFinger2:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_2);
-		break;
+			int32 ParentIndex = UE4HandSkeleton::GetParentIndex(BoneIndex);
+			if (ParentIndex != -1)
+			{
+				BoneRotation = TargetBoneRotationsMS[ParentIndex].Inverse() * BoneRotation;
+			}
 
-	case ESteamVRBone::EBone_PinkyFinger3:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_3);
-		break;
+			Pose[TargetBoneIndex].SetRotation(BoneRotation);
+		}
+	}
 
-	case ESteamVRBone::EBone_PinkyFinger4:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Pinky_4);
-		break;
-
-	case ESteamVRBone::EBone_Aux_Thumb:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Thumb);
-		break;
-
-	case ESteamVRBone::EBone_Aux_IndexFinger:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Index);
-		break;
-
-	case ESteamVRBone::EBone_Aux_MiddleFinger:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Middle);
-		break;
-
-	case ESteamVRBone::EBone_Aux_RingFinger:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Ring);
-		break;
-
-	case ESteamVRBone::EBone_Aux_PinkyFinger:
-		UpdateBoneMap(SrcBoneName, CustomBoneMapping.Aux_Pinky);
-		break;
-
-	default:
-		break;
+	// Set the wrist bone position
+	{
+		FCompactPoseBoneIndex WristBoneIndex = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(EUE4HandBone_Wrist));
+		Pose[WristBoneIndex].SetTranslation(BoneTransformsMS[ESteamVRBone_Wrist].GetTranslation());
 	}
 }
 
-void FAnimNode_SteamVRInputAnimPose::UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName)
-{
-	FName NewName = NAME_None;
-	if (RetargetName != NAME_None || !RetargetName.IsEqual(""))
-	{
-		NewName = RetargetName;
-	}
 
-	TransformedBoneNames.Add(NewName);
-	BoneNameMap.Add(SrcBoneName, NewName);
-}
-
-FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice()
+FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice() const
 {
 	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
 	for (auto MotionController : MotionControllers)
@@ -363,4 +307,18 @@ FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice()
 	}
 
 	return nullptr;
+}
+
+
+FTransform FAnimNode_SteamVRInputAnimPose::CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex) const
+{
+	FTransform BoneTransform = Pose[BoneIndex];
+
+	FCompactPoseBoneIndex ParentIndex = Pose.GetParentBoneIndex(BoneIndex);
+	if (ParentIndex != INDEX_NONE)
+	{
+		BoneTransform = BoneTransform * CalcModelSpaceTransform(Pose, ParentIndex);
+	}
+
+	return BoneTransform;
 }

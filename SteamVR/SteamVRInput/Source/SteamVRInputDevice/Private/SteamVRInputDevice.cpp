@@ -340,7 +340,7 @@ FTransform CalcModelSpaceTransform(const FTransform* OutBoneTransform, int32 Bon
 }
 
 
-bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bXAxisForward, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
+bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
 {
 	// Check that the size of the buffer we will be writing into is big enough to hold all the bone transforms
 	if (OutBoneTransformCount < STEAMVR_SKELETON_BONE_COUNT)
@@ -350,71 +350,69 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bXAxisForward, EV
 
 	if (VRInput() != nullptr && SteamVRSystem != nullptr)
 	{
-			// Get the handle for the skeletal action.  If its invalid (the necessary skeletal action is not in the manifest) then return false
-			vr::VRActionHandle_t ActionHandle = (bLeftHand) ? VRSkeletalHandleLeft : VRSkeletalHandleRight;
-			if (ActionHandle == k_ulInvalidActionHandle)
-			{
-				return false;
-			}
+		// Get the handle for the skeletal action.  If its invalid (the necessary skeletal action is not in the manifest) then return false
+		vr::VRActionHandle_t ActionHandle = (bLeftHand) ? VRSkeletalHandleLeft : VRSkeletalHandleRight;
+		if (ActionHandle == k_ulInvalidActionHandle)
+		{
+			return false;
+		}
 
-			// Get skeletal data
-			VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
-			EVRInputError Err = VRInput()->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
+		// Get skeletal data
+		VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
+		EVRInputError Err = VRInput()->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
 
-			// TODO: [JoeV] bXAxisForward for skeletons imported with "Force X Axis Forward"
+		// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
+		// we need to convert them to UE4's coordinate system.  
+		// SteamVR coords:	X=right,	Y=up,		Z=backwards,	right-handed,	scale is meters
+		// UE4 coords:		X=forward,	Y=right,	Z=up,			left-handed,	scale is centimeters
 
-			// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
-			// we need to convert them to UE4's coordinate system.  
-			// SteamVR coords:	X=right,	Y=up,		Z=backwards,	right-handed,	scale is meters
-			// UE4 coords:		X=forward,	Y=right,	Z=up,			left-handed,	scale is centimeters
+		// The root is positioned at the controller's anchor position with zero rotation.  
+		// However because of the conversion from SteamVR coordinates to Unreal coordinates the root bone is scaled
+		// to the new coordinate system
+		FTransform& RootTransform = OutBoneTransform[ESteamVRBone_Root];
+		RootTransform.SetComponents(FQuat::Identity, FVector::ZeroVector, FVector(100.f, 100.f, 100.f));
 
-			// The root is positioned at the controller's anchor position with zero rotation.  
-			// However because of the conversion from SteamVR coordinates to Unreal coordinates the root bone is scaled
-			// to the new coordinate system
-			FTransform& RootTransform = OutBoneTransform[ESteamVRBone::EBone_Root];
-			RootTransform.SetComponents(FQuat::Identity, FVector::ZeroVector, FVector(100.f, 100.f, 100.f));
+		// Transform all the non-root bones to the new coordinate system
+		for (int32 BoneIndex = ESteamVRBone_Root + 1; BoneIndex < STEAMVR_SKELETON_BONE_COUNT; ++BoneIndex)
+		{
+			const VRBoneTransform_t& SrcTransform = SteamVRBoneTransforms[BoneIndex];
 
-			// Transform all the non-root bones to the new coordinate system
-			for (int32 BoneIndex = ESteamVRBone::EBone_Root + 1; BoneIndex < STEAMVR_SKELETON_BONE_COUNT; ++BoneIndex)
-			{
-				const VRBoneTransform_t& SrcTransform = SteamVRBoneTransforms[BoneIndex];
+			FQuat NewRotation(
+				SrcTransform.orientation.z,
+				-SrcTransform.orientation.x,
+				SrcTransform.orientation.y,
+				-SrcTransform.orientation.w
+			);
 
-				FQuat NewRotation(
-					SrcTransform.orientation.z,
-					-SrcTransform.orientation.x,
-					SrcTransform.orientation.y,
-					-SrcTransform.orientation.w
-				);
+			FVector NewTranslation(
+				SrcTransform.position.v[2],
+				-SrcTransform.position.v[0],
+				SrcTransform.position.v[1]
+			);
 
-				FVector NewTranslation(
-					SrcTransform.position.v[2],
-					-SrcTransform.position.v[0],
-					SrcTransform.position.v[1]
-				);
+			FTransform& DstTransform = OutBoneTransform[BoneIndex];
+			DstTransform.SetRotation(NewRotation);
+			DstTransform.SetTranslation(NewTranslation);
+		}
 
-				FTransform& DstTransform = OutBoneTransform[BoneIndex];
-				DstTransform.SetRotation(NewRotation);
-				DstTransform.SetTranslation(NewTranslation);
-			}
+		// Apply an extra transformation to the children of the root bone to compensate for the changes made to the root
+		// to make it fit the new coordinate system even though it has zero rotation
+		FQuat FixupRotation(FVector(0.f, 0.f, 1.f), PI);
 
-			// Apply an extra transformation to the children of the root bone to compensate for the changes made to the root
-			// to make it fit the new coordinate system even though it has zero rotation
-			FQuat FixupRotation(FVector(0.f, 0.f, 1.f), PI);
+		for (int32 ChildIndex = 0; ChildIndex < SteamVRSkeleton::GetChildCount(ESteamVRBone_Root); ++ChildIndex)
+		{
+			int32 BoneIndex = SteamVRSkeleton::GetChildIndex(ESteamVRBone_Root, ChildIndex);
 
-			for (int32 ChildIndex = 0; ChildIndex < SteamVRSkeleton::GetChildCount(ESteamVRBone::EBone_Root); ++ChildIndex)
-			{
-				int32 BoneIndex = SteamVRSkeleton::GetChildIndex(ESteamVRBone::EBone_Root, ChildIndex);
+			FTransform& DstTransform = OutBoneTransform[BoneIndex];
 
-				FTransform& DstTransform = OutBoneTransform[BoneIndex];
+			FVector NewTranslation = DstTransform.GetTranslation() * FVector(-1.f, -1.f, 1.f);
+			FQuat NewRotation = FixupRotation * DstTransform.GetRotation();
 
-				FVector NewTranslation = DstTransform.GetTranslation() * FVector(-1.f, -1.f, 1.f);
-				FQuat NewRotation = FixupRotation * DstTransform.GetRotation();
+			DstTransform.SetRotation(NewRotation);
+			DstTransform.SetTranslation(NewTranslation);
+		}
 
-				DstTransform.SetRotation(NewRotation);
-				DstTransform.SetTranslation(NewTranslation);
-			}
-
-			return true;
+		return true;
 	}
 
 	return false;

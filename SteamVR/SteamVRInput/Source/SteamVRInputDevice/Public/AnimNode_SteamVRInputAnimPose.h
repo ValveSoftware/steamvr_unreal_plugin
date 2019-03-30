@@ -55,15 +55,7 @@ UENUM(BlueprintType)
 enum class EHandSkeleton : uint8
 {
 	VR_SteamVRHandSkeleton 	UMETA(DisplayName = "SteamVR Hand Skeleton"),
-	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton"),
-	VR_CustomSkeleton 		UMETA(DisplayName = "Custom Skeleton")
-};
-
-UENUM(BlueprintType)
-enum class ESkeletonForwardAxis : uint8
-{
-	VR_SkeletonAxisX 	UMETA(DisplayName = "X Axis"),
-	VR_SkeletonAxisY	UMETA(DisplayName = "Y Axis")
+	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton")
 };
 
 USTRUCT()
@@ -80,12 +72,6 @@ struct FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	ESkeletonForwardAxis SkeletonForwardAxis;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
-	FSteamVRBoneMapping CustomBoneMapping;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 
@@ -100,12 +86,14 @@ public:
 
 	FAnimNode_SteamVRInputAnimPose();
 
-	TMap<FName, FName> BoneNameMap;
-	TArray<FName, TMemStackAllocator<>> TransformedBoneNames;
+	/** 
+	 * Retarget the given array of bone transforms for the SteamVR skeleton to the UE4 hand skeleton and apply it to the given FPoseContext. 
+	 * The bone transforms are in the bone's local space.  Assumes that PoseContest.Pose has already been set to its reference pose
+	*/
+	void PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const;
 
-	int32 GetSteamVRHandIndex(int32 UE4BoneIndex);
-	void ProcessBoneMap(int32 BoneIndex, const FName& SrcBoneName);
-	void UpdateBoneMap(const FName& SrcBoneName, const FName RetargetName);
-	FSteamVRInputDevice* GetSteamVRInputDevice();
+	FSteamVRInputDevice* GetSteamVRInputDevice() const;
 
+	/** Recursively calculate the model-space transform of the given bone from the local-space transforms on the given pose */
+	FTransform CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex) const;
 };
