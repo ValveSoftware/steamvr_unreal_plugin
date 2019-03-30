@@ -39,30 +39,30 @@ POSSIBILITY OF SUCH DAMAGE.
 // bone in the SteamVR hand skeleton
 static const int32 kUE4BoneToSteamVRBone[] = {
 	ESteamVRBone_Wrist,			// EUE4HandBone_Wrist
-	ESteamVRBone_IndexFinger0,	// EUE4HandBone_Index_01
-	ESteamVRBone_IndexFinger1,	// EUE4HandBone_Index_02
-	ESteamVRBone_IndexFinger2,	// EUE4HandBone_Index_03
-	ESteamVRBone_MiddleFinger0, // EUE4HandBone_Middle_01
-	ESteamVRBone_MiddleFinger1, // EUE4HandBone_Middle_02
-	ESteamVRBone_MiddleFinger2, // EUE4HandBone_Middle_03
-	ESteamVRBone_PinkyFinger0,	// EUE4HandBone_Pinky_01
-	ESteamVRBone_PinkyFinger1,	// EUE4HandBone_Pinky_02
-	ESteamVRBone_PinkyFinger2,	// EUE4HandBone_Pinky_03
-	ESteamVRBone_RingFinger0,	// EUE4HandBone_Ring_01
-	ESteamVRBone_RingFinger1,	// EUE4HandBone_Ring_02
-	ESteamVRBone_RingFinger2,	// EUE4HandBone_Ring_03
-	ESteamVRBone_Thumb0,		// EUE4HandBone_Thumb_01
-	ESteamVRBone_Thumb1,		// EUE4HandBone_Thumb_02
-	ESteamVRBone_Thumb2			// EUE4HandBone_Thumb_03
+	ESteamVRBone_IndexFinger1,	// EUE4HandBone_Index_01
+	ESteamVRBone_IndexFinger2,	// EUE4HandBone_Index_02
+	ESteamVRBone_IndexFinger3,	// EUE4HandBone_Index_03
+	ESteamVRBone_MiddleFinger1, // EUE4HandBone_Middle_01
+	ESteamVRBone_MiddleFinger2, // EUE4HandBone_Middle_02
+	ESteamVRBone_MiddleFinger3, // EUE4HandBone_Middle_03
+	ESteamVRBone_PinkyFinger1,	// EUE4HandBone_Pinky_01
+	ESteamVRBone_PinkyFinger2,	// EUE4HandBone_Pinky_02
+	ESteamVRBone_PinkyFinger3,	// EUE4HandBone_Pinky_03
+	ESteamVRBone_RingFinger1,	// EUE4HandBone_Ring_01
+	ESteamVRBone_RingFinger2,	// EUE4HandBone_Ring_02
+	ESteamVRBone_RingFinger3,	// EUE4HandBone_Ring_03
+	ESteamVRBone_Thumb1,		// EUE4HandBone_Thumb_01
+	ESteamVRBone_Thumb2,		// EUE4HandBone_Thumb_02
+	ESteamVRBone_Thumb3			// EUE4HandBone_Thumb_03
 };
 static_assert( sizeof(kUE4BoneToSteamVRBone) / sizeof(kUE4BoneToSteamVRBone[0]) == EUE4HandBone_Count, "Mapping from UE4 hand bones to their corresponding SteamVR hand bones is the wrong size" );
 
 // List of the knuckle bones of the SteamVR hand skeleton
 static const int32 kSteamVRKnuckleBones[] = {
-	ESteamVRBone_IndexFinger0,
-	ESteamVRBone_MiddleFinger0,
-	ESteamVRBone_RingFinger0,
-	ESteamVRBone_PinkyFinger0
+	ESteamVRBone_IndexFinger1,
+	ESteamVRBone_MiddleFinger1,
+	ESteamVRBone_RingFinger1,
+	ESteamVRBone_PinkyFinger1
 };
 static_assert( sizeof(kSteamVRKnuckleBones) / sizeof(kSteamVRKnuckleBones[0]) == 4, "List of SteamVR knuckle bones should only have 4 entries" );
 
