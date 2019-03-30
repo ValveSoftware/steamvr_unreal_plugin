@@ -770,36 +770,42 @@ void FSteamVRInputDevice::ReloadActionManifest()
 {
 #if WITH_EDITOR
 
-	// Restart SteamVR
-	if (SteamVRSystem)
+	if (VRInput() != nullptr && VRApplications() !=nullptr)
 	{
-		VR_Shutdown();
+		// Restart SteamVR
+		if (SteamVRSystem)
+		{
+			VR_Shutdown();
+		}
+		InitSteamVRSystem();
+
+		if (SteamVRSystem != nullptr)
+		{
+			// Set Action Manifest Path
+			const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
+		
+			// Set Action Manifest
+			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
+		
+			// Load application manifest
+			FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		
+			// Get the App Process Id
+			uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
+		
+			// Set SteamVR AppKey
+			FString AppFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
+			FString SteamVRAppKey = (TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + AppFileName).ToLower();
+		
+			// Set AppKey for this Editor Session
+			AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		}
 	}
-	InitSteamVRSystem();
-
-	// Set Action Manifest Path
-	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
-	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
-
-	// Set Action Manifest
-	EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-	GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
-
-	// Load application manifest
-	FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
-	EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
-	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
-
-	// Get the App Process Id
-	uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
-
-	// Set SteamVR AppKey
-	FString AppFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
-	FString SteamVRAppKey = (TEXT(APP_MANIFEST_PREFIX) + SanitizeString(GameProjectName) + TEXT(".") + AppFileName).ToLower();
-
-	// Set AppKey for this Editor Session
-	AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
-	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 #endif
 }
 
@@ -913,10 +919,10 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
 				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
 				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
-			}
 
-			TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
-			ControllerPoseArray.Add(Special8JsonValueObject);
+				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
+				ControllerPoseArray.Add(Special8JsonValueObject);
+			}
 
 			// Add Controller Input Array To Action Set
 			ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
@@ -1961,16 +1967,19 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 
 bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle)
 {
-	// Get Skeletal Handle
-	EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
-	if ((Err != VRInputError_None || !SkeletalHandle) && Err != LastInputError)
+	if (VRInput() != nullptr)
 	{
-		GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
-		Err = LastInputError;
-	}
-	else
-	{
-		return true;
+		// Get Skeletal Handle
+		EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
+		if ((Err != VRInputError_None || !SkeletalHandle) && Err != LastInputError)
+		{
+			GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
+			Err = LastInputError;
+		}
+		else
+		{
+			return true;
+		}
 	}
 	return false;
 }
