@@ -27,28 +27,38 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "SteamVREditor.h"
+#include "AnimGraphNode_SteamVRInputAnimPose.h"
 
-#pragma once
+#define LOCTEXT_NAMESPACE "SteamVRInputAnimNode"
 
-#include "AnimGraphNode_Base.h"
-#include "AnimNode_SteamVRInputAnimPose.h"
-#include "AnimGraphNode_SteamVRInputAnimPose.generated.h"
-
-using namespace vr;
-
-UCLASS(MinimalAPI)
-class UAnimGraphNode_SteamVRInputAnimPose : public UAnimGraphNode_Base
+UAnimGraphNode_SteamVRInputAnimPose::UAnimGraphNode_SteamVRInputAnimPose(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	GENERATED_UCLASS_BODY()
+}
 
-	UPROPERTY(EditAnywhere, Category=Settings)
-	FAnimNode_SteamVRInputAnimPose Node;
+// Node Color
+FLinearColor UAnimGraphNode_SteamVRInputAnimPose::GetNodeTitleColor() const 
+{ 
+	return FLinearColor(0.f, 0.f, 255.f, 1.f);
+}
 
-public:
-	// UEdGraphNode interface
-	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
-	virtual FLinearColor GetNodeTitleColor() const override;
-	virtual FText GetMenuCategory() const override;
-	virtual FText GetTooltipText() const override;
-	// End of UEdGraphNode interface
-};
+// Node Category
+FText UAnimGraphNode_SteamVRInputAnimPose::GetMenuCategory() const
+{
+	return LOCTEXT("NodeCategory", "SteamVR Input");
+}
+
+// Node Title
+FText UAnimGraphNode_SteamVRInputAnimPose::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	return LOCTEXT("NodeTitle", "SteamVR Skeletal Anim Pose");
+}
+
+// Node Tooltip
+FText UAnimGraphNode_SteamVRInputAnimPose::GetTooltipText() const
+{
+	return LOCTEXT("NodeTooltip", "Retrieves the current pose from the SteamVR Skeletal Input API");
+}
+
+#undef LOCTEXT_NAMESPACE
