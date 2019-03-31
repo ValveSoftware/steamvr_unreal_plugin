@@ -146,7 +146,7 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		EVRSkeletalMotionRange MotionRange = bWithController ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 
 		// Left Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(true, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
+		SteamVRInputDevice->GetSkeletalData(true, false, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
 		LeftHand.Root = OutPose[0];
 		LeftHand.Wrist = OutPose[1];
@@ -189,7 +189,7 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		LeftHand.Bone_Count = OutPose[31];
 
 		// Right Hand - Grab Skeletal Data
-		SteamVRInputDevice->GetSkeletalData(false, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
+		SteamVRInputDevice->GetSkeletalData(false, false, MotionRange, OutPose, STEAMVR_SKELETON_BONE_COUNT);
 
 		RightHand.Root = OutPose[0];
 		RightHand.Wrist = OutPose[1];

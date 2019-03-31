@@ -53,6 +53,50 @@ POSSIBILITY OF SUCH DAMAGE.
 #define LOCTEXT_NAMESPACE "SteamVRInputDevice"
 DEFINE_LOG_CATEGORY_STATIC(LogSteamVRInputDevice, Log, All);
 
+// List of bones that are effectively in model space because
+// they are children of the root
+static const int32 kModelSpaceBones[] = {
+	ESteamVRBone_Wrist,
+	ESteamVRBone_Aux_Thumb,
+	ESteamVRBone_Aux_IndexFinger,
+	ESteamVRBone_Aux_MiddleFinger,
+	ESteamVRBone_Aux_RingFinger,
+	ESteamVRBone_Aux_PinkyFinger,
+};
+
+// List of the metacarpal bones of the SteamVR skeleton
+static const int32 kMetacarpalBones[] = {
+	ESteamVRBone_Thumb0,
+	ESteamVRBone_IndexFinger0,
+	ESteamVRBone_MiddleFinger0,
+	ESteamVRBone_RingFinger0,
+	ESteamVRBone_PinkyFinger0
+};
+
+// List of bones that only need to have their translation mirrored in the SteamVR skeleton
+static const int32 kMirrorTranslationOnlyBones[] = {
+	ESteamVRBone_Thumb1,
+	ESteamVRBone_Thumb2,
+	ESteamVRBone_Thumb3,
+	ESteamVRBone_IndexFinger1,
+	ESteamVRBone_IndexFinger2,
+	ESteamVRBone_IndexFinger3,
+	ESteamVRBone_IndexFinger4,
+	ESteamVRBone_MiddleFinger1,
+	ESteamVRBone_MiddleFinger2,
+	ESteamVRBone_MiddleFinger3,
+	ESteamVRBone_MiddleFinger4,
+	ESteamVRBone_RingFinger1,
+	ESteamVRBone_RingFinger2,
+	ESteamVRBone_RingFinger3,
+	ESteamVRBone_RingFinger4,
+	ESteamVRBone_PinkyFinger1,
+	ESteamVRBone_PinkyFinger2,
+	ESteamVRBone_PinkyFinger3,
+	ESteamVRBone_PinkyFinger4
+};
+
+
 FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 	: MessageHandler(InMessageHandler)
 {
@@ -339,8 +383,7 @@ FTransform CalcModelSpaceTransform(const FTransform* OutBoneTransform, int32 Bon
 	return BoneTransformMS;
 }
 
-
-bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
+bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bMirror, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount)
 {
 	// Check that the size of the buffer we will be writing into is big enough to hold all the bone transforms
 	if (OutBoneTransformCount < STEAMVR_SKELETON_BONE_COUNT)
@@ -360,6 +403,16 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange
 		// Get skeletal data
 		VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
 		EVRInputError Err = VRInput()->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
+		if (Err != VRInputError_None)
+		{
+			return false;
+		}
+
+		// Optionally mirror the pose to the opposite hand
+		if (bMirror)
+		{
+			MirrorSteamVRSkeleton(SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
+		}
 
 		// GetSkeletalBoneData returns bone transforms are in SteamVR's coordinate system, so
 		// we need to convert them to UE4's coordinate system.  
@@ -2102,6 +2155,59 @@ void FSteamVRInputDevice::GetInputError(EVRInputError InputError, FString InputA
 	}
 
 	return;
+}
+
+void FSteamVRInputDevice::MirrorSteamVRSkeleton(VRBoneTransform_t* BoneTransformsLS, int32 BoneTransformCount) const
+{
+	check(BoneTransformsLS != nullptr);
+	check(BoneTransformCount == SteamVRSkeleton::GetBoneCount());
+
+	// Mirror the bones whose rotations transfer directly and only the translation needs to be fixed
+	{
+		const int32 TranslationOnlyBoneCount = sizeof(kMirrorTranslationOnlyBones) / sizeof(kMirrorTranslationOnlyBones[0]);
+		for (int32 i = 0; i < TranslationOnlyBoneCount; ++i)
+		{
+			const int32 BoneIndex = kMirrorTranslationOnlyBones[i];
+
+			vr::HmdVector4_t& Position = BoneTransformsLS[BoneIndex].position;
+			Position.v[0] *= -1.f;
+			Position.v[1] *= -1.f;
+			Position.v[2] *= -1.f;
+		}
+	}
+
+	// Mirror the metacarpals
+	{
+		const int32 MetaCarpalBoneCount = sizeof(kMetacarpalBones) / sizeof(kMetacarpalBones[0]);
+		for (int32 i = 0; i < MetaCarpalBoneCount; ++i)
+		{
+			const int32 BoneIndex = kMetacarpalBones[i];
+
+			vr::VRBoneTransform_t& BoneTransform = BoneTransformsLS[BoneIndex];
+
+			BoneTransform.position.v[0] *= -1.f;
+			
+			vr::HmdQuaternionf_t OriginalRotation = BoneTransform.orientation;
+			BoneTransform.orientation.w = OriginalRotation.x;
+			BoneTransform.orientation.x = -OriginalRotation.w;
+			BoneTransform.orientation.y = OriginalRotation.z;
+			BoneTransform.orientation.z = -OriginalRotation.y;
+		}
+	}
+
+	// Mirror the children of the root
+	{
+		const int32 ModelSpaceBoneCount = sizeof(kModelSpaceBones) / sizeof(kModelSpaceBones[0]);
+		for (int32 i = 0; i < ModelSpaceBoneCount; ++i)
+		{
+			const int32 BoneIndex = kModelSpaceBones[i];
+
+			vr::VRBoneTransform_t& BoneTransform = BoneTransformsLS[BoneIndex];
+			BoneTransform.position.v[0] *= -1.f;
+			BoneTransform.orientation.y *= -1.f;
+			BoneTransform.orientation.z *= -1.f;
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE //"SteamVRInputDevice"

@@ -156,17 +156,17 @@ public:
 			float Frequency = 1.f, float Amplitude = 0.5f);
 
 	/**
-	* Check wether or not Curls and Splay values are being retrieved per frame from the SteamVR Input System
-	* @return LeftHandState - Wether or not curls and splay values are being retrieved from the left hand
-	* @return RightHandState -  Wether or not curls and splay values are being retrieved from the right hand
+	* Check Whether or not Curls and Splay values are being retrieved per frame from the SteamVR Input System
+	* @return LeftHandState - Whether or not curls and splay values are being retrieved from the left hand
+	* @return RightHandState -  Whether or not curls and splay values are being retrieved from the right hand
 	*/
 	UFUNCTION(BlueprintCallable, Category="SteamVR Input")
 	static void GetCurlsAndSplaysState(bool& LeftHandState, bool& RightHandState);
 
 	/**
-	* Tell SteamVR wether or not to retrieve Curls and Splay values per frame
-	* @param NewLeftHandState - Wether or not curls and splay values will be retrieved for the left hand
-	* @param NewRightHandState -  Wether or not curls and splay values will be retrieved for the right hand
+	* Tell SteamVR Whether or not to retrieve Curls and Splay values per frame
+	* @param NewLeftHandState - Whether or not curls and splay values will be retrieved for the left hand
+	* @param NewRightHandState -  Whether or not curls and splay values will be retrieved for the right hand
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
@@ -175,8 +175,8 @@ public:
 	* Retrieve the live skeletal input bone values from SteamVR
 	* @return LeftHand - Per bone transform values for the left hand skeleton
 	* @return RightHand - Per bone transform values for the right hand skeleton
-	* @param bWithController - Wether or not retrieve skeletal input values with controller
-	* @param bXAxisForward - Wether or not the Skeleton has the X axis facing forward
+	* @param bWithController - Whether or not retrieve skeletal input values with controller
+	* @param bXAxisForward - Whether or not the Skeleton has the X axis facing forward
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
