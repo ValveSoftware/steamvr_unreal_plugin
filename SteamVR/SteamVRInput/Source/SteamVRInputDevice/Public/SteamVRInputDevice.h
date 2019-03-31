@@ -75,6 +75,35 @@ public:
 	*/
 	bool GetSkeletalData(bool bLeftHand, bool bMirror, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
 
+	/**
+	* Retrieve the left hand pose information - position, orientation and velocities
+	* @return Position - Translation from the pose data matrix in UE coordinates
+	* @return Orientation - Orientation derived from the pose data matrix in UE coordinates
+	* @return AngularVelocity - The angular velocity of the hand this frame
+	* @return Velocity - The velocity of the hand this frame
+	*/
+	void GetLeftHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity); 
+
+	/**
+	* Retrieve the right hand pose information - position, orientation and velocities
+	* @return Position - Translation from the pose data matrix in UE coordinates
+	* @return Orientation - Orientation derived from the pose data matrix in UE coordinates
+	* @return AngularVelocity - The angular velocity of the hand this frame
+	* @return Velocity - The velocity of the hand this frame
+	*/
+	void GetRightHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity);
+	
+	/**
+	* Calculate the UE equivalent orientation and position from a SteamVR PoseData matrix 
+	* @param PoseData - The pose data returned by SteamVR
+	* @return OutPosition - Translation from the pose data
+	* @return OutOrientation - Orientation from the pose data
+	*/
+	void GetUETransform(InputPoseActionData_t PoseData, FVector& OutPosition, FRotator& OutOrientation);
+
+	/** Retrieve skeletal tracking level for all controllers */
+	void GetControllerFidelity();
+
 #if WITH_EDITOR
 	/** Have the action manifest regenerated. Used by the plugin Editor UI */
 	void RegenerateActionManifest();
@@ -213,10 +242,16 @@ public:
 	FString EditorAppKey;
 
 	/** Whether or not skeletal input is supported and present in the controller in the player's left hand  */
-	bool bIsSkeletalControllerLeftPresent = false;
+	bool bIsSkeletalControllerLeftPresent;
 
 	/** Whether or not skeletal input is supported and present in the controller in the player's right hand  */
-	bool bIsSkeletalControllerRightPresent = false;
+	bool bIsSkeletalControllerRightPresent;
+
+	/** The skeletal tracking level for the controller in the player's left hand  */
+	EVRSkeletalTrackingLevel LeftControllerFidelity;
+
+	/** The skeletal tracking level for the controller in the player's right hand  */
+	EVRSkeletalTrackingLevel RightControllerFidelity;
 
 private:
 #if WITH_EDITOR

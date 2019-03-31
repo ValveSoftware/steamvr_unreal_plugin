@@ -36,30 +36,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRSkeletonDefinition.h"
 #include "AnimNode_SteamVRInputAnimPose.generated.h"
 
-/** Valid range of motion for a skeletal animation */
-UENUM(BlueprintType)
-enum class EMotionRange : uint8
-{
-	VR_WithoutController 	UMETA(DisplayName = "Without Controller"),
-	VR_WithController 		UMETA(DisplayName = "With Controller")
-};
-
-/** Valid values for hands thats used for the Skeletal Input System calls */
-UENUM(BlueprintType)
-enum class EHand : uint8
-{
-	VR_LeftHand 	UMETA(DisplayName = "Left Hand"),
-	VR_RightHand 	UMETA(DisplayName = "Right Hand")
-};
-
-/** Types of known skeletons that this animation node can handle */
-UENUM(BlueprintType)
-enum class EHandSkeleton : uint8
-{
-	VR_SteamVRHandSkeleton 	UMETA(DisplayName = "SteamVR Hand Skeleton"),
-	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton")
-};
-
 /**
 * Custom animation node to retrieve poses from the Skeletal Input System
 */

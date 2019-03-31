@@ -125,6 +125,62 @@ void USteamVRInputDeviceFunctionLibrary::GetCurlsAndSplaysState(bool& LeftHandSt
 	}
 }
 
+void USteamVRInputDeviceFunctionLibrary::GetSkeletalState(bool& LeftHandState, bool& RightHandState)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		LeftHandState = SteamVRInputDevice->bIsSkeletalControllerLeftPresent;
+		RightHandState = SteamVRInputDevice->bIsSkeletalControllerRightPresent;
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetControllerFidelity(EControllerFidelity& LeftControllerFidelity, EControllerFidelity& RightControllerFidelity)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		// Update the skeletal tracking level from SteamVR
+		SteamVRInputDevice->GetControllerFidelity();
+
+		// Return the left controller fidelity
+		switch (SteamVRInputDevice->LeftControllerFidelity)
+		{
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Full:
+			LeftControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Full;
+			break;
+
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Partial:
+			LeftControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Partial;
+			break;
+
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Estimated:
+			// falls through
+		default:
+			LeftControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Estimated;
+			break;
+		}
+
+		// Return the right controller fidelity
+		switch (SteamVRInputDevice->RightControllerFidelity)
+		{
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Full:
+			RightControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Full;
+			break;
+
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Partial:
+			RightControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Partial;
+			break;
+
+		case EVRSkeletalTrackingLevel::VRSkeletalTracking_Estimated:
+			// falls through
+		default:
+			RightControllerFidelity = EControllerFidelity::VR_ControllerFidelity_Estimated;
+			break;
+		}
+	}
+}
+
 void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
@@ -230,6 +286,24 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		RightHand.Aux_Pinky = OutPose[30];
 
 		RightHand.Bone_Count = OutPose[31];
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetLeftHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->GetLeftHandPoseData(Position, Orientation, AngularVelocity, Velocity);
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetRightHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->GetRightHandPoseData(Position, Orientation, AngularVelocity, Velocity);
 	}
 }
 

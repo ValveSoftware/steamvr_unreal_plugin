@@ -130,6 +130,39 @@ enum class ESteamVRHand : uint8
 	VR_Right	UMETA(DisplayName = "Right")
 };
 
+/** Valid range of motion for a skeletal animation */
+UENUM(BlueprintType)
+enum class EMotionRange : uint8
+{
+	VR_WithoutController 	UMETA(DisplayName = "Without Controller"),
+	VR_WithController 		UMETA(DisplayName = "With Controller")
+};
+
+/** Valid values for hands thats used for the Skeletal Input System calls */
+UENUM(BlueprintType)
+enum class EHand : uint8
+{
+	VR_LeftHand 	UMETA(DisplayName = "Left Hand"),
+	VR_RightHand 	UMETA(DisplayName = "Right Hand")
+};
+
+/** Types of known skeletons that this animation node can handle */
+UENUM(BlueprintType)
+enum class EHandSkeleton : uint8
+{
+	VR_SteamVRHandSkeleton 	UMETA(DisplayName = "SteamVR Hand Skeleton"),
+	VR_UE4HandSkeleton 		UMETA(DisplayName = "UE4 Hand Skeleton")
+};
+
+/** Skeletal Tracking Level of a controller */
+UENUM(BlueprintType)
+enum class EControllerFidelity : uint8
+{
+	VR_ControllerFidelity_Estimated 	UMETA(DisplayName = "Controller Fidelity Estimated"),
+	VR_ControllerFidelity_Full 			UMETA(DisplayName = "Controller Fidelity Full"),
+	VR_ControllerFidelity_Partial 		UMETA(DisplayName = "Controller Fidelity Partial")
+};
+
 /*
  * SteamVR Input Extended Functions
  * Functions and properties defined here are safe for developer use
@@ -164,6 +197,22 @@ public:
 	static void GetCurlsAndSplaysState(bool& LeftHandState, bool& RightHandState);
 
 	/**
+	* Check Whether or not controllers attached to either hand have Skeletal Input support
+	* @return LeftHandState - Whether or not the controller attached to the player's left hand have skeletal input support
+	* @return RightHandState -  Whether or not the controller attached to the player's right hand have skeletal input support
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetSkeletalState(bool& LeftHandState, bool& RightHandState);
+
+	/** 
+	* Retrieve skeletal tracking level for all controllers 
+	* @return LeftControllerFidelity - The skeletal tracking level of the left controller
+	* @return RightControllerFidelity -  The skeletal tracking level of the right controller
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetControllerFidelity(EControllerFidelity& LeftControllerFidelity, EControllerFidelity& RightControllerFidelity);
+
+	/**
 	* Tell SteamVR Whether or not to retrieve Curls and Splay values per frame
 	* @param NewLeftHandState - Whether or not curls and splay values will be retrieved for the left hand
 	* @param NewRightHandState -  Whether or not curls and splay values will be retrieved for the right hand
@@ -181,6 +230,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController=false);
 	
+	/**
+	* Retrieve the left hand pose information - position, orientation and velocities
+	* @return Position - Translation from the pose data matrix in UE coordinates
+	* @return Orientation - Orientation derived from the pose data matrix in UE coordinates
+	* @return AngularVelocity - The angular velocity of the hand this frame
+	* @return Velocity - The velocity of the hand this frame
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetLeftHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity);
+
+	/**
+	* Retrieve the right hand pose information - position, orientation and velocities
+	* @return Position - Translation from the pose data matrix in UE coordinates
+	* @return Orientation - Orientation derived from the pose data matrix in UE coordinates
+	* @return AngularVelocity - The angular velocity of the hand this frame
+	* @return Velocity - The velocity of the hand this frame
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetRightHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity);
+
 	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
 	* @param SteamBoneTransform - The SteamVR Bone Transform value to get the UE coordinates for

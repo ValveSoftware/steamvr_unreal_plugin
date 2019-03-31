@@ -668,7 +668,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
 
-	if (VRInput() != nullptr && VRCompositor())
+	if (VRInput() != nullptr && VRCompositor() != nullptr)
 	{
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
@@ -716,6 +716,120 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 	}
 
 	return TrackingStatus;
+}
+
+void FSteamVRInputDevice::GetControllerFidelity()
+{
+	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
+	{
+		InputPoseActionData_t PoseData = {};
+		EVRInputError InputError = VRInputError_NoData;
+
+		InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected)
+		{
+			VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &LeftControllerFidelity);
+			bIsSkeletalControllerLeftPresent = (LeftControllerFidelity >= VRSkeletalTracking_Partial);
+		}
+		else
+		{
+			bIsSkeletalControllerLeftPresent = false;
+			LeftControllerFidelity = EVRSkeletalTrackingLevel::VRSkeletalTracking_Estimated;
+		}
+
+		InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected)
+		{
+			VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleRight, &RightControllerFidelity);
+			bIsSkeletalControllerRightPresent = (RightControllerFidelity >= VRSkeletalTracking_Partial);
+		} 
+		else
+		{
+			bIsSkeletalControllerRightPresent = false;
+			RightControllerFidelity = EVRSkeletalTrackingLevel::VRSkeletalTracking_Estimated;
+		}
+	}
+}
+
+void FSteamVRInputDevice::GetLeftHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity)
+{
+	InputPoseActionData_t PoseData = {};
+	EVRInputError InputError = VRInputError_NoData;
+
+	if (bIsSkeletalControllerRightPresent && VRInput() != nullptr)
+	{
+		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected && InputError == VRInputError_None)
+		{
+			GetUETransform(PoseData, Position, Orientation);
+			AngularVelocity = FVector(
+				PoseData.pose.vAngularVelocity.v[2],
+				-PoseData.pose.vAngularVelocity.v[0],
+				PoseData.pose.vAngularVelocity.v[1]
+			);
+			Velocity = FVector(
+				PoseData.pose.vVelocity.v[2],
+				-PoseData.pose.vVelocity.v[0],
+				PoseData.pose.vVelocity.v[1]
+			);
+		}
+	}
+}
+
+void FSteamVRInputDevice::GetRightHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity)
+{
+	InputPoseActionData_t PoseData = {};
+	EVRInputError InputError = VRInputError_NoData;
+
+	if (bIsSkeletalControllerRightPresent && VRInput() != nullptr)
+	{
+		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected && InputError == VRInputError_None)
+		{
+			GetUETransform(PoseData, Position, Orientation);
+			AngularVelocity = FVector(
+										PoseData.pose.vAngularVelocity.v[2],
+										-PoseData.pose.vAngularVelocity.v[0],
+										PoseData.pose.vAngularVelocity.v[1]
+									 );
+			Velocity = FVector(
+								PoseData.pose.vVelocity.v[2],
+								-PoseData.pose.vVelocity.v[0],
+								PoseData.pose.vVelocity.v[1]
+								);
+		}
+	}
+}
+
+void FSteamVRInputDevice::GetUETransform(InputPoseActionData_t PoseData, FVector& OutPosition, FRotator& OutOrientation)
+{
+	// Get SteamVR Transform Matrix for this skeleton
+	HmdMatrix34_t Matrix = PoseData.pose.mDeviceToAbsoluteTracking;
+
+	// Transform SteamVR Pose to Unreal Pose
+	FMatrix Pose = FMatrix(
+		FPlane(Matrix.m[0][0], Matrix.m[1][0], Matrix.m[2][0], 0.0f),
+		FPlane(Matrix.m[0][1], Matrix.m[1][1], Matrix.m[2][1], 0.0f),
+		FPlane(Matrix.m[0][2], Matrix.m[1][2], Matrix.m[2][2], 0.0f),
+		FPlane(Matrix.m[0][3], Matrix.m[1][3], Matrix.m[2][3], 1.0f)
+	);
+
+
+	// Transform SteamVR Rotation Quaternion to a UE FRotator
+	FQuat OrientationQuat;
+	FQuat Orientation(Pose);
+	OrientationQuat.X = -Orientation.Z;
+	OrientationQuat.Y = Orientation.X;
+	OrientationQuat.Z = Orientation.Y;
+	OrientationQuat.W = -Orientation.W;
+
+
+	FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters);
+	OutPosition = Position;
+
+	//OutOrientation = BaseOrientation.Inverse() * OutOrientation;
+	OutOrientation.Normalize();
+	OutOrientation = OrientationQuat.Rotator();			
 }
 
 void FSteamVRInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value)
