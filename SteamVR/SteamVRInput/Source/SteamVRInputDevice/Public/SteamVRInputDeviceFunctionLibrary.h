@@ -221,6 +221,20 @@ public:
 	static void SetCurlsAndSplaysState(bool NewLeftHandState, bool NewRightHandState);
 
 	/**
+	* Check whether we are using a skeleton pose or the raw controller pose for the orientation and position of the motion controller
+	* @param bUseSkeletonPose - Whether or not we are using the skeleton pose instead of the controller raw pose
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetPoseSource(bool& bUsingSkeletonPose);
+
+	/**
+	* Set whether to use skeleton pose or the raw controller pose for the orientation and position of the motion controller
+	* @param bUseSkeletonPose - Whether or not to use the skeleton pose instead of the controller raw pose
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void SetPoseSource(bool bUseSkeletonPose);
+
+	/**
 	* Retrieve the live skeletal input bone values from SteamVR
 	* @return LeftHand - Per bone transform values for the left hand skeleton
 	* @return RightHand - Per bone transform values for the right hand skeleton

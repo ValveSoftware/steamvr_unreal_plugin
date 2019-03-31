@@ -588,18 +588,36 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 
 bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
 {
-	if (VRInput() != nullptr && VRCompositor())
+	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
 	{
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
 
+		VRActionHandle_t LeftActionHandle = bUseSkeletonPose ? VRSkeletalHandleLeft : VRControllerHandleLeft;
+		VRActionHandle_t RightActionHandle = bUseSkeletonPose ? VRSkeletalHandleRight : VRControllerHandleRight;
+
 		switch (DeviceHand)
 		{
 		case EControllerHand::Left:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
+			{
+				InputError = VRInput()->GetPoseActionData(LeftActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				return true;
+			}
 			break;
 		case EControllerHand::Right:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			
+			if (RightActionHandle != vr::k_ulInvalidActionHandle)
+			{
+				InputError = VRInput()->GetPoseActionData(RightActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				return true;
+			}
 			break;
 		case EControllerHand::Special_1:
 			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);

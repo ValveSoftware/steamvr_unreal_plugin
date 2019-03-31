@@ -242,10 +242,13 @@ public:
 	FString EditorAppKey;
 
 	/** Whether or not skeletal input is supported and present in the controller in the player's left hand  */
-	bool bIsSkeletalControllerLeftPresent;
+	bool bIsSkeletalControllerLeftPresent = false;
 
 	/** Whether or not skeletal input is supported and present in the controller in the player's right hand  */
-	bool bIsSkeletalControllerRightPresent;
+	bool bIsSkeletalControllerRightPresent = false;
+
+	/** Whether to use the Skeleton Pose for the Orientation and Position of the motion controller  */
+	bool bUseSkeletonPose = false;
 
 	/** The skeletal tracking level for the controller in the player's left hand  */
 	EVRSkeletalTrackingLevel LeftControllerFidelity;
