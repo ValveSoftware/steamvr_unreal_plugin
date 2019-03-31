@@ -51,4 +51,5 @@ public:
 	TSharedPtr<FUICommandInfo> JsonControllerBindings;
 	TSharedPtr<FUICommandInfo> ReloadActionManifest;
 	TSharedPtr<FUICommandInfo> LaunchBindingsURL;
+	TSharedPtr<FUICommandInfo> AddSampleInputs;
 };

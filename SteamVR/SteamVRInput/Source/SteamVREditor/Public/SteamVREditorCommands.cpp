@@ -40,6 +40,7 @@ void FSteamVREditorCommands::RegisterCommands()
 	UI_COMMAND(JsonControllerBindings, "Regenerate Controller Bindings", "Regenerate Controller Bindings", EUserInterfaceActionType::Button, FInputGesture());
 	UI_COMMAND(ReloadActionManifest, "Reload Action Manifest", "Reload Action Manifest", EUserInterfaceActionType::Button, FInputGesture());
 	UI_COMMAND(LaunchBindingsURL, "Launch SteamVR Bindings Dashboard", "Launch SteamVR Bindings Dashboard", EUserInterfaceActionType::Button, FInputGesture());
+	UI_COMMAND(AddSampleInputs, "Add Sample Inputs", "Add Sample Inputs", EUserInterfaceActionType::Button, FInputGesture());
 }
 
 #undef LOCTEXT_NAMESPACE
