@@ -61,16 +61,38 @@ public:
 	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
 	// End of IMotionController Interface
 
-	/** The SteamVR Sytem Handler, will be valid if there's an active SteamVR session */
-	IVRSystem* SteamVRSystem = nullptr;
-
 	/** Initialize the SteamVR System. Will cause a reconnect if one is already active  */
 	void InitSteamVRSystem();
 
-	/** Wether or not Curls and Splay values for the LEFT HAND are fed to the game every frame */
+	/**
+	* Retrieve the skeletal input from SteamVR
+	* @param bLeftHand - Whether or not retrieve values for the Left Hand instead of the Right Hand
+	* @param bMirror - Will mirror the pose read from SteamVR to fit the skeleton of the opposite hand
+	* @param MotionRange - Whether to retrieve skeletal anim values with or without controllers
+	* @param OutBoneTransform - The transform for each bone as defined in the SteamVR Skeleton
+	* @param OutBoneTransformCount - The number of bones in the SteamVR Skeleton as reported by the SteamVR Input system
+	* @return Whether or not we successfully retrieved the transform values
+	*/
+	bool GetSkeletalData(bool bLeftHand, bool bMirror, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
+
+#if WITH_EDITOR
+	/** Have the action manifest regenerated. Used by the plugin Editor UI */
+	void RegenerateActionManifest();
+
+	/** Have the controller bindings regenerated. Used by the plugin Editor UI  */
+	void RegenerateControllerBindings();
+
+	/** Reload the action manifest to the SteamVR system. Use if you changed the action manifest manually */
+	void ReloadActionManifest();
+#endif
+
+	/** The SteamVR System Handler, will be valid if there's an active SteamVR session */
+	IVRSystem* SteamVRSystem = nullptr;
+
+	/** Whether or not Curls and Splay values for the LEFT HAND are fed to the game every frame */
 	bool bCurlsAndSplaysEnabled_L = true;
 
-	/** Wether or not Curls and Splay values for the RIGHT HAND are fed to the game every frame */
+	/** Whether or not Curls and Splay values for the RIGHT HAND are fed to the game every frame */
 	bool bCurlsAndSplaysEnabled_R = true;
 
 	/** @deprecated Number of controllers that are currently active in a session */
@@ -109,7 +131,7 @@ public:
 		float ThumbIndexSplayAnalog;	// Float value of the thumb-index splay
 		float IndexMiddleSplayAnalog;	// Float value of the index-middle splay
 		float MiddleRingSplayAnalog;	// Float value of the middle-ring splay
-		float RingPinkySplayAnalog;	// Float value of the ring-pinky splay
+		float RingPinkySplayAnalog;		// Float value of the ring-pinky splay
 	};
 
 	/** Current input values of the active player controllers  */
@@ -124,7 +146,7 @@ public:
 	/** The handle to the action set that will be used in generating the Action Manifest and Controller Bindings  */
 	VRActionSetHandle_t MainActionSet;
 
-	/** The raw pose handle forthe left controller  */
+	/** The raw pose handle for the left controller  */
 	VRActionHandle_t VRControllerHandleLeft;
 
 	/** The raw pose handle for the right controller  */
@@ -166,7 +188,7 @@ public:
 	/** Current skeletal summary input values of the right hand  */
 	VRSkeletalSummaryData_t VRSkeletalSummaryDataRight;
 
-	/** The last input error that was encountered. Used for preventing spamming hte output log  */
+	/** The last input error that was encountered. Used for preventing spamming the output log  */
 	EVRInputError LastInputError = VRInputError_None;
 
 	/** Delay that will be applied for buttons  */
@@ -190,58 +212,14 @@ public:
 	/** The unique app key used by SteamVR to distinguish an Editor Session  */
 	FString EditorAppKey;
 
-	/** Wether or not skeletal input is supported and present in the controller in the player's left hand  */
+	/** Whether or not skeletal input is supported and present in the controller in the player's left hand  */
 	bool bIsSkeletalControllerLeftPresent = false;
 
-	/** Wether or not skeletal input is supported and present in the controller in the player's right hand  */
+	/** Whether or not skeletal input is supported and present in the controller in the player's right hand  */
 	bool bIsSkeletalControllerRightPresent = false;
-	/**
-	* Retrieve the skeletal input from SteamVR
-	* @param bLeftHand - Wehter or not retrieve values for the Left Hand instead of the Right Hand
-	* @param MotionRange - Wether to retrieve skeletal anim values with or without controllers
-	* @param OutBoneTransform - The transform for each bone as defined in the SteamVR Skeleton
-	* @param OutBoneTransformCount - The number of bones in the SteamVR Skeleton as reported by the SteamVR Input system
-	* @return Wether or not we sucessfully retrieved the transform values
-	*/
-	bool GetSkeletalData(bool bLeftHand, EVRSkeletalMotionRange MotionRange, FTransform* OutBoneTransform, int32 OutBoneTransformCount);
-
-#if WITH_EDITOR
-	/** Have the action manifest regenerated. Used by the plugin Eidtor UI */
-	void RegenerateActionManifest();
-
-	/** Have the controller bindings regenerated. Used by the plugin Eidtor UI  */
-	void RegenerateControllerBindings();
-
-	/** Reload the action manifest to the SteamVR system. Use if you changed the action manifest manually */
-	void ReloadActionManifest();
-#endif
 
 private:
-	/** Provides a user-friendly version of the results of a SteamVR Input call in English to the Output Log */
-	void GetInputError(EVRInputError InputError, FString InputAction);
-
-	/** Our Message handler to direct input from the SteamVRInput System to the game runtime */
-	TSharedRef<FGenericApplicationMessageHandler> MessageHandler;
-
-	/** Currently active SteamVRInput Error. Used to comapare with the last error to avoid spamming the output log. */
-	EVRInputError SteamVRError = VRInputError_None;
-
-	/** Previous SteamVRInput Error. Used to compare against the current SteamVR Error to avoid spamming logs */
-	EVRInputError PrevSteamVRError = VRInputError_None;
-
-	/** @deprecated Initialize the SteamVR device Ids to UE Controller Id mappings */
-	void InitControllerMappings();
-
-	/** Setup the keys used by the Skeletal Input System  */
-	void InitSkeletalControllerKeys();
-
-	/** Grab the inputs from SteamVR and process them so the active game can consume the actions as needed  */
-	void SendSkeletalInputEvents();
-
 #if WITH_EDITOR
-	/** Delegate called when an action mapping has been modified in the editor  */
-	FDelegateHandle ActionMappingsChangedHandle;
-
 	/** 
 	 * Generate the controller bindings for SteamVR supported controllers
 	 * @param BindingsPath - Where the controller input profile json files will be generated (by default, this is Config\SteamVRBindings)
@@ -259,14 +237,29 @@ private:
 	* @param JsonValuesArray - The generated mappings in json format
 	*/
 	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray);
+
+	/** Delegate called when an action mapping has been modified in the editor  */
+	FDelegateHandle ActionMappingsChangedHandle;
 #endif
+
+	/** Provides a user-friendly version of the results of a SteamVR Input call in English to the Output Log */
+	void GetInputError(EVRInputError InputError, FString InputAction);
+
+	/** @deprecated Initialize the SteamVR device Ids to UE Controller Id mappings */
+	void InitControllerMappings();
+
+	/** Setup the keys used by the Skeletal Input System  */
+	void InitSkeletalControllerKeys();
+
+	/** Grab the inputs from SteamVR and process them so the active game can consume the actions as needed  */
+	void SendSkeletalInputEvents();
 
 	/**
 	* Create the action manifest used by the SteamVR Input System
-	* @param GenerateActions - Wether to generate main actions from the project input settings
-	* @param GenerateBindings - Wether to generate the controller bindings for all supported SteamVR controllers
-	* @param RegisterApp - Wether to register currently running application as an Editor session
-	* @param DeleteBindings - Wether to overwrite current controller bindings (if any)
+	* @param GenerateActions - Whether to generate main actions from the project input settings
+	* @param GenerateBindings - Whether to generate the controller bindings for all supported SteamVR controllers
+	* @param RegisterApp - Whether to register currently running application as an Editor session
+	* @param DeleteBindings - Whether to overwrite current controller bindings (if any)
 	*/
 	void GenerateActionManifest(bool GenerateActions=true, bool GenerateBindings=true, bool RegisterApp=true, bool DeleteBindings=false);
 
@@ -276,7 +269,7 @@ private:
 	* @param ProjectName - The name of the project from the project settings' description field
 	* @param OutAppKey - The generated unique appkey for this application
 	* @param OutAppManifestPath - Where the application manifest will be generated to. Default is under the project's Config folder
-	* @return Wether or not the application manifest was generated succesfully and the running Editor session has been properly registered to SteamVR
+	* @return Whether or not the application manifest was generated successfully and the running Editor session has been properly registered to SteamVR
 	*/
 	bool GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath);
 
@@ -284,7 +277,7 @@ private:
 	* Utility function that builds a json object from a string of fields. Input strings should be paired (e.g fieldname1, fieldvalue1, fieldname2, fieldvalue2 ...)
 	* @param StringFields - The paired strings to generate a json object for (e.g fieldname1, fieldvalue1, fieldname2, fieldvalue2 ...)
 	* @param OutJsonObject - The resulting json object
-	* @return Wether or not we generated a valid json object
+	* @return Whether or not we generated a valid json object
 	*/
 	bool BuildJsonObject(TArray<FString> StringFields, TSharedRef<FJsonObject> OutJsonObject);
 
@@ -302,7 +295,7 @@ private:
 	*/
 	void ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs);
 
-	/** Remove any invalid ction to Axis mappings so they won#t be generated by the plugin */
+	/** Remove any invalid action to Axis mappings so they won#t be generated by the plugin */
 	void SanitizeActions();
 
 	/**
@@ -315,18 +308,13 @@ private:
 	* Get the Skeletal Input Handle for a give controller input path
 	* @param ActionPath - The SteamVR user path for the controller hand we want the skeletal handle for
 	* @param SkeletalHandle - Will hold the skeletal handle if found. k_InvalidHandleValue if an error is encountered
-	* @return Wether or not wether the Skeletal Handle was succesfully read
-	*/	bool SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle);
-
-	/** Input Axis (Analog/Float) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
-	TArray<FInputAxisKeyMapping> KeyAxisMappings;
-
-	/** Input Key (Digital/Boolean) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
-	TArray<FInputActionKeyMapping> KeyMappings;
+	* @return Whether or not Whether the Skeletal Handle was successfully read
+	*/	
+	bool SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle);
 
 	/**
 	* Look for any Key Mappings defined in the project's DefaultInput.ini 
-	* @param InputSettings - The engine's inputsettings
+	* @param InputSettings - The engine's input settings
 	* @param ActionName - The name of the action where we want to find controller inputs for
 	* @param OutMappings - Will hold the Action to controller axis mapping result of the search
 	*/
@@ -334,7 +322,7 @@ private:
 
 	/**
 	* Look for any Key Mappings defined in the project's DefaultInput.ini 
-	* @param InputSettings - The engine's inputsettings
+	* @param InputSettings - The engine's input settings
 	* @param ActionName - The name of the action where we want to find controller inputs for
 	* @param OutMappings - Will hold the Action to controller key mapping result of the search
 	*/
@@ -354,4 +342,26 @@ private:
 	* @return A copy of the processed text
 	*/
 	FString SanitizeString(FString& InOutString);
+
+	/**
+	* Transform the bone transforms for one hand to fit the skeleton of the opposite hand
+	* @param BoneTransformsLS - The bone transforms to mirror, in local (parent) space
+	* @param BoneTransformCount - The number of elements in the BoneTransformsLS array.  Must equal the number of bones in the SteamVR skeleton
+	*/
+	void MirrorSteamVRSkeleton(VRBoneTransform_t* BoneTransformsLS, int32 BoneTransformCount) const;
+
+	/** Our Message handler to direct input from the SteamVRInput System to the game runtime */
+	TSharedRef<FGenericApplicationMessageHandler> MessageHandler;
+
+	/** Currently active SteamVRInput Error. Used to compare with the last error to avoid spamming the output log. */
+	EVRInputError SteamVRError = VRInputError_None;
+
+	/** Previous SteamVRInput Error. Used to compare against the current SteamVR Error to avoid spamming logs */
+	EVRInputError PrevSteamVRError = VRInputError_None;
+
+	/** Input Axis (Analog/Float) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
+	TArray<FInputAxisKeyMapping> KeyAxisMappings;
+
+	/** Input Key (Digital/Boolean) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
+	TArray<FInputActionKeyMapping> KeyMappings;
 };

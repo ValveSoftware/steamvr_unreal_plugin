@@ -80,7 +80,11 @@ struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRInputAnimPose : public FAnimNode_
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
 	EHandSkeleton HandSkeleton;
 
-	/** The UE4 euivalent of the SteamVR Transform values per bone */
+	/** Should the pose be mirrored so it can be applied to the opposite hand */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = ( AlwaysAsPin ))
+	bool Mirror;
+
+	/** The UE4 equivalent of the SteamVR Transform values per bone */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
 

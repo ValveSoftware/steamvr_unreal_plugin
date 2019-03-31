@@ -51,9 +51,9 @@ static const int32 kUE4BoneToSteamVRBone[] = {
 	ESteamVRBone_RingFinger1,	// EUE4HandBone_Ring_01
 	ESteamVRBone_RingFinger2,	// EUE4HandBone_Ring_02
 	ESteamVRBone_RingFinger3,	// EUE4HandBone_Ring_03
-	ESteamVRBone_Thumb1,		// EUE4HandBone_Thumb_01
-	ESteamVRBone_Thumb2,		// EUE4HandBone_Thumb_02
-	ESteamVRBone_Thumb3			// EUE4HandBone_Thumb_03
+	ESteamVRBone_Thumb0,		// EUE4HandBone_Thumb_01
+	ESteamVRBone_Thumb1,		// EUE4HandBone_Thumb_02
+	ESteamVRBone_Thumb2			// EUE4HandBone_Thumb_03
 };
 static_assert( sizeof(kUE4BoneToSteamVRBone) / sizeof(kUE4BoneToSteamVRBone[0]) == EUE4HandBone_Count, "Mapping from UE4 hand bones to their corresponding SteamVR hand bones is the wrong size" );
 
@@ -109,7 +109,7 @@ void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
 		EVRSkeletalMotionRange SteamVRMotionRange = (MotionRange == EMotionRange::VR_WithController) ? VRSkeletalMotionRange_WithController : VRSkeletalMotionRange_WithoutController;
 		bool bIsLeftHand = (Hand == EHand::VR_LeftHand);
 		
-		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, SteamVRMotionRange, BoneTransforms, STEAMVR_SKELETON_BONE_COUNT))
+		if (SteamVRInputDevice->GetSkeletalData(bIsLeftHand, Mirror, SteamVRMotionRange, BoneTransforms, STEAMVR_SKELETON_BONE_COUNT))
 		{
 			// If the target hand skeleton is the SteamVR skeleton, then we can just copy the transforms directly into the pose
 			if (HandSkeleton == EHandSkeleton::VR_SteamVRHandSkeleton)
@@ -204,8 +204,10 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 		FVector WristForwardLS_UE4 = WristTransform_UE4.GetRotation().UnrotateVector(ToKnuckleAverageMS_UE4);
 
 		// Get the axis that most closely matches the direction the palm of the hand is facing
-		FVector WristSideDirectionLS_SteamVR = ( Hand == EHand::VR_RightHand ) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
-		FVector WristSideDirectionLS_UE4 = ( Hand == EHand::VR_RightHand ) ? FVector(0.f, 1.f, 0.f) : FVector(0.f, 1.f, 0.f);
+		bool bIsRightHanded = ( Hand == EHand::VR_RightHand && !Mirror ) || ( Hand == EHand::VR_LeftHand && Mirror );
+
+		FVector WristSideDirectionLS_SteamVR = ( bIsRightHanded ) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
+		FVector WristSideDirectionLS_UE4 = ( bIsRightHanded ) ? FVector(0.f, 1.f, 0.f) : FVector(0.f, 1.f, 0.f);
 
 		// Take the cross product with the forward vector for each hand to ensure that the side vector is perpendicular to the forward vector
 		WristSideDirectionLS_SteamVR = FVector::CrossProduct(WristForwardLS_SteamVR, WristSideDirectionLS_SteamVR);
