@@ -1196,7 +1196,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Create Controller Binding Object for this binding file
 			TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
 			TArray<FString> ControllerStringFields = { "controller_type", *SupportedController.Name.ToString(),
-											 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
+											 TEXT("binding_url"), *(SupportedController.Name.ToString() + TEXT(".json")) //*FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
 			};
 			BuildJsonObject(ControllerStringFields, ControllerBindingObject);
 			DefaultBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
