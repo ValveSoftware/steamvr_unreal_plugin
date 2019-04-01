@@ -48,6 +48,40 @@ class FSteamVRInputDeviceModule : public ISteamVRInputDeviceModule
 void FSteamVRInputDeviceModule::StartupModule()
 {
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+	TArray<IInputDeviceModule*> PluginImplementations = IModularFeatures::Get().GetModularFeatureImplementations<IInputDeviceModule>(IInputDeviceModule::GetModularFeatureName());
+	UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Number of Input Devices: %i"), PluginImplementations.Num());
+
+
+	if (IModularFeatures::Get().IsModularFeatureAvailable(FName("SteamVRController")))
+	{
+		IModularFeatures::Get().GetModularFeature<IInputDeviceModule>(FName("SteamVRController")).ShutdownModule();
+	}
+	
+
+	//TArray<IInputDeviceModule*> PluginImplementations1 = IModularFeatures::Get().GetModularFeatureImplementations<IInputDeviceModule>(IInputDeviceModule::GetModularFeatureName());
+	//for (auto InputPluginIt = PluginImplementations1.CreateIterator(); InputPluginIt; ++InputPluginIt)
+	//{
+	//	(*InputPluginIt)->~IModuleInterface();
+	//	UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Asked SteamVRController to gracefully shutdown"));
+	//}
+
+	//IModularFeatures::Get().GetModularFeatureImplementation<IInputDeviceModule>(FName("SteamVRController")).ShutdownModule();
+
+	// Unload UE4 Stock Engine SteamVRController Module (if present)
+	FModuleManager& ModuleManager = FModuleManager::Get();
+	ModuleManager.AbandonModule(FName("SteamVRController"));
+	if (ModuleManager.UnloadModule(FName("SteamVRController")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Unloaded UE4 SteamVR Controller"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[SteamVR Input] Unable to unload UE4 SteamVR Controller"));
+	}
+	
+	TArray<IInputDeviceModule*> PluginImplementations2 = IModularFeatures::Get().GetModularFeatureImplementations<IInputDeviceModule>(IInputDeviceModule::GetModularFeatureName());
+	UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Number of Input Devices: %i"), PluginImplementations2.Num());
 }
 
 void FSteamVRInputDeviceModule::ShutdownModule()

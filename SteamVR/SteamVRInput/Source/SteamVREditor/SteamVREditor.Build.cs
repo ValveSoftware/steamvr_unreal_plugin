@@ -2,9 +2,8 @@ using UnrealBuildTool;
 
 public class SteamVREditor : ModuleRules
 {
-	public SteamVREditor(TargetInfo Target)
-	{
-		
+	public SteamVREditor(ReadOnlyTargetRules Target) : base(Target)
+    {	
 		PublicIncludePaths.AddRange(
 			new string[] {
 				"Public"

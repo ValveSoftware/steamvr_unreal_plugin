@@ -27,7 +27,7 @@ using UnrealBuildTool;
 
 public class OpenVRSDK : ModuleRules
 {
-	public OpenVRSDK(TargetInfo Target)
+	public OpenVRSDK(ReadOnlyTargetRules Target) : base(Target)
     {
 		Type = ModuleType.External;
 		string HeadersPath = Path.Combine(ModuleDirectory, "headers");

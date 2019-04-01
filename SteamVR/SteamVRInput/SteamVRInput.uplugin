@@ -17,7 +17,7 @@
     {
       "Name": "SteamVRInput",
       "Type": "Runtime",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "Default",
       "WhitelistPlatforms": [
         "Win64"
       ]
@@ -25,7 +25,7 @@
     {
       "Name": "SteamVRInputDevice",
       "Type": "Runtime",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "Default",
       "WhitelistPlatforms": [
         "Win64"
       ]
@@ -33,7 +33,7 @@
     {
       "Name": "SteamVREditor",
       "Type": "Editor",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "Default",
       "WhitelistPlatforms": [
         "Win64"
       ]

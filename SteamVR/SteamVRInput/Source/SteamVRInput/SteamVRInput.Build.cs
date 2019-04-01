@@ -3,7 +3,7 @@ using System.IO;
 
 public class SteamVRInput : ModuleRules
 {
-	public SteamVRInput(TargetInfo Target)
+	public SteamVRInput(ReadOnlyTargetRules Target) : base(Target)
     {
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
