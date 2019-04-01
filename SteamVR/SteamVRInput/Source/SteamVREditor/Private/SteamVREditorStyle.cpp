@@ -72,7 +72,12 @@ TSharedRef< FSlateStyleSet > FSteamVREditorStyle::Create()
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("SteamVREditorStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("SteamVRInput")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("SteamVREditor.PluginAction", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("SteamVREditor.PluginAction", new IMAGE_BRUSH(TEXT("Icon_PluginAction"), Icon40x40));
+	Style->Set("SteamVREditor.JsonActionManifest", new IMAGE_BRUSH(TEXT("Icon_regenerate_action_manifest"), Icon16x16));
+	Style->Set("SteamVREditor.JsonControllerBindings", new IMAGE_BRUSH(TEXT("Icon_regenerate_controller_bindings"), Icon16x16));
+	Style->Set("SteamVREditor.ReloadActionManifest", new IMAGE_BRUSH(TEXT("Icon_reload_action_manifest"), Icon16x16));
+	Style->Set("SteamVREditor.LaunchBindingsURL", new IMAGE_BRUSH(TEXT("Icon_launch_bindings_url"), Icon16x16));
+	Style->Set("SteamVREditor.AddSampleInputs", new IMAGE_BRUSH(TEXT("Icon_add_sample_inputs"), Icon16x16));
 
 	return Style;
 }

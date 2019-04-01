@@ -201,12 +201,15 @@ void FSteamVREditorModule::AddMenuExtension(FMenuBuilder& Builder)
 
 void FSteamVREditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
 {
-	//Builder.AddToolBarButton(FSteamVREditorCommands::Get().PluginAction);
+	FSteamVREditorStyle MenuStyle = FSteamVREditorStyle();
+	MenuStyle.Initialize();
+
 	Builder.AddComboButton(
 		FUIAction(FExecuteAction::CreateRaw(this, &FSteamVREditorModule::PluginButtonClicked)),
 		FOnGetContent::CreateRaw(this, &FSteamVREditorModule::FillComboButton, PluginCommands),
 		LOCTEXT("SteamVRInputBtn", "SteamVR Input"),
-		LOCTEXT("SteamVRInputBtnTootlip", "SteamVR Input")
+		LOCTEXT("SteamVRInputBtnTootlip", "SteamVR Input"),
+		FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.PluginAction")
 	);
 }
 
@@ -214,11 +217,11 @@ TSharedRef<SWidget> FSteamVREditorModule::FillComboButton(TSharedPtr<class FUICo
 {
 	FMenuBuilder MenuBuilder(true, Commands);
 
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().ReloadActionManifest);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().AddSampleInputs);
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.JsonActionManifest"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.JsonControllerBindings"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().ReloadActionManifest, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.ReloadActionManifest"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.LaunchBindingsURL"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().AddSampleInputs, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.AddSampleInputs"));
 
 	return MenuBuilder.MakeWidget();
 }

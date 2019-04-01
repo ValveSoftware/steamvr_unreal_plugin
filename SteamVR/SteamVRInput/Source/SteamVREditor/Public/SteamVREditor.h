@@ -65,4 +65,5 @@ private:
 
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> FillComboButton(TSharedPtr<class FUICommandList> Commands);
+
 };
