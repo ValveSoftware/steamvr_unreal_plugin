@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "ISteamVRControllerPlugin.h"
 #include "IInputDeviceModule.h"
 
 STEAMVRINPUT_API class ISteamVRInputDeviceModule : public IInputDeviceModule
@@ -47,4 +48,7 @@ public:
 	{
 		return FModuleManager::Get().IsModuleLoaded("SteamVRInputDevice");
 	}
+
+	/** We'll keep a reference to the engine's SteamVR  Controller so we can request its removal during module shutdown */
+	ISteamVRControllerPlugin* StockController;
 };

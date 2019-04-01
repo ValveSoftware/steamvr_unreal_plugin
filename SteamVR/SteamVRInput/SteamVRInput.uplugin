@@ -38,6 +38,11 @@
         "Win64"
       ]
     }
-  ]
+  ],
+  "Plugins": [
+         {
+             "Name": "SteamVR",
+             "Enabled": true
+         }
+	]
 }
-

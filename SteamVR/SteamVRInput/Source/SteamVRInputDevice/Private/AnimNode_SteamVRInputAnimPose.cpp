@@ -80,21 +80,21 @@ FAnimNode_SteamVRInputAnimPose::FAnimNode_SteamVRInputAnimPose()
 {
 }
 
-void FAnimNode_SteamVRInputAnimPose::Initialize(const FAnimationInitializeContext& Context)
+void FAnimNode_SteamVRInputAnimPose::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 }
 
-void FAnimNode_SteamVRInputAnimPose::CacheBones(const FAnimationCacheBonesContext & Context)
+void FAnimNode_SteamVRInputAnimPose::CacheBones_AnyThread(const FAnimationCacheBonesContext & Context)
 {
 }
 
-void FAnimNode_SteamVRInputAnimPose::Update(const FAnimationUpdateContext & Context)
+void FAnimNode_SteamVRInputAnimPose::Update_AnyThread(const FAnimationUpdateContext & Context)
 {
 	// Grab node inputs
 	EvaluateGraphExposedInputs.Execute(Context);
 }
 
-void FAnimNode_SteamVRInputAnimPose::Evaluate(FPoseContext& Output)
+void FAnimNode_SteamVRInputAnimPose::Evaluate_AnyThread(FPoseContext& Output)
 {
 	Output.ResetToRefPose();
 

@@ -36,41 +36,42 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRSkeletonDefinition.h"
 #include "AnimNode_SteamVRInputAnimPose.generated.h"
 
+
 /**
 * Custom animation node to retrieve poses from the Skeletal Input System
 */
-USTRUCT()
+USTRUCT(BlueprintInternalUseOnly)
 struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRInputAnimPose : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
 
 	/** Range of motion for the skeletal input values */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EMotionRange MotionRange;
+	EMotionRange MotionRange = EMotionRange::VR_WithoutController;
 
 	/** Which hand should the animation node retrieve skeletal input values for */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EHand Hand;
+	EHand Hand = EHand::VR_RightHand;
 
 	/** What kind of skeleton are we dealing with */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EHandSkeleton HandSkeleton;
+	EHandSkeleton HandSkeleton = EHandSkeleton::VR_SteamVRHandSkeleton;
 
 	/** Should the pose be mirrored so it can be applied to the opposite hand */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = ( AlwaysAsPin ))
-	bool Mirror;
+	bool Mirror = false;
 
 	/** The UE4 equivalent of the SteamVR Transform values per bone */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
-	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
+	FSteamVRSkeletonTransform SteamVRSkeletalTransform = {};
 
 public:
 
 	// FAnimNode_Base interface
-	virtual void Initialize(const FAnimationInitializeContext& Context) override;
-	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
-	virtual void Update(const FAnimationUpdateContext & Context) override;
-	virtual void Evaluate(FPoseContext& Output) override;
+	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
+	virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext & Context) override;
+	virtual void Update_AnyThread(const FAnimationUpdateContext & Context) override;
+	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRInputAnimPose();

@@ -45,7 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
 
 /** UE4 Bone definition of the SteamVR Skeleton */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, Category = "SteamVR Input")
 struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 {
 	GENERATED_BODY()
@@ -123,7 +123,7 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 	FTransform Bone_Count;
 };
 
-UENUM(BlueprintType)	
+UENUM(BlueprintType, Category = "SteamVR Input")
 enum class ESteamVRHand : uint8
 {
 	VR_Left		UMETA(DisplayName = "Left"),
@@ -131,7 +131,7 @@ enum class ESteamVRHand : uint8
 };
 
 /** Valid range of motion for a skeletal animation */
-UENUM(BlueprintType)
+UENUM(BlueprintType, Category = "SteamVR Input")
 enum class EMotionRange : uint8
 {
 	VR_WithoutController 	UMETA(DisplayName = "Without Controller"),
@@ -139,7 +139,7 @@ enum class EMotionRange : uint8
 };
 
 /** Valid values for hands thats used for the Skeletal Input System calls */
-UENUM(BlueprintType)
+UENUM(BlueprintType, Category = "SteamVR Input")
 enum class EHand : uint8
 {
 	VR_LeftHand 	UMETA(DisplayName = "Left Hand"),
@@ -147,7 +147,7 @@ enum class EHand : uint8
 };
 
 /** Types of known skeletons that this animation node can handle */
-UENUM(BlueprintType)
+UENUM(BlueprintType, Category = "SteamVR Input")
 enum class EHandSkeleton : uint8
 {
 	VR_SteamVRHandSkeleton 	UMETA(DisplayName = "SteamVR Hand Skeleton"),
@@ -155,7 +155,7 @@ enum class EHandSkeleton : uint8
 };
 
 /** Skeletal Tracking Level of a controller */
-UENUM(BlueprintType)
+UENUM(BlueprintType, Category = "SteamVR Input")
 enum class EControllerFidelity : uint8
 {
 	VR_ControllerFidelity_Estimated 	UMETA(DisplayName = "Controller Fidelity Estimated"),

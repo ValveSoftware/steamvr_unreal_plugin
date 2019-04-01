@@ -57,8 +57,13 @@ public:
 	// End of IInput Device Interface
 
 	// IMotionController Interface
-	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const;
-	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
+	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const FName MotionSource, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const;
+	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const FName MotionSource) const;
+	virtual void EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const;
+	virtual float GetCustomParameterValue(const FName MotionSource, FName ParameterName, bool& bValueFound) const { bValueFound = false;  return 0.f; }
+	virtual FName GetMotionControllerDeviceTypeName() const override;
+	// End IMotionController interface
+
 	// End of IMotionController Interface
 
 	/** Initialize the SteamVR System. Will cause a reconnect if one is already active  */
