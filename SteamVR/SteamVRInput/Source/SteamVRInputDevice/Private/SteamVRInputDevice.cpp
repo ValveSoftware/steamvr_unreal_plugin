@@ -940,10 +940,11 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 	// Create Application Object 
 	TSharedRef<FJsonObject> ApplicationObject = MakeShareable(new FJsonObject());
+	FString AbsoluteManifestPath = *IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath);
 	TArray<FString> AppStringFields = { "app_key",  OutAppKey,
 										"launch_type", "url",
 										"url", "steam://launch/",
-										"action_manifest_path", *IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)
+										"action_manifest_path", AbsoluteManifestPath.Replace(TEXT("/"), TEXT("\\"))
 	};
 	BuildJsonObject(AppStringFields, ApplicationObject);
 
@@ -992,10 +993,6 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
 		
-			// Set Action Manifest
-			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
-		
 			// Load application manifest
 			FString AppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
@@ -1011,6 +1008,10 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			// Set AppKey for this Editor Session
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+
+			// Set Action Manifest
+			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 		}
 	}
 #endif
