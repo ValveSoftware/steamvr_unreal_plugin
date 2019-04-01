@@ -191,6 +191,24 @@ void USteamVRInputDeviceFunctionLibrary::SetCurlsAndSplaysState(bool NewLeftHand
 	}
 }
 
+void USteamVRInputDeviceFunctionLibrary::GetPoseSource(bool& bUsingSkeletonPose)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		bUsingSkeletonPose = SteamVRInputDevice->bUseSkeletonPose;
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::SetPoseSource(bool bUseSkeletonPose)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRInputDevice->bUseSkeletonPose = bUseSkeletonPose;
+	}
+}
+
 void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTransform& LeftHand, FSteamVRSkeletonTransform& RightHand, bool bWithController)
 {
 	FTransform OutPose[STEAMVR_SKELETON_BONE_COUNT];

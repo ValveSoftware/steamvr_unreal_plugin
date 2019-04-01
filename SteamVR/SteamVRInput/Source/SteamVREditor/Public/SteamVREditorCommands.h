@@ -38,7 +38,7 @@ class FSteamVREditorCommands : public TCommands<FSteamVREditorCommands>
 public:
 
 	FSteamVREditorCommands()
-		: TCommands<FSteamVREditorCommands>(TEXT("SteamVREditor"), NSLOCTEXT("Contexts", "SteamVREditor", "SteamVREditor Plugin"), NAME_None, FSteamVREditorStyle::GetStyleSetName())
+		: TCommands<FSteamVREditorCommands>(TEXT("SteamVREditor"), NSLOCTEXT("Contexts", "SteamVREditor", "SteamVREditor Plugin"), NAME_None, TEXT("SteamVREditor.Common.Icon"))
 	{
 	}
 
@@ -51,4 +51,5 @@ public:
 	TSharedPtr<FUICommandInfo> JsonControllerBindings;
 	TSharedPtr<FUICommandInfo> ReloadActionManifest;
 	TSharedPtr<FUICommandInfo> LaunchBindingsURL;
+	TSharedPtr<FUICommandInfo> AddSampleInputs;
 };

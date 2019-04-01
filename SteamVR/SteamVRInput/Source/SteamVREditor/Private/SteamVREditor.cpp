@@ -80,6 +80,12 @@ void FSteamVREditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::LaunchBindingsURL),
 		FCanExecuteAction());
 	
+	// Add Sample Inputs
+	PluginCommands->MapAction(
+		FSteamVREditorCommands::Get().AddSampleInputs,
+		FExecuteAction::CreateRaw(this, &FSteamVREditorModule::AddSampleInputs),
+		FCanExecuteAction());
+
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	
 	{
@@ -129,6 +135,65 @@ void FSteamVREditorModule::LaunchBindingsURL()
 	USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL();
 }
 
+void FSteamVREditorModule::AddSampleInputs()
+{
+	// Get Existing Input Settings
+	auto DefaultInputSettings = GetDefault<UInputSettings>();
+	TArray<FInputAxisKeyMapping> ExistingAxisKeys = DefaultInputSettings->AxisMappings;
+	TArray<FInputActionKeyMapping> ExistingActionKeys = DefaultInputSettings->ActionMappings;
+
+	// Create new Input Settings
+	UInputSettings* InputSettings = GetMutableDefault<UInputSettings>();
+
+	if (InputSettings->IsValidLowLevel())
+	{
+		// Sample analog mapping
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SteamVR Test Analog Mapping")), EKeys::MotionController_Left_TriggerAxis);
+		
+		// Sample digital mapping
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Digital Mapping")), EKeys::MotionController_Left_Trigger);
+
+		// Sample mapping - custom knuckles keys
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Knuckles Mapping")), SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Pinch_Grab);
+
+		// Update the config file
+		InputSettings->SaveKeyMappings();
+		InputSettings->UpdateDefaultConfigFile();
+	}
+}
+
+bool FSteamVREditorModule::AddUniqueAxisMapping(TArray<FInputAxisKeyMapping> ExistingAxisKeys, UInputSettings* InputSettings, FName ActionName, FKey ActionKey)
+{
+	// Create new axis mapping
+	FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(ActionName, ActionKey);
+
+	// Check if this mapping already exists in the project
+	if (ExistingAxisKeys.Find(NewAxisMapping) < 1)
+	{
+		// If none, create a new one
+		InputSettings->AddAxisMapping(NewAxisMapping);
+		return true;
+	}
+	
+return false;
+}
+
+bool FSteamVREditorModule::AddUniqueActionMapping(TArray<FInputActionKeyMapping> ExistingActionKeys, UInputSettings* InputSettings, FName ActionName, FKey ActionKey)
+{
+	// Create new action mapping
+	FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(ActionName, ActionKey);
+
+	// Check if this mapping already exists in the project
+	if (ExistingActionKeys.Find(NewActionMapping) < 1)
+	{
+		// If none, create a new one
+		InputSettings->AddActionMapping(NewActionMapping);
+		return true;
+	}
+
+	return false;
+}
+
 void FSteamVREditorModule::AddMenuExtension(FMenuBuilder& Builder)
 {
 	Builder.AddMenuEntry(FSteamVREditorCommands::Get().PluginAction);
@@ -136,12 +201,15 @@ void FSteamVREditorModule::AddMenuExtension(FMenuBuilder& Builder)
 
 void FSteamVREditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
 {
-	//Builder.AddToolBarButton(FSteamVREditorCommands::Get().PluginAction);
+	FSteamVREditorStyle MenuStyle = FSteamVREditorStyle();
+	MenuStyle.Initialize();
+
 	Builder.AddComboButton(
 		FUIAction(FExecuteAction::CreateRaw(this, &FSteamVREditorModule::PluginButtonClicked)),
 		FOnGetContent::CreateRaw(this, &FSteamVREditorModule::FillComboButton, PluginCommands),
 		LOCTEXT("SteamVRInputBtn", "SteamVR Input"),
-		LOCTEXT("SteamVRInputBtnTootlip", "SteamVR Input")
+		LOCTEXT("SteamVRInputBtnTootlip", "SteamVR Input"),
+		FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.PluginAction")
 	);
 }
 
@@ -149,10 +217,11 @@ TSharedRef<SWidget> FSteamVREditorModule::FillComboButton(TSharedPtr<class FUICo
 {
 	FMenuBuilder MenuBuilder(true, Commands);
 
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().ReloadActionManifest);
-	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL);
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonActionManifest, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.JsonActionManifest"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().JsonControllerBindings, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.JsonControllerBindings"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().ReloadActionManifest, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.ReloadActionManifest"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().LaunchBindingsURL, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.LaunchBindingsURL"));
+	MenuBuilder.AddMenuEntry(FSteamVREditorCommands::Get().AddSampleInputs, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FSteamVREditorStyle::GetStyleSetName(), "SteamVREditor.AddSampleInputs"));
 
 	return MenuBuilder.MakeWidget();
 }
