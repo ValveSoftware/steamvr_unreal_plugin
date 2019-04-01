@@ -1,25 +1,24 @@
 using UnrealBuildTool;
+using System.IO;
 
 public class SteamVREditor : ModuleRules
 {
-	public SteamVREditor(TargetInfo Target)
-	{
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				"Public"
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"Private",
-			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
+	public SteamVREditor(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PublicIncludePaths.AddRange(
+            new string[] {
+                "Public"
+            }
+            );
+
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "Private",
+            }
+            );
+
+        PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
@@ -33,7 +32,6 @@ public class SteamVREditor : ModuleRules
             }
 			);
 			
-		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{

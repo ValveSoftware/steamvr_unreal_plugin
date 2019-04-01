@@ -134,6 +134,8 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 
 	InitSteamVRSystem();
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+
 }
 
 FSteamVRInputDevice::~FSteamVRInputDevice()
@@ -586,7 +588,7 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 	return false;
 }
 
-bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
 {
 	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
 	{
@@ -917,10 +919,11 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 	// Create Application Object 
 	TSharedRef<FJsonObject> ApplicationObject = MakeShareable(new FJsonObject());
+	FString AbsoluteManifestPath = *IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath);
 	TArray<FString> AppStringFields = { "app_key",  OutAppKey,
 										"launch_type", "url",
 										"url", "steam://launch/",
-										"action_manifest_path", *IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)
+										"action_manifest_path", AbsoluteManifestPath.Replace(TEXT("/"), TEXT("\\"))
 	};
 	BuildJsonObject(AppStringFields, ApplicationObject);
 
@@ -968,16 +971,12 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			// Set Action Manifest Path
 			const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
-		
-			// Set Action Manifest
-			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
-		
+			
 			// Load application manifest
 			FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
-		
+
 			// Get the App Process Id
 			uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
 		
@@ -988,6 +987,10 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			// Set AppKey for this Editor Session
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+
+			// Set Action Manifest
+			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 		}
 	}
 #endif
@@ -1172,7 +1175,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Create Controller Binding Object for this binding file
 			TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
 			TArray<FString> ControllerStringFields = { "controller_type", *SupportedController.Name.ToString(),
-											 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
+											 TEXT("binding_url"), *(SupportedController.Name.ToString() + TEXT(".json")) //*FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
 			};
 			BuildJsonObject(ControllerStringFields, ControllerBindingObject);
 			DefaultBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
@@ -1417,6 +1420,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
+
 	ControllerTypes.Empty();
 	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Knuckles Controllers")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers")));
@@ -1425,6 +1429,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch")));
 	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads")));
+
 
 #pragma region ACTIONS
 	// Clear Actions cache

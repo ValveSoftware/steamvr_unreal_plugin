@@ -48,6 +48,36 @@ class FSteamVRInputDeviceModule : public ISteamVRInputDeviceModule
 void FSteamVRInputDeviceModule::StartupModule()
 {
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+	// Attempt tp do a clean shutdown - currently unimplemented with the stock SteamVR Controller
+	if (IModularFeatures::Get().IsModularFeatureAvailable(FName("SteamVRController")))
+	{
+		IModularFeatures::Get().GetModularFeature<IInputDeviceModule>(FName("SteamVRController")).ShutdownModule();
+	}
+
+	// Unload the engine's stock SteamVR Controller
+	FModuleManager& ModuleManager = FModuleManager::Get();
+	ISteamVRControllerPlugin* StockController = ModuleManager.GetModulePtr<ISteamVRControllerPlugin>(FName("SteamVRController"));
+
+	if (StockController != nullptr)
+	{
+		// Manually Unregister Module Feature instead of straight up unloading
+		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), StockController);
+		StockController->ShutdownModule();
+		StockController->~ISteamVRControllerPlugin();
+	}
+	else
+	{
+		// Unload UE4 Stock Engine SteamVRController Module (if present)
+		if (ModuleManager.UnloadModule(FName("SteamVRController")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Unloaded UE4 SteamVR Controller"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("[SteamVR Input] Unable to unload UE4 SteamVR Controller"));
+		}
+	}
 }
 
 void FSteamVRInputDeviceModule::ShutdownModule()

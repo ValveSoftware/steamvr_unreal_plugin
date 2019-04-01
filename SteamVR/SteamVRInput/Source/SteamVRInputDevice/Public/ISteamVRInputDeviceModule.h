@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "ISteamVRControllerPlugin.h"
 #include "IInputDeviceModule.h"
 
 STEAMVRINPUT_API class ISteamVRInputDeviceModule : public IInputDeviceModule

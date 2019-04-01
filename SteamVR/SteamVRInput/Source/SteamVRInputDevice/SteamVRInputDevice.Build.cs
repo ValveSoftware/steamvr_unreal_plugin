@@ -3,8 +3,8 @@ using System.IO;
 
 public class SteamVRInputDevice : ModuleRules
 {
-	public SteamVRInputDevice(TargetInfo Target)
-	{
+	public SteamVRInputDevice(ReadOnlyTargetRules Target) : base(Target)
+    {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PrivatePCHHeaderFile = "Public/ISteamVRInputDeviceModule.h";
 
@@ -15,6 +15,7 @@ public class SteamVRInputDevice : ModuleRules
          {
             "TargetPlatform",
             "SteamVRInput",
+            "SteamVRController",
             "SteamVR"
         });
 
@@ -26,6 +27,7 @@ public class SteamVRInputDevice : ModuleRules
                 "Engine",
                 "HeadMountedDisplay",
                 "SteamVR",
+                "SteamVRController",
                 "Json",
                 "JsonUtilities"
 			}
