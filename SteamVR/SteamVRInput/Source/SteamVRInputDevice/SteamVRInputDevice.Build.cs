@@ -42,7 +42,7 @@ public class SteamVRInputDevice : ModuleRules
             }
             );
 
-        if (UEBuildConfiguration.bBuildEditor == true)
+        if (Target.bBuildEditor == true)
         {
             DynamicallyLoadedModuleNames.Add("UnrealEd");
         }
