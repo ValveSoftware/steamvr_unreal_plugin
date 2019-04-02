@@ -908,7 +908,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	EditorAppKey = FString(OutAppKey);
 
 	// Set Application Manifest Path - same directory where the action manifest will be
-	OutAppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+	OutAppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
 	// Create Application Manifest json objects
@@ -972,11 +972,11 @@ void FSteamVRInputDevice::ReloadActionManifest()
 		if (SteamVRSystem != nullptr)
 		{
 			// Set Action Manifest Path
-			const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+			const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
 			
 			// Load application manifest
-			FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+			FString AppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 		
@@ -1409,7 +1409,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	auto InputSettings = GetDefault<UInputSettings>();
 
 	// Set Action Manifest Path
-	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+	const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Action Manifest Path: %s"), *ManifestPath);
 
 	// Create Action Manifest json object
@@ -1417,7 +1417,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	TArray<FString> LocalizationFields = {"language_tag", "en_US"};
 
 	// Set where to look for controller binding files and prepare file manager
-	const FString ControllerBindingsPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH;
+	const FString ControllerBindingsPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Controller Bindings Path: %s"), *ControllerBindingsPath);
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
