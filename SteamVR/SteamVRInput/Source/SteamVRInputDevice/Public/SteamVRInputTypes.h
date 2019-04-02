@@ -222,8 +222,8 @@ struct FInputMapping
 
 struct FSteamVRInputAction
 {
-	FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
 	FString		Path;			// The SteamVR name of the action (e.g. main/in/{ActionName})
+	FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
 	EActionType	Type;			// The SteamVR input data type
 	FName		KeyX;			// The UE Key in the X axis or float axis (e.g. Motion_Controller_Thumbstick_X)
 	FName		KeyY;			// The UE Key in the Y axis
