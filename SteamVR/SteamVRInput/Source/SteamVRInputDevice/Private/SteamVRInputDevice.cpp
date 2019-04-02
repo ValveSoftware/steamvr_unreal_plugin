@@ -968,11 +968,7 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			// Set Action Manifest Path
 			const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
-		
-			// Set Action Manifest
-			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
-		
+			
 			// Load application manifest
 			FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), false);
@@ -988,6 +984,10 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			// Set AppKey for this Editor Session
 			AppError = VRApplications()->IdentifyApplication(AppProcessId, TCHAR_TO_UTF8(*SteamVRAppKey));
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+
+			// Set Action Manifest
+			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 		}
 	}
 #endif
@@ -1172,7 +1172,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Create Controller Binding Object for this binding file
 			TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
 			TArray<FString> ControllerStringFields = { "controller_type", *SupportedController.Name.ToString(),
-											 TEXT("binding_url"), *FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
+											 TEXT("binding_url"), *(SupportedController.Name.ToString() + TEXT(".json")) //*FileManager.ConvertToAbsolutePathForExternalAppForRead(*BindingsFilePath)
 			};
 			BuildJsonObject(ControllerStringFields, ControllerBindingObject);
 			DefaultBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));

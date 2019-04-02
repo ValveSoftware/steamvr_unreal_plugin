@@ -26,6 +26,7 @@ public class SteamVRInputDevice : ModuleRules
                 "Engine",
                 "HeadMountedDisplay",
                 "SteamVR",
+                "SteamVRController",
                 "Json",
                 "JsonUtilities"
 			}
