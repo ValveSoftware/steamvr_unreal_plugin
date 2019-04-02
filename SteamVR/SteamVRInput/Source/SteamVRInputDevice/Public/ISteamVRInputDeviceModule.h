@@ -48,7 +48,4 @@ public:
 	{
 		return FModuleManager::Get().IsModuleLoaded("SteamVRInputDevice");
 	}
-
-	/** We'll keep a reference to the engine's SteamVR  Controller so we can request its removal during module shutdown */
-	ISteamVRControllerPlugin* StockController;
 };

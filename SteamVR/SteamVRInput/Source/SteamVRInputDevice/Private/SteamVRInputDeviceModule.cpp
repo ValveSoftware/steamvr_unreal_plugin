@@ -56,29 +56,34 @@ void FSteamVRInputDeviceModule::StartupModule()
 		IModularFeatures::Get().GetModularFeature<IInputDeviceModule>(FName("SteamVRController")).ShutdownModule();
 	}
 
-	// Manually Unregister Module Feature since there is no Shutdown() implemented in SteamVRController and destructor won't be called until later
+	// Unload the engine's stock SteamVR Controller
 	FModuleManager& ModuleManager = FModuleManager::Get();
-	StockController = ModuleManager.GetModulePtr<ISteamVRControllerPlugin>(FName("SteamVRController"));
-	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), StockController);
+	ISteamVRControllerPlugin* StockController = ModuleManager.GetModulePtr<ISteamVRControllerPlugin>(FName("SteamVRController"));
 
-	// Unload UE4 Stock Engine SteamVRController Module (if present)
-	if (ModuleManager.UnloadModule(FName("SteamVRController")))
+	if (StockController != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Unloaded UE4 SteamVR Controller"));
+		// Manually Unregister Module Feature instead of straight up unloading
+		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), StockController);
+		StockController->ShutdownModule();
+		StockController->~ISteamVRControllerPlugin();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[SteamVR Input] Unable to unload UE4 SteamVR Controller"));
+		// Unload UE4 Stock Engine SteamVRController Module (if present)
+		if (ModuleManager.UnloadModule(FName("SteamVRController")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[SteamVR Input] Unloaded UE4 SteamVR Controller"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("[SteamVR Input] Unable to unload UE4 SteamVR Controller"));
+		}
 	}
-
 }
 
 void FSteamVRInputDeviceModule::ShutdownModule()
 {
 	IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
-
-	// Request GC to remove stock SteamVR Controller 
-	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), StockController);
 }
 
 IMPLEMENT_MODULE(FSteamVRInputDeviceModule, SteamVRInputDevice)
