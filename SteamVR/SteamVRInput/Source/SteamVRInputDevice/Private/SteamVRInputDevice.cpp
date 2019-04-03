@@ -2022,15 +2022,6 @@ void FSteamVRInputDevice::SanitizeActions()
 {
 	for (int32 i = 0; i < Actions.Num(); i++)
 	{
-		// Check for X,Y keys validity
-		//if (!(Actions[i].KeyX.ToString().Contains(TEXT("_X")) || Actions[i].KeyX.ToString().Contains(TEXT("X-Axis"))))
-		//{
-		//	Actions.RemoveAt(i, 1, false);
-		//}
-		//else if (!(Actions[i].KeyY.ToString().Contains(TEXT("_Y")) || Actions[i].KeyY.ToString().Contains(TEXT("Y-Axis"))))
-		//{
-		//	Actions.RemoveAt(i, 1, false);
-		//}
 		if (!Actions[i].KeyX.IsNone() && !Actions[i].KeyY.IsNone() && Actions[i].KeyZ.IsNone())
 		{
 			// Check for X & Y Handedness Match for Vector2s
@@ -2051,6 +2042,7 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		// Get Project Name this plugin is used in
 		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
 		GameFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
+		GameProjectName = GameFileName;
 		if (GConfig)
 		{
 			GConfig->GetString(
@@ -2061,10 +2053,10 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 			);
 
 		}
-		else
-		{
 
-			// Unable to retrieve project name, reverting to raw application executable name
+		// Check for empty project name
+		if (GameProjectName.IsEmpty())
+		{
 			GameProjectName = GameFileName;
 		}
 
