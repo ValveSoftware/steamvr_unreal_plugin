@@ -44,13 +44,15 @@ void FAnimNode_SteamVRSetWristTransform::Initialize(const FAnimationInitializeCo
 	// Initialize our poses
 	ReferencePose.Initialize(Context);
 	TargetPose.Initialize(Context);
+
 }
 
-void FAnimNode_SteamVRSetWristTransform::CacheBones(const FAnimationCacheBonesContext & Context)
+void FAnimNode_SteamVRSetWristTransform::CacheBones(const FAnimationCacheBonesContext& Context)
 {
+
 }
 
-void FAnimNode_SteamVRSetWristTransform::Update(const FAnimationUpdateContext & Context)
+void FAnimNode_SteamVRSetWristTransform::Update(const FAnimationUpdateContext& Context)
 {
 	// Update our poses this frame
 	ReferencePose.Update(Context);
@@ -60,10 +62,6 @@ void FAnimNode_SteamVRSetWristTransform::Update(const FAnimationUpdateContext & 
 void FAnimNode_SteamVRSetWristTransform::Evaluate(FPoseContext& Output)
 {
 	Output.ResetToRefPose();
-
-	// Set source bone indices
-	FCompactPoseBoneIndex RootBoneIndex = FCompactPoseBoneIndex(0);
-	FCompactPoseBoneIndex SteamVRWristBoneIndex = FCompactPoseBoneIndex(1);
 
 	// Apply all the bones from the target to the output pose
 	TargetPose.Evaluate(Output);
