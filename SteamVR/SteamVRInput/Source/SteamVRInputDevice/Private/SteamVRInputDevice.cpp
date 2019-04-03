@@ -1028,6 +1028,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
 			ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
 			ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 			TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
 			ControllerPoseArray.Add(ControllerLeftJsonValueObject);
@@ -1036,6 +1037,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
 			ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
 			ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
 			ControllerPoseArray.Add(ControllerRightJsonValueObject);
@@ -1046,6 +1048,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
 				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
 				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
+				Special1JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
 				ControllerPoseArray.Add(Special1JsonValueObject);
@@ -1054,6 +1057,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
 				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
 				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
+				Special2JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
 				ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
@@ -1062,6 +1066,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
 				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
 				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
+				Special3JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
 				ControllerPoseArray.Add(Special3JsonValueObject);
@@ -1070,6 +1075,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
 				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
 				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
+				Special4JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
 				ControllerPoseArray.Add(Special4JsonValueObject);
@@ -1078,6 +1084,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
 				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
 				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
+				Special5JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
 				ControllerPoseArray.Add(Special5JsonValueObject);
@@ -1086,6 +1093,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
 				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
 				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
+				Special6JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
 				ControllerPoseArray.Add(Special6JsonValueObject);
@@ -1094,6 +1102,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
 				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
 				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
+				Special7JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 	
 				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
 				ControllerPoseArray.Add(Special7JsonValueObject);
@@ -1102,6 +1111,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
 				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
 				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+				Special8JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
 				ControllerPoseArray.Add(Special8JsonValueObject);
