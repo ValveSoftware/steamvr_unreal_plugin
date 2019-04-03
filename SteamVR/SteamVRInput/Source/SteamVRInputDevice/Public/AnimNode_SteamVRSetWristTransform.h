@@ -60,11 +60,18 @@ public:
 
 	// FAnimNode_Base interface
 	virtual void Initialize(const FAnimationInitializeContext& Context) override;
-	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
-	virtual void Update(const FAnimationUpdateContext & Context) override;
+	virtual void CacheBones(const FAnimationCacheBonesContext& Context) override;
+	virtual void Update(const FAnimationUpdateContext& Context) override;
 	virtual void Evaluate(FPoseContext& Output) override;
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRSetWristTransform();
+
+private:
+	/** The root bone index of the SteamVR & UE4 Skeletons */
+	FCompactPoseBoneIndex RootBoneIndex = FCompactPoseBoneIndex(0);
+
+	/** The wrist bone index of the SteamVR Skeleton */
+	FCompactPoseBoneIndex SteamVRWristBoneIndex = FCompactPoseBoneIndex(1);
 
 };

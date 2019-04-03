@@ -68,7 +68,7 @@ public:
 
 	// FAnimNode_Base interface
 	virtual void Initialize(const FAnimationInitializeContext& Context) override;
-	virtual void CacheBones(const FAnimationCacheBonesContext & Context) override;
+	virtual void CacheBones(const FAnimationCacheBonesContext& Context) override;
 	virtual void Update(const FAnimationUpdateContext & Context) override;
 	virtual void Evaluate(FPoseContext& Output) override;
 	// End of FAnimNode_Base interface
