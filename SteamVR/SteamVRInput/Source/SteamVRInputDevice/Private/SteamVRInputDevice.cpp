@@ -169,6 +169,8 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 				UE_LOG(LogSteamVRInputDevice, Display, TEXT("Found the following device: [%i] %s"), id, *stringCache);
 			}
 		}
+
+		DeviceSignature = 2019;
 	}
 }
 

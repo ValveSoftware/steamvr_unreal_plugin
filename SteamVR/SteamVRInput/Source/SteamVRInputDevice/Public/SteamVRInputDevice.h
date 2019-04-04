@@ -256,6 +256,9 @@ public:
 	/** The skeletal tracking level for the controller in the player's right hand  */
 	EVRSkeletalTrackingLevel RightControllerFidelity;
 
+	/** Device identifier used to check for class validity */
+	int32 DeviceSignature = 0;
+
 private:
 #if WITH_EDITOR
 	/** 
