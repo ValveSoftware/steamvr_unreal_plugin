@@ -1432,6 +1432,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
 	ControllerTypes.Empty();
+	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset")));
 	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers")));
@@ -1750,7 +1751,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		{
 			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Invalid json format for controller binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
 		}
-		// Attempt to find what controller this binding file is for (yeah ended this comment with a preposition)
+		// Attempt to find what controller this binding file is for 
 		else if (!JsonObject->TryGetStringField(TEXT("controller_type"), ControllerType) || ControllerType.IsEmpty())
 		{
 			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to determine controller type for this binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
@@ -1814,7 +1815,12 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Save json as a UTF8 file
 	if (GenerateActions)
 	{
-		if (!FileManager.FileExists(*ManifestPath) || (FileManager.FileExists(*ManifestPath) && DeleteIfExists))
+		if (FileManager.FileExists(*ManifestPath) && DeleteIfExists)
+		{
+			FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*ManifestPath);
+		}
+
+		if (!FileManager.FileExists(*ManifestPath))
 		{
 			if (!FFileHelper::SaveStringToFile(ActionManifest, *ManifestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
 			{
