@@ -372,41 +372,10 @@ namespace SteamVRSkeletalControllerKeyNames
 
 	const FGamepadKeyNames::Type SteamVR_Skeleton_Left_Finger_RingPinky_Splay("Skeleton_Left_Finger_RingPinky_Splay");
 	const FGamepadKeyNames::Type SteamVR_Skeleton_Right_Finger_RingPinky_Splay("Skeleton_Right_Finger_RingPinky_Splay");
-
 }
 
 namespace SteamVRSkeletalControllerKeys
 {
-	// Knuckles CapSense
-	const FKey SteamVR_Knuckles_Left_A_CapSense("Knuckles_Left_A_CapSense");
-	const FKey SteamVR_Knuckles_Right_A_CapSense("Knuckles_Right_A_CapSense");
-	const FKey SteamVR_Knuckles_Left_B_CapSense("Knuckles_Left_B_CapSense");
-	const FKey SteamVR_Knuckles_Right_B_CapSense("Knuckles_Right_B_CapSense");
-
-	const FKey SteamVR_Knuckles_Left_Trigger_CapSense("Knuckles_Left_Trigger_CapSense");
-	const FKey SteamVR_Knuckles_Right_Trigger_CapSense("Knuckles_Right_Trigger_CapSense");
-
-	const FKey SteamVR_Knuckles_Left_Thumbstick_CapSense("Knuckles_Left_Thumbstick_CapSense");
-	const FKey SteamVR_Knuckles_Right_Thumbstick_CapSense("Knuckles_Right_Thumbstick_CapSense");
-
-	const FKey SteamVR_Knuckles_Left_Trackpad_CapSense("Knuckles_Left_Trackpad_CapSense");
-	const FKey SteamVR_Knuckles_Right_Trackpad_CapSense("Knuckles_Right_Trackpad_CapSense");
-
-	const FKey SteamVR_Knuckles_Left_Trackpad_GripForce("Knuckles_Left_Trackpad_GripForce");
-	const FKey SteamVR_Knuckles_Right_Trackpad_GripForce("Knuckles_Right_Trackpad_GripForce");
-
-	// Knuckles Trackpad
-	const FKey SteamVR_Knuckles_Left_Trackpad_X("Knuckles_Left_Trackpad_X");
-	const FKey SteamVR_Knuckles_Right_Trackpad_X("Knuckles_Right_Trackpad_X");
-	const FKey SteamVR_Knuckles_Left_Trackpad_Y("Knuckles_Left_Trackpad_Y");
-	const FKey SteamVR_Knuckles_Right_Trackpad_Y("Knuckles_Right_Trackpad_Y");
-
-	// Knuckles Special Action Keys
-	const FKey SteamVR_Knuckles_Left_Grip_Grab("Knuckles_Left_Grip_Grab");
-	const FKey SteamVR_Knuckles_Right_Grip_Grab("Knuckles_Right_Grip_Grab");
-	const FKey SteamVR_Knuckles_Left_Pinch_Grab("Knuckles_Left_Pinch_Grab");
-	const FKey SteamVR_Knuckles_Right_Pinch_Grab("Knuckles_Right_Pinch_Grab");
-
 	// SteamVR Input Curls
 	const FKey SteamVR_Skeleton_Left_Finger_Index_Curl("Skeleton_Left_Finger_Index_Curl");
 	const FKey SteamVR_Skeleton_Right_Finger_Index_Curl("Skeleton_Right_Finger_Index_Curl");

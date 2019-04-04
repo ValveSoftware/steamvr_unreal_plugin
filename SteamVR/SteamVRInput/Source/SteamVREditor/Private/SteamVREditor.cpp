@@ -27,6 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
+#pragma once
 
 #include "SteamVREditor.h"
 #include "IMotionController.h"
@@ -35,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SlateExtras.h"
 #include "SteamVREditorStyle.h"
 #include "SteamVREditorCommands.h"
+#include "SteamVRControllerKeys.h"
 #include "LevelEditor.h"
 
 static const FName SteamVREditorTabName("SteamVREditor");
@@ -154,7 +156,7 @@ void FSteamVREditorModule::AddSampleInputs()
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Digital Mapping")), EKeys::MotionController_Left_Trigger);
 
 		// Sample mapping - custom knuckles keys
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Knuckles Mapping")), SteamVRSkeletalControllerKeys::SteamVR_Knuckles_Left_Pinch_Grab);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Knuckles Mapping")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left);
 
 		// Update the config file
 		InputSettings->SaveKeyMappings();

@@ -37,7 +37,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "SteamVRInputTypes.h"
-#include "SteamVRKnucklesKeys.h"
 #include "SteamVRInputPublic.h"
 
 class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public IMotionController
@@ -291,6 +290,9 @@ private:
 
 	/** Setup the keys used by the Skeletal Input System  */
 	void InitSkeletalControllerKeys();
+
+	/** Setup the keys used by supported SteamVR Controllers  */
+	void InitControllerKeys();
 
 	/** Grab the inputs from SteamVR and process them so the active game can consume the actions as needed  */
 	void SendSkeletalInputEvents();
