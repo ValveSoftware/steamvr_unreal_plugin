@@ -49,12 +49,6 @@ void FSteamVRInputDeviceModule::StartupModule()
 {
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 
-	// Attempt tp do a clean shutdown - currently unimplemented with the stock SteamVR Controller
-	if (IModularFeatures::Get().IsModularFeatureAvailable(FName("SteamVRController")))
-	{
-		IModularFeatures::Get().GetModularFeature<IInputDeviceModule>(FName("SteamVRController")).ShutdownModule();
-	}
-
 	// Unload the engine's stock SteamVR Controller
 	FModuleManager& ModuleManager = FModuleManager::Get();
 	ISteamVRControllerPlugin* StockController = ModuleManager.GetModulePtr<ISteamVRControllerPlugin>(FName("SteamVRController"));
