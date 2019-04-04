@@ -298,15 +298,17 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 }
 
 
-FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice() const
+FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice()
 {
 	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
 	for (auto MotionController : MotionControllers)
 	{
-		FName DeviceName = MotionController->GetModularFeatureName();
-		return static_cast<FSteamVRInputDevice*>(MotionController);
+		FSteamVRInputDevice* TestSteamVRDevice = static_cast<FSteamVRInputDevice*>(MotionController);
+		if (TestSteamVRDevice != nullptr && TestSteamVRDevice->DeviceSignature == FString(TEXT("SteamVRInputDevice")))
+		{
+			return TestSteamVRDevice;
+		}
 	}
-
 	return nullptr;
 }
 
