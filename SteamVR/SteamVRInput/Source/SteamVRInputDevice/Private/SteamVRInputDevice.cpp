@@ -172,7 +172,7 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 			}
 		}
 
-		DeviceSignature = FString(TEXT("SteamVRInputDevice"));
+		DeviceSignature = 2019;
 	}
 }
 
