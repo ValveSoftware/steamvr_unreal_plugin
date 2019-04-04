@@ -91,7 +91,7 @@ void FAnimNode_SteamVRInputAnimPose::CacheBones_AnyThread(const FAnimationCacheB
 void FAnimNode_SteamVRInputAnimPose::Update_AnyThread(const FAnimationUpdateContext & Context)
 {
 	// Grab node inputs
-	EvaluateGraphExposedInputs.Execute(Context);
+	GetEvaluateGraphExposedInputs().Execute(Context);
 }
 
 void FAnimNode_SteamVRInputAnimPose::Evaluate_AnyThread(FPoseContext& Output)
