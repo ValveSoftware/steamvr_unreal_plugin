@@ -262,7 +262,7 @@ public:
 	EVRSkeletalTrackingLevel RightControllerFidelity;
 
 	/** Device identifier used to check for class validity */
-	FString DeviceSignature;
+	int32 DeviceSignature = 0;
 
 private:
 #if WITH_EDITOR
