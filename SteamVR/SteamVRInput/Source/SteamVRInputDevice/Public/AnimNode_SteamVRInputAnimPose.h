@@ -83,7 +83,7 @@ public:
 	void PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const;
 
 	/** Retrieve the first active SteamVRInput device present in this game */
-	FSteamVRInputDevice* GetSteamVRInputDevice() const;
+	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 	/** Recursively calculate the model-space transform of the given bone from the local-space transforms on the given pose */
 	FTransform CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex) const;
