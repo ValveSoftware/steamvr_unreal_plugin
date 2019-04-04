@@ -932,7 +932,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	TSharedPtr<FJsonObject> LocStringsObject = MakeShareable(new FJsonObject());
 	TSharedRef<FJsonObject> AppNameObject = MakeShareable(new FJsonObject());
 	AppNameObject->SetStringField("name", GameProjectName + " [UE Editor]");
-	LocStringsObject->SetObjectField("en_US", AppNameObject);
+	LocStringsObject->SetObjectField("en_us", AppNameObject);
 	ApplicationObject->SetObjectField("strings", LocStringsObject);
 
 	// Assemble the json app manifest
