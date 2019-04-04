@@ -11,7 +11,7 @@
 					"path": "/user/hand/right/input/a",
 					"inputs":
 					{
-						"position":
+						"press":
 						{
 							"output": "/actions/main/in/TeleportRight"
 						}
@@ -29,22 +29,22 @@
 					}
 				},
 				{
-					"mode": "trigger",
+					"mode": "button",
 					"path": "/user/hand/left/input/trigger",
 					"inputs":
 					{
-						"pull":
+						"click":
 						{
 							"output": "/actions/main/in/GrabLeft"
 						}
 					}
 				},
 				{
-					"mode": "trigger",
+					"mode": "button",
 					"path": "/user/hand/right/input/trigger",
 					"inputs":
 					{
-						"pull":
+						"click":
 						{
 							"output": "/actions/main/in/GrabRight"
 						}
@@ -55,7 +55,7 @@
 					"path": "/user/hand/left/input/a",
 					"inputs":
 					{
-						"position":
+						"click":
 						{
 							"output": "/actions/main/in/TeleportLeft"
 						}
@@ -96,7 +96,7 @@
 				},
 				{
 					"mode": "force_sensor",
-					"path": "/user/hand/left/input/trackpad",
+					"path": "/user/hand/left/input/grip",
 					"inputs":
 					{
 						"force":
@@ -107,7 +107,7 @@
 				},
 				{
 					"mode": "force_sensor",
-					"path": "/user/hand/right/input/trackpad",
+					"path": "/user/hand/right/input/grip",
 					"inputs":
 					{
 						"force":
@@ -120,7 +120,8 @@
 			"poses": [
 				{
 					"output": "/actions/main/in/controllerleft",
-					"path": "/user/hand/left/pose/raw"
+					"path": "/user/hand/left/pose/raw",
+					"requirement": "optional"
 				},
 				{
 					"output": "/actions/main/in/controllerright",
@@ -149,5 +150,5 @@
 			]
 		}
 	},
-	"description": ""
+	"description": "Virtual Reality BP Game Template"
 }
