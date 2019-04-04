@@ -100,12 +100,9 @@ namespace IndexControllerKeys
 
 	// Trackpad Directions
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_Up_Left("SteamVR_Valve_Index_Controller_Trackpad_Up_Left");
-	const FKey SteamVR_Valve_Index_Controller_Trackpad_Down_Left("SteamVR_Valve_Index_Controller_Trackpad_Down_Left");
+	const FKey SteamVR_Valve_Index_Controller_Trackpad_Up_Right("SteamVR_Valve_Index_Controller_Trackpad_Up_Right");
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_L_Left("SteamVR_Valve_Index_Controller_Trackpad_L_Left");
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_R_Left("SteamVR_Valve_Index_Controller_Trackpad_R_Left");
-
-	// Trackpad Directions
-	const FKey SteamVR_Valve_Index_Controller_Trackpad_Up_Right("SteamVR_Valve_Index_Controller_Trackpad_Up_Right");
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_Down_Right("SteamVR_Valve_Index_Controller_Trackpad_Down_Right");
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_L_Right("SteamVR_Valve_Index_Controller_Trackpad_L_Right");
 	const FKey SteamVR_Valve_Index_Controller_Trackpad_R_Right("SteamVR_Valve_Index_Controller_Trackpad_R_Right");
@@ -149,9 +146,11 @@ namespace ViveControllerKeys
 
 	// Trackpad Directions
 	const FKey SteamVR_Vive_Controller_Trackpad_Up_Left("SteamVR_Vive_Controller_Trackpad_Up_Left");
+	const FKey SteamVR_Vive_Controller_Trackpad_Up_Right("SteamVR_Vive_Controller_Trackpad_Up_Right");
 	const FKey SteamVR_Vive_Controller_Trackpad_Down_Left("SteamVR_Vive_Controller_Trackpad_Down_Left");
 	const FKey SteamVR_Vive_Controller_Trackpad_Down_Right("SteamVR_Vive_Controller_Trackpad_Down_Right");
 	const FKey SteamVR_Vive_Controller_Trackpad_L_Left("SteamVR_Vive_Controller_Trackpad_L_Left");
+	const FKey SteamVR_Vive_Controller_Trackpad_L_Right("SteamVR_Vive_Controller_Trackpad_L_Right");
 	const FKey SteamVR_Vive_Controller_Trackpad_R_Left("SteamVR_Vive_Controller_Trackpad_R_Left");
 	const FKey SteamVR_Vive_Controller_Trackpad_R_Right("SteamVR_Vive_Controller_Trackpad_R_Right");
 }
@@ -188,7 +187,7 @@ namespace OculusTouchKeys
 	// Joystick Directions
 	const FKey SteamVR_Oculus_Touch_Joystick_Up_Left("SteamVR_Oculus_Touch_Joystick_Up_Left");
 	const FKey SteamVR_Oculus_Touch_Joystick_Down_Left("SteamVR_Oculus_Touch_Joystick_Down_Left");
-	const FKey SteamVR_Oculus_Touch_Joystick_L_Left("SteamVR_Oculus_Touch_Joystick_L_Right");
+	const FKey SteamVR_Oculus_Touch_Joystick_L_Left("SteamVR_Oculus_Touch_Joystick_L_Left");
 	const FKey SteamVR_Oculus_Touch_Joystick_R_Left("SteamVR_Oculus_Touch_Joystick_R_Left");
 
 	const FKey SteamVR_Oculus_Touch_Joystick_Up_Right("SteamVR_Oculus_Touch_Joystick_Up_Right");
@@ -221,29 +220,14 @@ namespace WindowsMRKeys
 	const FKey SteamVR_Windows_MR_Controller_Application_Press_Left("SteamVR_Windows_MR_Controller_Application_Press_Left");
 	const FKey SteamVR_Windows_MR_Controller_Application_Press_Right("SteamVR_Windows_MR_Controller_Application_Press_Right");
 
-	// Button A
-	const FKey SteamVR_Windows_MR_Controller_A_Press_Left("SteamVR_Windows_MR_Controller_A_Press_Left");
-	const FKey SteamVR_Windows_MR_Controller_A_Touch_Left("SteamVR_Windows_MR_Controller_A_Touch_Left");
-	const FKey SteamVR_Windows_MR_Controller_A_Press_Right("SteamVR_Windows_MR_Controller_A_Press_Right");
-	const FKey SteamVR_Windows_MR_Controller_A_Touch_Right("SteamVR_Windows_MR_Controller_A_Touch_Right");
-
-	// Button B
-	const FKey SteamVR_Windows_MR_Controller_B_Press_Left("SteamVR_Windows_MR_Controller_B_Press_Left");
-	const FKey SteamVR_Windows_MR_Controller_B_Touch_Left("SteamVR_Windows_MR_Controller_B_Touch_Left");
-	const FKey SteamVR_Windows_MR_Controller_B_Press_Right("SteamVR_Windows_MR_Controller_B_Press_Right");
-	const FKey SteamVR_Windows_MR_Controller_B_Touch_Right("SteamVR_Windows_MR_Controller_B_Touch_Right");
-
 	// Joystick
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Press_Left("SteamVR_Windows_MR_Controller_Joystick_Press_Left");
-	const FKey SteamVR_Windows_MR_Controller_Joystick_Touch_Left("SteamVR_Windows_MR_Controller_Joystick_Touch_Left");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Press_Right("SteamVR_Windows_MR_Controller_Joystick_Press_Right");
-	const FKey SteamVR_Windows_MR_Controller_Joystick_Touch_Right("SteamVR_Windows_MR_Controller_Joystick_Touch_Right");
 
 	const FKey SteamVR_Windows_MR_Controller_Joystick_X_Left("SteamVR_Windows_MR_Controller_Joystick_X_Left");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Y_Left("SteamVR_Windows_MR_Controller_Joystick_Y_Left");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_X_Right("SteamVR_Windows_MR_Controller_Joystick_X_Right");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Y_Right("SteamVR_Windows_MR_Controller_Joystick_Y_Right");
-
 
 	// Joystick Directions
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Up_Left("SteamVR_Windows_MR_Controller_Joystick_Up_Left");
@@ -252,7 +236,7 @@ namespace WindowsMRKeys
 	const FKey SteamVR_Windows_MR_Controller_Joystick_R_Left("SteamVR_Windows_MR_Controller_Joystick_R_Left");
 
 	const FKey SteamVR_Windows_MR_Controller_Joystick_Up_Right("SteamVR_Windows_MR_Controller_Joystick_Up_Right");
-	const FKey SteamVR_Windows_MR_Controller_Joystick_Down_Right("SteamVR_alve_Index_Controller_Joystick_Down_Right");
+	const FKey SteamVR_Windows_MR_Controller_Joystick_Down_Right("SteamVR_Windows_MR_Controller_Joystick_Down_Right");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_L_Right("SteamVR_Windows_MR_Controller_Joystick_L_Right");
 	const FKey SteamVR_Windows_MR_Controller_Joystick_R_Right("SteamVR_Windows_MR_Controller_Joystick_R_Right");
 
@@ -282,7 +266,7 @@ namespace WindowsMRKeys
 	const FKey SteamVR_Windows_MR_Controller_Trackpad_Up_Left("SteamVR_Windows_MR_Controller_Trackpad_Up_Left");
 	const FKey SteamVR_Windows_MR_Controller_Trackpad_Down_Left("SteamVR_Windows_MR_Controller_Trackpad_Down_Left");
 	const FKey SteamVR_Windows_MR_Controller_Trackpad_Up_Right("SteamVR_Windows_MR_Controller_Trackpad_Up_Right");
-	const FKey SteamVR_Windows_MR_Controller_Trackpad_Down_Right("SteamVR_alve_Index_Controller_Trackpad_Down_Right");
+	const FKey SteamVR_Windows_MR_Controller_Trackpad_Down_Right("SteamVR_Windows_MR_Controller_Trackpad_Down_Right");
 
 	const FKey SteamVR_Windows_MR_Controller_Trackpad_L_Left("SteamVR_Windows_MR_Controller_Trackpad_L_Left");
 	const FKey SteamVR_Windows_MR_Controller_Trackpad_R_Left("SteamVR_Windows_MR_Controller_Trackpad_R_Left");
