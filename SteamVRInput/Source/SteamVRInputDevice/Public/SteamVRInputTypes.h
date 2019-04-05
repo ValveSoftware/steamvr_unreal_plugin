@@ -264,7 +264,7 @@ struct FSteamVRInputAction
 		, KeyZ()
 		, Value()
 		, bState(inState)
-		, bRequirement(false)
+		, bRequirement(true)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
@@ -277,7 +277,7 @@ struct FSteamVRInputAction
 		, KeyY()
 		, KeyZ()
 		, Value(inValue1D, 0.f, 0.f)
-		, bRequirement(false)
+		, bRequirement(true)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
@@ -290,7 +290,7 @@ struct FSteamVRInputAction
 		, KeyY(inKeyName_Y)
 		, KeyZ()
 		, Value(inValue2D.X, inValue2D.Y, 0.f)
-		, bRequirement(false)
+		, bRequirement(true)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}
@@ -303,7 +303,7 @@ struct FSteamVRInputAction
 		, KeyY(inKeyName_Y)
 		, KeyZ(inKeyName_Z)
 		, Value(inValue3D.X, inValue3D.Y, inValue3D.Z)
-		, bRequirement(false)
+		, bRequirement(true)
 		, Handle()
 		, LastError(VRInputError_None)
 	{}

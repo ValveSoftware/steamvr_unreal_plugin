@@ -1328,39 +1328,39 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		// Controller poses
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_CONTROLLER_LEFT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Left Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_CONTROLLER_RIGHT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Right Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
 		}
 
 		// Other poses
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_L));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 1 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_R));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 2 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_L));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 3 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_R));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 4 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 5 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
 		}
 		{
@@ -1370,24 +1370,24 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 7 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 8 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
 		}
 
 		// Skeletal Data
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SKELETON_LEFT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Skeleton, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Skeleton, false,
 				FName(TEXT("Skeleton (Left)")), FString(TEXT(ACTION_PATH_SKEL_HAND_LEFT))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SKELETON_RIGHT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Skeleton, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Skeleton, false,
 				FName(TEXT("Skeleton (Right)")), FString(TEXT(ACTION_PATH_SKEL_HAND_RIGHT))));
 		}
 
@@ -1403,11 +1403,11 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		// Haptics
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_LEFT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Left)"))));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, false, FName(TEXT("Haptic (Left)"))));
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_RIGHT));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, true, FName(TEXT("Haptic (Right)"))));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Vibration, false, FName(TEXT("Haptic (Right)"))));
 		}
 
 		// Add base actions to the action manifest
