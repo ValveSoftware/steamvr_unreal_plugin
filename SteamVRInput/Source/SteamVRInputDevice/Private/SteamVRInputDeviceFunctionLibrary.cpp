@@ -38,17 +38,9 @@ using namespace vr;
 
 void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand Hand, float StartSecondsFromNow, float DurationSeconds, float Frequency, float Amplitude)
 {
-#if STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
-	EVRInitError SteamVRInitError = VRInitError_None;
-	IVRSystem* SteamVRSystem = VR_Init(&SteamVRInitError, VRApplication_Scene);
-
-	if (SteamVRInitError == VRInitError_None)
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
 	{
-		const FString ManifestPath = FPaths::GeneratedConfigDir() / ACTION_MANIFEST;
-
-		VRActionHandle_t vrVibrationLeft;
-		VRActionHandle_t vrVibrationRight;
-
 		if (Amplitude < 0.f)
 		{
 			Amplitude = 0.f;
@@ -58,28 +50,19 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand
 			Amplitude = 1.f;
 		}
 
-		EVRInputError Err;
-		if (Hand == ESteamVRHand::VR_Left)
-		{
-			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &vrVibrationLeft);
-			Err = VRInput()->TriggerHapticVibrationAction(vrVibrationLeft, StartSecondsFromNow,
-				DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
-			//UE_LOG(LogTemp, Warning, TEXT("[STEAMVR INPUT] Haptic (Left): %i"), (int32)Err);
-		}
-		else
-		{
-			Err = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &vrVibrationRight);
-			Err = VRInput()->TriggerHapticVibrationAction(vrVibrationRight, StartSecondsFromNow,
-				DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
-			//UE_LOG(LogTemp, Warning, TEXT("[STEAMVR INPUT] Haptic (Right): %i"), (int32)Err);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[STEAMVR INPUT] Error initializing Steam VR during Haptic call: %i"), (int32)SteamVRInitError);
-	}
+		// Setup which hand data we will get from SteamVR
+		VRActionHandle_t ActiveSkeletalHand = k_ulInvalidActionHandle;
 
-#endif // STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
+		if (Hand == ESteamVRHand::VR_Left && SteamVRInputDevice->VRVibrationLeft != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerLeftPresent && SteamVRInputDevice->VRSkeletalHandleLeft != k_ulInvalidActionHandle)
+		{
+			ActiveSkeletalHand = SteamVRInputDevice->VRSkeletalHandleLeft;
+			VRInput()->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationLeft, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+		}
+		else if (Hand == ESteamVRHand::VR_Right && SteamVRInputDevice->VRVibrationLeft != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerRightPresent && SteamVRInputDevice->VRSkeletalHandleRight != k_ulInvalidActionHandle)
+		{
+			VRInput()->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationRight, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+		}
+	}
 }
 
 void USteamVRInputDeviceFunctionLibrary::RegenActionManifest()

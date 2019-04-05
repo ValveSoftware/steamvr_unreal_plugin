@@ -158,6 +158,7 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 	{
 		UE_LOG(LogSteamVRInputDevice, Display, TEXT("SteamVR runtime %u.%u.%u initialised with status: %s"), k_nSteamVRVersionMajor, k_nSteamVRVersionMinor, k_nSteamVRVersionBuild, *FString(VR_GetVRInitErrorAsEnglishDescription(SteamVRInitError)));
 
+		// Echo all attached SteamVR devices
 		for (unsigned int id = 0; id < k_unMaxTrackedDeviceCount; ++id)
 		{
 			ETrackedDeviceClass trackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
@@ -168,6 +169,22 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 				uint32 StringBytes = SteamVRSystem->GetStringTrackedDeviceProperty(id, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
 				FString stringCache = *FString(UTF8_TO_TCHAR(buf));
 				UE_LOG(LogSteamVRInputDevice, Display, TEXT("Found the following device: [%i] %s"), id, *stringCache);
+			}
+		}
+
+		// Get Haptic Handles
+		if (VRInput() != nullptr)
+		{
+			LastInputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &VRVibrationLeft);
+			if (LastInputError != VRInputError_None)
+			{
+				VRVibrationLeft = k_ulInvalidActionHandle;
+			}
+
+			LastInputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &VRVibrationRight);
+			if (LastInputError != VRInputError_None)
+			{
+				VRVibrationRight = k_ulInvalidActionHandle;
 			}
 		}
 

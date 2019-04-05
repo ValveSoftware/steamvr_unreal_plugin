@@ -210,6 +210,12 @@ public:
 	/** The handle for the skeletal input of the right hand  */
 	VRActionHandle_t VRSkeletalHandleRight;
 
+	/** The handle for the vibration of the right hand  */
+	VRActionHandle_t VRVibrationLeft;
+
+	/** The handle for the vibration of the right hand  */
+	VRActionHandle_t VRVibrationRight;
+
 	/** Current skeletal summary input values of the left hand  */
 	VRSkeletalSummaryData_t VRSkeletalSummaryDataLeft;
 
