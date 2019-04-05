@@ -149,14 +149,76 @@ void FSteamVREditorModule::AddSampleInputs()
 
 	if (InputSettings->IsValidLowLevel())
 	{
-		// Sample analog mapping
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SteamVR Test Analog Mapping")), EKeys::MotionController_Left_TriggerAxis);
-		
-		// Sample digital mapping
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Digital Mapping")), EKeys::MotionController_Left_Trigger);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Left);
 
-		// Sample mapping - custom knuckles keys
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("SteamVR Test Knuckles Mapping")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Right);
+
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left);
+
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right);
+
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Left);
+
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right);
+
+
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Right);
+
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Left);
+
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Right);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Right);
+
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Left);
+
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Left);
+		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Right);
+		
 
 		// Update the config file
 		InputSettings->SaveKeyMappings();
