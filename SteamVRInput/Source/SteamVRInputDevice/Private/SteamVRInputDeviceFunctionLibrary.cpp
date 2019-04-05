@@ -353,6 +353,76 @@ void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()
 	}
 }
 
+void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr && VRInput() != nullptr)
+	{
+		// Get action state this frame
+		VRActiveActionSet_t ActiveActionSets[] = {
+			{
+				SteamVRInputDevice->MainActionSet,
+				k_ulInvalidInputValueHandle,
+				k_ulInvalidActionSetHandle
+			}
+		};
+
+		EVRInputError Err = VRInput()->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
+		if (Err != VRInputError_None)
+		{
+			FingerCurls = {};
+			FingerSplays = {};
+			return;
+		}
+
+		// Setup which hand data we will get from SteamVR
+		VRActionHandle_t ActiveSkeletalHand = k_ulInvalidActionHandle;
+
+		if (Hand == EHand::VR_LeftHand && SteamVRInputDevice->bIsSkeletalControllerLeftPresent && SteamVRInputDevice->VRSkeletalHandleLeft != k_ulInvalidActionHandle)
+		{
+			ActiveSkeletalHand = SteamVRInputDevice->VRSkeletalHandleLeft;
+		}
+		else if (Hand == EHand::VR_RightHand && SteamVRInputDevice->bIsSkeletalControllerRightPresent && SteamVRInputDevice->VRSkeletalHandleRight != k_ulInvalidActionHandle)
+		{
+			ActiveSkeletalHand = SteamVRInputDevice->VRSkeletalHandleRight;
+		}
+
+		// Get Skeletal Summary Data
+		VRSkeletalSummaryData_t ActiveSkeletalSummaryData;
+		if (ActiveSkeletalHand != k_ulInvalidActionHandle)
+		{
+			Err = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
+		}
+		else
+		{
+			FingerCurls = {};
+			FingerSplays = {};
+			return;
+		}
+		
+		// Update curls and splay values for output
+		if (Err == VRInputError_None)
+		{
+			FingerCurls.Thumb = ActiveSkeletalSummaryData.flFingerCurl[VRFinger_Thumb];
+			FingerCurls.Index = ActiveSkeletalSummaryData.flFingerCurl[VRFinger_Index];
+			FingerCurls.Middle = ActiveSkeletalSummaryData.flFingerCurl[VRFinger_Middle];
+			FingerCurls.Ring = ActiveSkeletalSummaryData.flFingerCurl[VRFinger_Ring];
+			FingerCurls.Pinky = ActiveSkeletalSummaryData.flFingerCurl[VRFinger_Pinky];
+
+			FingerSplays.Index_Middle = ActiveSkeletalSummaryData.flFingerSplay[VRFingerSplay_Index_Middle];
+			FingerSplays.Middle_Ring = ActiveSkeletalSummaryData.flFingerSplay[VRFingerSplay_Middle_Ring];
+			FingerSplays.Ring_Pinky = ActiveSkeletalSummaryData.flFingerSplay[VRFingerSplay_Ring_Pinky];
+			FingerSplays.Thumb_Index = ActiveSkeletalSummaryData.flFingerSplay[VRFingerSplay_Thumb_Index];
+			return;
+		}
+
+	}
+
+	// Unable to retrieve the curls and splay values for this hand, send zeroed out values back to the user
+	FingerCurls = {};
+	FingerSplays = {};
+}
+
 FSteamVRInputDevice* USteamVRInputDeviceFunctionLibrary::GetSteamVRInputDevice()
 {
 	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
@@ -366,3 +436,4 @@ FSteamVRInputDevice* USteamVRInputDeviceFunctionLibrary::GetSteamVRInputDevice()
 	}
 	return nullptr;
 }
+

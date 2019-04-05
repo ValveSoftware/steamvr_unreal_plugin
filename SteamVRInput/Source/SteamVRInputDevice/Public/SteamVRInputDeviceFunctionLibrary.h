@@ -122,6 +122,47 @@ struct STEAMVRINPUTDEVICE_API FSteamVRSkeletonTransform
 	FTransform Bone_Count;
 };
 
+/** SteamVR finger curls */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRFingerCurls
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Thumb;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Index;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Middle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Ring;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Pinky;
+};
+
+/** SteamVR finger splays */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRFingerSplays
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Thumb_Index;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Index_Middle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Middle_Ring;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	float	Ring_Pinky;
+};
+
 UENUM(BlueprintType)	
 enum class ESteamVRHand : uint8
 {
@@ -174,6 +215,14 @@ class STEAMVRINPUTDEVICE_API USteamVRInputDeviceFunctionLibrary : public UBluepr
 public:
 	/** Retrieve the first available SteamVR Input device currently active in a game */
 	static FSteamVRInputDevice* GetSteamVRInputDevice();
+
+	/**
+	* Get the finger curl and splay for a give hand in the current frame
+	* @param Hand - Which hand to get the finger curls and splay values for
+	* @param FingerCurls - Curl values for each finger pair this frame
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays);
 
 	/**
 	* Generate haptic feedback in the requested controller
