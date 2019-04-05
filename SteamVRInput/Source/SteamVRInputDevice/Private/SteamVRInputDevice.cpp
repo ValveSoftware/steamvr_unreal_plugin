@@ -1295,7 +1295,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 	// Create Action Manifest json object
 	TSharedRef<FJsonObject> ActionManifestObject = MakeShareable(new FJsonObject());
-	TArray<FString> LocalizationFields = {"language_tag", "en_US"};
+	TArray<FString> LocalizationFields = {"language_tag", "en_us"};
 
 	// Set where to look for controller binding files and prepare file manager
 	const FString ControllerBindingsPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH;
