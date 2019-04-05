@@ -1769,14 +1769,16 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 			// Check Hand if any, we have a third state in cases where a UE key does not signify handedness
 			if (AxisMapping.Key.GetFName().ToString().Contains(TEXT("(L)"), ESearchCase::CaseSensitive) ||
-				AxisMapping.Key.GetFName().ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive)
-				)
+				(AxisMapping.Key.GetFName().ToString().Contains(TEXT("_Left"), ESearchCase::CaseSensitive) 
+					&& (!AxisMapping.Key.GetFName().ToString().Contains(TEXT("_Left_"), ESearchCase::CaseSensitive))
+				))
 			{
 				KeyHand = 1;
 			}
 			else if (AxisMapping.Key.GetFName().ToString().Contains(TEXT("(R)")) ||
-				AxisMapping.Key.GetFName().ToString().Contains(TEXT("Right"))
-				)
+				(AxisMapping.Key.GetFName().ToString().Contains(TEXT("_Right"), ESearchCase::CaseSensitive)
+				&& (!AxisMapping.Key.GetFName().ToString().Contains(TEXT("_Right_"), ESearchCase::CaseSensitive))
+				))
 			{
 				KeyHand = 2;
 			}
@@ -1785,8 +1787,9 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				KeyHand = 0;
 			}
 
-			FString KeySuffix = (AxisMapping.Key.GetFName().ToString()).Right(6);
+			FString KeySuffix = (AxisMapping.Key.GetFName().ToString()).Right(12);
 			if (KeySuffix.Contains(TEXT("_X"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+				KeySuffix.Contains(TEXT("_X_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 				KeySuffix.Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 				)
 			{
@@ -1806,10 +1809,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					for (auto& AxisMappingInner : AxisMappingsInner)
 					{
 						// Find Y & Z axes
-						FString KeyNameSuffix = (AxisMappingInner.Key.GetFName().ToString()).Right(6);
+						FString KeyNameSuffix = (AxisMappingInner.Key.GetFName().ToString()).Right(12);
 
 						// Populate Axes Caches
 						if (KeyNameSuffix.Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+							KeyNameSuffix.Contains(TEXT("_Y_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 							KeyNameSuffix.Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 							)
 						{
