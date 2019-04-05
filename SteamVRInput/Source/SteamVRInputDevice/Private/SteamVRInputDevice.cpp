@@ -1255,7 +1255,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			}
 
 			// Special handling for axes
-			if (CacheMode.IsEqual(TEXT("joystick"))
+			if ((CacheMode.IsEqual(TEXT("joystick")) || CacheMode.IsEqual(TEXT("trackpad")))
 				&& InInputMapping[i].Actions[j].Right(6) == TEXT("X_axis")
 				&& CacheType == TEXT("position"))
 			{
