@@ -1262,6 +1262,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				CacheType = "";
 			}
 
+			if (CacheMode.IsEqual(TEXT("trackpad")) && CacheType == TEXT("click"))
+			{
+				CacheType = TEXT("button");
+			}
+
 			if (!CacheType.IsEmpty())
 			{
 				// Set Action Input Type
