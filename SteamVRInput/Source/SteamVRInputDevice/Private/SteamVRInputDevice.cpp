@@ -886,7 +886,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 			// Create Action Bindings in JSON Format
 			TArray<TSharedPtr<FJsonValue>> JsonValuesArray;
-			GenerateActionBindings(InInputMapping, JsonValuesArray);
+			GenerateActionBindings(InInputMapping, JsonValuesArray, SupportedController);
 
 			// Create Action Set
 			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
@@ -1064,17 +1064,18 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 	}
 }
 
-void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray)
+void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller)
 {
 	for (int i = 0; i < InInputMapping.Num(); i++)
 	{
+		// Check that we are generating bindings only for the correct controller
+		if (!InInputMapping[i].InputKey.ToString().Contains(Controller.KeyEquivalent))
+		{
+			continue;
+		}
+
 		for (int32 j = 0; j < InInputMapping[i].Actions.Num(); j++)
 		{
-			// TODO: Catch curls and splays in action events
-			if (InInputMapping[i].InputKey.ToString().Contains(TEXT("Curl"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
-				InInputMapping[i].InputKey.ToString().Contains(TEXT("Splay"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
-				continue;
-
 			// Set Cache Vars
 			FSteamVRInputState InputState;
 			FName CacheMode;
@@ -1271,7 +1272,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 
 				// Add to Sources Array
 				TSharedRef<FJsonValueObject> JsonValueObject = MakeShareable(new FJsonValueObject(ActionSourceJsonObject));
-				JsonValuesArray.Add(JsonValueObject);
+				JsonValuesArray.AddUnique(JsonValueObject);
 			}
 		}
 	}
@@ -1299,14 +1300,14 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
 	ControllerTypes.Empty();
-	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset")));
-	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive")));
-	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch")));
-	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller")));
-	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads")));
+	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset"), TEXT("Valve_Index_Headset")));
+	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("Index_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("Vive_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers"), TEXT("Vive_Tracker")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive"), TEXT("Vive")));
+	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch"), TEXT("Oculus_Touch")));
+	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller"), TEXT("Windows_MR")));
+	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads"), TEXT("Gamepads")));
 
 #pragma region ACTIONS
 	// Clear Actions cache
@@ -1755,6 +1756,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 		}
 	}
 }
+
 
 void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSettings, TArray<FName> &InOutUniqueInputs)
 {

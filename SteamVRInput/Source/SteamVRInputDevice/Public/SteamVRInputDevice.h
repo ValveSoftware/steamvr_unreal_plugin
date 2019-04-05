@@ -282,7 +282,7 @@ private:
 	* @param InInputMapping - The mapping of SteamVR actions and their controller inputs
 	* @param JsonValuesArray - The generated mappings in json format
 	*/
-	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray);
+	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller);
 
 	/** Delegate called when an action mapping has been modified in the editor  */
 	FDelegateHandle ActionMappingsChangedHandle;
