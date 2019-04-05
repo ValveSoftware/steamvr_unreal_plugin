@@ -2387,8 +2387,8 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_R_Right", "SteamVR HTC Vive Controller (R) Trackpad Right"), FKeyDetails::GamepadKey));
 
 		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Left", "SteamVR HTC Vive Controller (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Right", "SteamVR HTC Vive Controller (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Left", "SteamVR HTC Vive Controller (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Right", "SteamVR HTC Vive Controller (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Left", "SteamVR HTC Vive Controller (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Right", "SteamVR HTC Vive Controller (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Special
