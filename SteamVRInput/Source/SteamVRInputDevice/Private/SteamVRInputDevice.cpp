@@ -2094,6 +2094,9 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Left", "SteamVR Valve Index Controller (L) Trackpad Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Right", "SteamVR Valve Index Controller (R) Trackpad Press"), FKeyDetails::GamepadKey));
 
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left", "SteamVR Valve Index Controller (L) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right", "SteamVR Valve Index Controller (R) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Up_Left", "SteamVR Valve Index Controller (L) Trackpad Up"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Down_Left", "SteamVR Valve Index Controller (L) Trackpad Down"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_L_Left", "SteamVR Valve Index Controller (L) Trackpad Left"), FKeyDetails::GamepadKey));
