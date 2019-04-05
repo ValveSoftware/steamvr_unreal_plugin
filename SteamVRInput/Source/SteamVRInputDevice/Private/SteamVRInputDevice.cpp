@@ -1750,7 +1750,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 	for (const FName& XAxisName : KeyAxisNames)
 	{
 		// Set X Axis Key Name Cache
-		FName XAxisNameKey = NAME_None;
+		FName XAxisNameKey = NAME_None;	
+		FName YAxisNameKey = NAME_None;
+		FName YAxisName = NAME_None;
+		FName ZAxisNameKey = NAME_None;
+		FName ZAxisName = NAME_None;
 
 		// Retrieve input axes associated with this action
 		FindAxisMappings(InputSettings, XAxisName, KeyAxisMappings);
@@ -1760,9 +1764,6 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 		{
 			// Add axes names here for use in the auto-generation of controller bindings
 			InOutUniqueInputs.AddUnique(AxisMapping.Key.GetFName());
-
-			// Set Key Name
-			XAxisNameKey = AxisMapping.Key.GetFName();
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
 			uint32 KeyHand = 0;
@@ -1793,12 +1794,6 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				KeySuffix.Contains(TEXT("X-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 				)
 			{
-				// Axes caches
-				FName YAxisName = NAME_None;
-				FName ZAxisName = NAME_None;
-				FName YAxisNameKey = NAME_None;
-				FName ZAxisNameKey = NAME_None;
-
 				// Go through all the axis names again looking for Y and Z inputs that correspond to this X input
 				for (const FName& KeyAxisNameInner : KeyAxisNames)
 				{
@@ -1817,7 +1812,6 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 							KeyNameSuffix.Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
 							)
 						{
-
 							if (((AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("(L)"), ESearchCase::CaseSensitive) ||
 								AxisMappingInner.Key.GetFName().ToString().Contains(TEXT("Left"), ESearchCase::CaseSensitive))
 								&& KeyHand == 1) ||
@@ -1826,8 +1820,14 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 									&& KeyHand == 2)
 								)
 							{
-								YAxisName = KeyAxisNameInner;
-								YAxisNameKey = AxisMappingInner.Key.GetFName();
+								if (KeyAxisNameInner.ToString().Contains(TEXT("_Y"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+									KeyAxisNameInner.ToString().Contains(TEXT("_Y_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+									KeyAxisNameInner.ToString().Contains(TEXT("Y-Axis"), ESearchCase::CaseSensitive, ESearchDir::FromEnd)
+									) 
+								{
+									YAxisName = KeyAxisNameInner;
+									YAxisNameKey = AxisMappingInner.Key.GetFName();
+								}
 							}
 						}
 						else if (KeyNameSuffix.Contains(TEXT("_Z"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
@@ -1865,9 +1865,13 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisNameKey, YAxisNameKey, ZAxisNameKey, FVector()));
 				}
 			}
+			else
+			{
+				continue;
+			}
 
-			// If we find at least one valid, then add this action to the list of SteamVR Input Actions as Vector1
-			if (!XAxisName.IsNone())
+			// Create a Vector1 if we can't find any corresponding Y & Z axis actions for this action mapping
+			if (!XAxisName.IsNone() && YAxisName.IsNone() && ZAxisName.IsNone())
 			{
 				// [1D] Populate all Vector1 actions
 				FString AxisName1D = AxisMapping.AxisName.ToString() + TEXT(" X_axis");
