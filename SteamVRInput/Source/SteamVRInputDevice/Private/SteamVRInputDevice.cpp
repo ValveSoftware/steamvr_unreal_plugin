@@ -1143,6 +1143,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			// Set Cache Mode
 			CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
 			CacheMode = InputState.bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
+			CacheMode = InputState.bIsTrackpad && !InputState.bIsAxis ? FName(TEXT("button")) : CacheMode;
 			CacheMode = InputState.bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
 			CacheMode = InputState.bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
 			CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
@@ -1260,11 +1261,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				&& CacheType == TEXT("position"))
 			{
 				CacheType = "";
-			}
-
-			if (CacheMode.IsEqual(TEXT("trackpad")) && CacheType == TEXT("click"))
-			{
-				CacheType = TEXT("button");
 			}
 
 			if (!CacheType.IsEmpty())
