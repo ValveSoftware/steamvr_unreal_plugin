@@ -2406,7 +2406,7 @@ void FSteamVRInputDevice::InitControllerKeys()
 
 		// Grip
 		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Left", "SteamVR Windows MR Controller (L) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Right", "SteamVR Windows MR Controller (L) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Right", "SteamVR Windows MR Controller (R) Grip Press"), FKeyDetails::GamepadKey));
 
 		// Joystick
 		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Press_Left", "SteamVR Windows MR Controller (L) Joystick Press"), FKeyDetails::GamepadKey));
