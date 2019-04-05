@@ -181,12 +181,14 @@ struct FControllerType
 	bool	bIsGenerated;
 	FName	Name;
 	FString	Description;
+	FString KeyEquivalent;
 
 	FControllerType() {}
-	FControllerType(const FName& inName, const FString& inDescription)
+	FControllerType(const FName& inName, const FString& inDescription, const FString& inKeyEquivalent)
 		: bIsGenerated(false)
 		, Name(inName)
-		, Description (inDescription)
+		, Description(inDescription)
+		, KeyEquivalent(inKeyEquivalent)
 	{}
 };
 
