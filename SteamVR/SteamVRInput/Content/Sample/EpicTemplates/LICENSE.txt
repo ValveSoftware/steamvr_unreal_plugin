@@ -1,1 +1,0 @@
-Unreal Engine Third Person Template and VR Template are licensed under the Unreal Engine EULA. https://www.unrealengine.com/en-US/eula 
