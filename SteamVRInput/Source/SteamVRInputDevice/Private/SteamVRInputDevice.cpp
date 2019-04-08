@@ -1052,8 +1052,16 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Set description of Bindings file to the Project Name
 			BindingsObject->SetStringField(TEXT("description"), GameProjectName);
 
-			// Save controller binding
+			// Set Bindings File Path
 			FString BindingsFilePath = BindingsPath / SupportedController.Name.ToString() + TEXT(".json");
+
+			// Delete if it exists
+			if (FileManager.FileExists(*BindingsFilePath) && bDeleteIfExists)
+			{
+				FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BindingsFilePath);
+			}
+
+			// Save controller binding
 			FString OutputJsonString;
 			TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&OutputJsonString);
 			FJsonSerializer::Serialize(BindingsObject, JsonWriter);
