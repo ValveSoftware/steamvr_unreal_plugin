@@ -173,6 +173,9 @@ struct FSteamVRAxisKeyMapping
 	FName XAxisName;
 	FName YAxisName;
 	FName ZAxisName;
+	FName XAxisKey;
+	FName YAxisKey;
+	FName ZAxisKey;
 	FString ActionName;
 	FString ActionNameWithPath;
 	FString ControllerName;
@@ -185,6 +188,9 @@ struct FSteamVRAxisKeyMapping
 		XAxisName = NAME_None;
 		YAxisName = NAME_None;
 		ZAxisName = NAME_None;
+		XAxisKey = NAME_None;
+		YAxisKey = NAME_None;
+		ZAxisKey = NAME_None;
 		ActionName = "";
 		ControllerName = "";
 	}

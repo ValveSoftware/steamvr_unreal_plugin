@@ -429,6 +429,10 @@ void FSteamVRInputDevice::SendControllerEvents()
 				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
+					// Test what we're receiving from SteamVR
+					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %f"), *Action.Path, *Action.KeyX.ToString(), AnalogData.x);
+					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Value %f"), *Action.Path, *Action.KeyY.ToString(), AnalogData.y);
+
 					// Send individual float axis value back to the Engine
 					if (!Action.KeyX.IsNone() && AnalogData.x != Action.Value.X)
 					{
@@ -2132,6 +2136,9 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			// Check if this controller is meant to be a float X axis key
 			if (bIsXAxis)
 			{
+				// Set X Axis
+				XAxisNameKey = FName(*KeyString_X);
+
 				// Go through all the axis names again looking for Y and Z inputs that correspond to this X input
 				for (const FName& KeyAxisNameInner : KeyAxisNames)
 				{
@@ -2154,8 +2161,8 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						// Check if this is an equivalent Y Axis key for our current X Axis key
 						if (KeyString_Y.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Y))
 						{
-							YAxisName = KeyAxisNameInner;
-							YAxisNameKey = AxisMappingInner.Key.GetFName();
+							YAxisName = FName(KeyAxisNameInner);
+							YAxisNameKey = FName(*KeyString_Y);
 						}
 						else if (KeyString_Z.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Z))
 						{
@@ -2171,6 +2178,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					// [2D] There's a Y Axis but no Z, this must be a Vector2
 					AxisMapping.XAxisName = FName(AxisMapping.InputAxisKeyMapping.AxisName);
 					AxisMapping.YAxisName = FName(YAxisName);
+					
+					AxisMapping.XAxisKey = FName(XAxisNameKey);
+					AxisMapping.YAxisKey = FName(YAxisNameKey);
+					
 					AxisMapping.bIsPartofVector2 = true;
 				}
 				else if (YAxisName != NAME_None && ZAxisName != NAME_None)
@@ -2179,6 +2190,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					AxisMapping.XAxisName = FName(AxisMapping.InputAxisKeyMapping.AxisName);
 					AxisMapping.YAxisName = FName(YAxisName);
 					AxisMapping.ZAxisName = FName(ZAxisName);
+					
+					AxisMapping.XAxisKey = FName(XAxisNameKey);
+					AxisMapping.YAxisKey = FName(YAxisNameKey);
+					AxisMapping.ZAxisKey = FName(ZAxisNameKey);
+
 					AxisMapping.bIsPartofVector3 = true;
 				}
 
@@ -2307,7 +2323,8 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						AxisMapping.YAxisName.ToString() +
 						TEXT(" X Y_axis2d");
 					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
-					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisNameKey, YAxisNameKey, FVector2D()));
+					
+					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), AxisMapping.XAxisKey, AxisMapping.YAxisKey, FVector2D()));
 					AxisMapping.ActionName = FString(AxisName2D);
 					AxisMapping.ActionNameWithPath = FString(ActionPath2D);
 				}
@@ -2341,7 +2358,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				// Add a Vector 1 to our Actions List
 				FString AxisName1D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() + TEXT(" axis");
 				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
-				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisNameKey, 0.0f));
+				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), AxisMapping.InputAxisKeyMapping.Key.GetFName(), 0.0f));
 				AxisMapping.ActionName = FString(AxisName1D);
 				AxisMapping.ActionNameWithPath = FString(ActionPath);
 			}
