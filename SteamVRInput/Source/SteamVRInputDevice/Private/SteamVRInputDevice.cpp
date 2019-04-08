@@ -466,7 +466,7 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 	return false;
 }
 
-bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const FName MotionSource, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
 {
 	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
 	{
@@ -476,9 +476,8 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		VRActionHandle_t LeftActionHandle = bUseSkeletonPose ? VRSkeletalHandleLeft : VRControllerHandleLeft;
 		VRActionHandle_t RightActionHandle = bUseSkeletonPose ? VRSkeletalHandleRight : VRControllerHandleRight;
 
-		switch (DeviceHand)
+		if (MotionSource == TEXT("Left"))
 		{
-		case EControllerHand::Left:
 			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				InputError = VRInput()->GetPoseActionData(LeftActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
@@ -487,9 +486,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				return true;
 			}
-			break;
-		case EControllerHand::Right:
-			
+		}
+		else if (MotionSource == TEXT("Right"))
+		{
 			if (RightActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				InputError = VRInput()->GetPoseActionData(RightActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
@@ -498,33 +497,38 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				return true;
 			}
-			break;
-		case EControllerHand::Special_1:
+		}
+		else if (MotionSource == TEXT("Special1"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_2:
+		}
+		else if (MotionSource == TEXT("Special2"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_3:
+		}
+		else if (MotionSource == TEXT("Special3"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_4:
+		}
+		else if (MotionSource == TEXT("Special4"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_5:
+		}
+		else if (MotionSource == TEXT("Special5"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_6:
+		}
+		else if (MotionSource == TEXT("Special6"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_7:
+		}
+		else if (MotionSource == TEXT("Special7"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_8:
+		}
+		else if (MotionSource == TEXT("Special8"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		default:
-			break;
 		}
 
 		if (InputError == VRInputError_None)
@@ -562,7 +566,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 	return true;
 }
 
-ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
+ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const FName MotionSource) const
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
 
@@ -571,40 +575,45 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
 
-		switch (DeviceHand)
+		if (MotionSource == TEXT("Left"))
 		{
-		case EControllerHand::Left:
 			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Right:
+		}
+		else if (MotionSource == TEXT("Right"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_1:
+		}
+		else if (MotionSource == TEXT("Special1"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_2:
+		}
+		else if (MotionSource == TEXT("Special2"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_3:
+		}
+		else if (MotionSource == TEXT("Special3"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_4:
+		}
+		else if (MotionSource == TEXT("Special4"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_5:
+		}
+		else if (MotionSource == TEXT("Special5"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_6:
+		}
+		else if (MotionSource == TEXT("Special6"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_7:
+		}
+		else if (MotionSource == TEXT("Special7"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		case EControllerHand::Special_8:
+		}
+		else if (MotionSource == TEXT("Special8"))
+		{
 			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			break;
-		default:
-			break;
 		}
 
 		if (InputError == VRInputError_None && PoseData.pose.bDeviceIsConnected)
@@ -616,6 +625,10 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 	return TrackingStatus;
 }
 
+void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
+{
+	// Empty for now
+}
 FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
 {
 	return FName(TEXT("SteamVRInputDevice"));
@@ -787,7 +800,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 	EditorAppKey = FString(OutAppKey);
 
 	// Set Application Manifest Path - same directory where the action manifest will be
-	OutAppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+	OutAppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
 	// Create Application Manifest json objects
@@ -851,11 +864,11 @@ void FSteamVRInputDevice::ReloadActionManifest()
 		if (SteamVRSystem != nullptr)
 		{
 			// Set Action Manifest Path
-			const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+			const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
 			
 			// Load application manifest
-			FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+			FString AppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 		
@@ -1529,7 +1542,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	auto InputSettings = GetDefault<UInputSettings>();
 
 	// Set Action Manifest Path
-	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+	const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Action Manifest Path: %s"), *ManifestPath);
 
 	// Create Action Manifest json object
@@ -1537,7 +1550,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	TArray<FString> LocalizationFields = {"language_tag", "en_us"};
 
 	// Set where to look for controller binding files and prepare file manager
-	const FString ControllerBindingsPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH;
+	const FString ControllerBindingsPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Controller Bindings Path: %s"), *ControllerBindingsPath);
 	IFileManager& FileManager = FFileManagerGeneric::Get();
 
