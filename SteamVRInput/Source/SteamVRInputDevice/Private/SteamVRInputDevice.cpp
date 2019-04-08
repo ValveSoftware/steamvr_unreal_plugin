@@ -2052,7 +2052,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 		GetSteamVRMappings(KeyAxisMappings, SteamVRKeyAxisMappings);
 
 		// STEP 1: Go through all X axis mappings, checking for which type of Vector this is (1, 2 or 3)
-		for (auto& AxisMapping : SteamVRKeyAxisMappings)
+		for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings)
 		{
 			// Add axes names here for use in the auto-generation of controller bindings
 			InOutUniqueInputs.AddUnique(AxisMapping.InputAxisKeyMapping.Key.GetFName());
@@ -2086,6 +2086,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 			// Set the Controller Type for this axis mapping
 			AxisMapping.ControllerName = CurrentControllerType;
+
+			// Create a Y Equivalent of the X Action to ensure we are matching the action and not just the controller type
+			FString CurrentActionName_Y = AxisMapping.InputAxisKeyMapping.AxisName.ToString().Replace(TEXT("_X"), TEXT("_Y"));
+			FString CurrentActionName_Z = AxisMapping.InputAxisKeyMapping.AxisName.ToString().Replace(TEXT("_X"), TEXT("_Z"));
 
 			// Convert the controller key id name to a string we can do some quick checks on it
 			FString KeyString_X = AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString();
@@ -2136,12 +2140,12 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						}
 
 						// Check if this is an equivalent Y Axis key for our current X Axis key
-						if (KeyString_Y.Equals(KeyNameString))
+						if (KeyString_Y.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Y))
 						{
 							YAxisName = KeyAxisNameInner;
 							YAxisNameKey = AxisMappingInner.Key.GetFName();
 						}
-						else if (KeyString_Z.Equals(KeyNameString))
+						else if (KeyString_Z.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Z))
 						{
 							ZAxisName = KeyAxisNameInner;
 							ZAxisNameKey = AxisMappingInner.Key.GetFName();
