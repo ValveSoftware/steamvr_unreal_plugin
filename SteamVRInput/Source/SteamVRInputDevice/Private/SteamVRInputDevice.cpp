@@ -1780,7 +1780,8 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 							if (ActionNameArray.Num() > 0)
 							{
-								ActionName = FString(ActionNameArray[0]); // Grab only the first action name
+								// Grab only the first action name & remove _X
+								ActionName = FString(ActionNameArray[0]).Replace(TEXT("_X"), TEXT("")); 
 							}
 						}
 						else
