@@ -165,6 +165,46 @@ enum EActionType
 	Invalid
 };
 
+struct FSteamVRAxisKeyMapping 
+{
+	FInputAxisKeyMapping InputAxisKeyMapping;
+	bool bIsPartofVector2;
+	bool bIsPartofVector3;
+	FName XAxisName;
+	FName YAxisName;
+	FName ZAxisName;
+	FString ActionName;
+	FString ActionNameWithPath;
+	FString ControllerName;
+
+	FSteamVRAxisKeyMapping(FInputAxisKeyMapping& inInputAxisKeyMapping,  bool inIsPartofVector2, bool inIsPartofVector3)
+		: InputAxisKeyMapping(inInputAxisKeyMapping)
+		, bIsPartofVector2(inIsPartofVector2)
+		, bIsPartofVector3(inIsPartofVector3)
+	{
+		XAxisName = NAME_None;
+		YAxisName = NAME_None;
+		ZAxisName = NAME_None;
+		ActionName = "";
+		ControllerName = "";
+	}
+};
+
+struct FSteamVRInputKeyMapping
+{
+	FInputActionKeyMapping InputKeyMapping;
+	FString ActionName;
+	FString ActionNameWithPath;
+	FString ControllerName;
+
+	FSteamVRInputKeyMapping(FInputActionKeyMapping& inInputKeyMapping)
+		: InputKeyMapping(inInputKeyMapping)
+	{
+		ActionName = "";
+		ControllerName = "";
+	}
+};
+
 const FString SActionTypes[] = {
 			TEXT("boolean"),
 			TEXT("vector1"),

@@ -364,6 +364,13 @@ private:
 	void FindAxisMappings(const UInputSettings* InputSettings, const FName AxisName, TArray<FInputAxisKeyMapping>& OutMappings) const;
 
 	/**
+	* Utility funtion to add meta data to a UE Axis Key Mapping
+	* @param InUEKeyMappings - Array of UE Axis key Mappings to process
+	* @result OutMappings - Array of SteamVR Axis Key Mappings 
+	*/
+	void GetSteamVRMappings(TArray<FInputAxisKeyMapping>& InUEKeyMappings, TArray<FSteamVRAxisKeyMapping>& OutMappings);
+
+	/**
 	* Look for any Key Mappings defined in the project's DefaultInput.ini 
 	* @param InputSettings - The engine's input settings
 	* @param ActionName - The name of the action where we want to find controller inputs for
@@ -405,6 +412,13 @@ private:
 	/** Input Axis (Analog/Float) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
 	TArray<FInputAxisKeyMapping> KeyAxisMappings;
 
+	/** Input Axis (Analog/Float) action mappings defined for this project with extra metadata */
+	TArray<FSteamVRAxisKeyMapping> SteamVRKeyAxisMappings;
+
+	/** Input keys (Digital/Boolean) action mappings defined for this project with extra metadata */
+	TArray<FSteamVRInputKeyMapping> SteamVRKeyInputMappings;
+
 	/** Input Key (Digital/Boolean) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
 	TArray<FInputActionKeyMapping> KeyMappings;
+
 };
