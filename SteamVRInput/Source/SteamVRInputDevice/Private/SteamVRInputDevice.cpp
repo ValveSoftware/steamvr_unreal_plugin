@@ -616,6 +616,11 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 	return TrackingStatus;
 }
 
+FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
+{
+	return FName(TEXT("SteamVRInputDevice"));
+}
+
 void FSteamVRInputDevice::GetControllerFidelity()
 {
 	if (VRInput() !=nullptr && VRCompositor() !=nullptr)

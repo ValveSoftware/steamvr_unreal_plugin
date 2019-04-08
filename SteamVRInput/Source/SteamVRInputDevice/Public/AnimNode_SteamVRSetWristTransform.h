@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /**
 * Custom animation node that sets the wrist transform of a target pose from a reference pose
 */
-USTRUCT()
+USTRUCT(BlueprintInternalUseOnly)
 struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRSetWristTransform : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
@@ -59,10 +59,10 @@ struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRSetWristTransform : public FAnimN
 public:
 
 	// FAnimNode_Base interface
-	virtual void Initialize(const FAnimationInitializeContext& Context) override;
-	virtual void CacheBones(const FAnimationCacheBonesContext& Context) override;
-	virtual void Update(const FAnimationUpdateContext& Context) override;
-	virtual void Evaluate(FPoseContext& Output) override;
+	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
+	virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
+	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
+	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	// End of FAnimNode_Base interface
 
 	FAnimNode_SteamVRSetWristTransform();

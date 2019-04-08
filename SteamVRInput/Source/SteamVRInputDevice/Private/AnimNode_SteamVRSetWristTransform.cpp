@@ -39,7 +39,7 @@ FAnimNode_SteamVRSetWristTransform::FAnimNode_SteamVRSetWristTransform()
 {
 }
 
-void FAnimNode_SteamVRSetWristTransform::Initialize(const FAnimationInitializeContext& Context)
+void FAnimNode_SteamVRSetWristTransform::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	// Initialize our poses
 	ReferencePose.Initialize(Context);
@@ -47,19 +47,19 @@ void FAnimNode_SteamVRSetWristTransform::Initialize(const FAnimationInitializeCo
 
 }
 
-void FAnimNode_SteamVRSetWristTransform::CacheBones(const FAnimationCacheBonesContext& Context)
+void FAnimNode_SteamVRSetWristTransform::CacheBones_AnyThread(const FAnimationCacheBonesContext& Context)
 {
 
 }
 
-void FAnimNode_SteamVRSetWristTransform::Update(const FAnimationUpdateContext& Context)
+void FAnimNode_SteamVRSetWristTransform::Update_AnyThread(const FAnimationUpdateContext& Context)
 {
 	// Update our poses this frame
 	ReferencePose.Update(Context);
 	TargetPose.Update(Context);
 }
 
-void FAnimNode_SteamVRSetWristTransform::Evaluate(FPoseContext& Output)
+void FAnimNode_SteamVRSetWristTransform::Evaluate_AnyThread(FPoseContext& Output)
 {
 	Output.ResetToRefPose();
 
