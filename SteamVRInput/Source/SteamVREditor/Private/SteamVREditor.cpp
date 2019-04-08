@@ -173,13 +173,13 @@ void FSteamVREditorModule::AddSampleInputs()
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), FGamepadKeyNames::MotionController_Right_Trigger);
 
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), FGamepadKeyNames::MotionController_Left_Trigger);
 
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right);
