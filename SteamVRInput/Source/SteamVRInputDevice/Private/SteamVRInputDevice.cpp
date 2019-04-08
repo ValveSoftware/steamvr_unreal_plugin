@@ -1771,7 +1771,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 					// Set localization text for this action
 					FString ActionName = Action.Name.ToString();
-					if (ActionName.Contains("_axis"))
+					if (ActionName.Contains("axis"))
 					{
 						if (ActionName.Contains(","))
 						{
@@ -1786,7 +1786,10 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 						}
 						else
 						{
-							ActionName = ActionName.LeftChop(7); // Remove " a_axis" for the localization string
+							if (ActionName.Right(5).Equals(" axis"))
+							{
+								ActionName = ActionName.LeftChop(5); // Remove " axis" for the localization string
+							}	
 						}
 					}
 					FString LocalizationArray[] = { Action.Path, ActionName };
