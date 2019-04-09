@@ -428,16 +428,18 @@ private:
 	/** 
 	*	Utility function to match a Temporary Action with this project's action
 	*	@param ActionName - The name of the action to match the next available key to
+	*	@param bIsY - Set a Y Axis key
 	*	@return DefinedKey - The key that this action was mapped to (if successful, check return bool)
 	*	@return bool - Whether or not an available action key was set
 	*/
-	bool DefineTemporaryAction(FName ActionName, FKey& DefinedKey);
+	bool DefineTemporaryAction(FName ActionName, FKey& DefinedKey, bool bIsY=false);
 
 	/**
 	*	Utility function to look for the temporary key that matches this action
 	*	@param ActionName - The name of the action that will be used to find the temporary key
+	*   @param bIsY - Look for a Y Axis key
 	*	@return FoundKey - The matching temporary key for this action (if successful, check return bool)
 	*	@return bool - Whether or not a matching key was found for this action
 	*/
-	bool FindTemporaryActionKey(FName ActionName, FKey& FoundKey);
+	bool FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY=false);
 };

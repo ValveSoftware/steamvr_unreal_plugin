@@ -435,17 +435,26 @@ void FSteamVRInputDevice::SendControllerEvents()
 				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
-					// Find the temporary action key
-					FKey FoundKey;
-					if (FindTemporaryActionKey(Action.Name, FoundKey) && (AnalogData.x != 0.f || AnalogData.y != 0.f))
+					// Find the temporary action key (X)
+					FKey FoundKeyX;
+					if (FindTemporaryActionKey(Action.Name, FoundKeyX) && (AnalogData.x != 0.f))
 					{
 						// Test what we're receiving from SteamVR
-						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %f"), *Action.Path, *FoundKey.GetFName().ToString(), AnalogData.x);
-						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Value %f"), *Action.Path, *FoundKey.GetFName().ToString(), AnalogData.y);
+						UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
 
 						Action.Value.X = AnalogData.x;
+						MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
+					}
+
+					// Find the temporary action key (X)
+					FKey FoundKeyY;
+					if (FindTemporaryActionKey(Action.Name, FoundKeyY, true) && (AnalogData.y != 0.f))
+					{
+						// Test what we're receiving from SteamVR
+						UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
+
 						Action.Value.Y = AnalogData.y;
-						MessageHandler->OnControllerAnalog(FoundKey.GetFName(), 0, Action.Value.Y);
+						MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
 					}
 				}
 				else if (ActionStateError != Action.LastError)
@@ -2448,20 +2457,32 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
 
 				// Create new action mapping
-				FKey NewKey;
-				if (DefineTemporaryAction(FName(*AxisName2D), NewKey))
+				FKey NewKeyX;
+				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyX))
 				{
-					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
+					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyX);
 					TempInputSettings->AddAxisMapping(NewAxisMapping);
-
-					// Save temporary mapping
-					TempInputSettings->SaveKeyMappings();
 				}
 				else
 				{
-					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 X-action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
 						*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
 				}
+
+				FKey NewKeyY;
+				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyY, true))
+				{
+					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyY);
+					TempInputSettings->AddAxisMapping(NewAxisMapping);
+				}
+				else
+				{
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 Y-action [%s] unsuccessful! May have reached maximum limit of 50 actions."),
+						*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+				}
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
 			}
 		}
 		else if (AxisMapping.bIsPartofVector3)
@@ -3158,21 +3179,28 @@ void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 }
 
 
-bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedKey)
+bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedKey, bool bIsY)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Defining: %s %i"), *ActionName.ToString(), bIsY);
+
 	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
 	{
-		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
+		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()) 
+			&& (TemporaryAction.bIsY == bIsY)
+			)
 		{
 			// Already defined, let's not create a duplicate
 			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Attempt to define temporary action [%s] unsuccessful! Duplicate."), *TemporaryAction.ActionName.ToString());
 			return false;
 		}
 
+		//UE_LOG(LogTemp, Warning, TEXT("%s %i"), *ActionName.ToString(), bIsY);
+
 		if (TemporaryAction.ActionName.IsNone())
 		{
 			TemporaryAction.ActionName = FName(ActionName);
 			DefinedKey = TemporaryAction.UE4Key;
+			TemporaryAction.bIsY = bIsY;
 			return true;
 		}
 	}
@@ -3181,14 +3209,26 @@ bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedK
 }
 
 
-bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKey)
+bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY)
 {
 	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
 	{
 		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
 		{
-			FoundKey = TemporaryAction.UE4Key;
-			return true;
+			if (bIsY)
+			{
+				if (TemporaryAction.bIsY)
+				{
+					FoundKey = TemporaryAction.UE4Key;
+					return true;
+				}
+			}
+			else
+			{
+				FoundKey = TemporaryAction.UE4Key;
+				return true;
+			}
+			
 		}
 	}
 

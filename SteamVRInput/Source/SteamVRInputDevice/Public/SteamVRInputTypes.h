@@ -398,10 +398,12 @@ struct FSteamVRTemporaryAction
 {
 	FKey UE4Key;
 	FName ActionName;
+	bool bIsY;
 
 	FSteamVRTemporaryAction(const FKey& inUE4Key, const FName& inActionName)
 		: UE4Key(inUE4Key)
 		, ActionName(inActionName)
 	{
+		bIsY = false;
 	}
 };
