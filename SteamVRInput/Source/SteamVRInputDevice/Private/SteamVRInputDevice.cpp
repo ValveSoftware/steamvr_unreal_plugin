@@ -388,7 +388,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 		// Go through Actions
 		for (auto& Action : Actions)
 		{
-			if (Action.Type == EActionType::Boolean)
+			if (Action.Type == EActionType::Boolean && !Action.Path.Contains(TEXT(" axis")) && !Action.Path.Contains(TEXT("_axis")))
 			{
 				// Get digital data from SteamVR
 				InputDigitalActionData_t DigitalData;
@@ -419,6 +419,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 				else if (ActionStateError != Action.LastError)
 				{
 					GetInputError(ActionStateError, TEXT("Error encountered retrieving digital data from SteamVR"));
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("%s"), *Action.Path);
 				}
 				Action.LastError = ActionStateError;
 			}
