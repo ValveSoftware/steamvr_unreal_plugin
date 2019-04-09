@@ -406,6 +406,9 @@ void FSteamVRInputDevice::SendControllerEvents()
 					FKey FoundKey;
 					if (FindTemporaryActionKey(Action.Name, FoundKey))
 					{
+						// Test what we're receiving from SteamVR
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %i"), *Action.Path, *FoundKey.GetFName().ToString(), DigitalData.bState);
+
 						if (Action.bState)
 						{
 							MessageHandler->OnControllerButtonPressed(FoundKey.GetFName(), 0, false);
@@ -1088,7 +1091,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 	{
 		// Check if this is a generic UE motion controller key
 		bool bHasSteamVRInputs = false;
-		if (Controller.KeyEquivalent.Contains(TEXT("Motion_Controller")))
+		if (Controller.KeyEquivalent.Contains(TEXT("MotionController")))
 		{
 			// Let's check if there's any SteamVR specific key that already exists for this action
 			for (FSteamVRInputKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyInputMappings)
@@ -1346,11 +1349,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				{
 					InputState.bIsAxis2 = true;
 				}
-				else if (SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.ToString().Contains(TEXT("_axis3d")))
+				else if (SteamVRAxisKeyMapping.ActionName.Contains(TEXT("_axis3d")))
 				{
 					InputState.bIsAxis3 = true;
 				}
-				else if (SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.ToString().Contains(TEXT("_axis")))
+				else if (SteamVRAxisKeyMapping.ActionName.Contains(TEXT(" axis")))
 				{
 					InputState.bIsAxis = true;
 				}
@@ -1683,6 +1686,14 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			// Go through all the project actions
 			for (FSteamVRInputAction& Action : Actions)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Action: %s Type: [%s]"), *Action.KeyX.ToString(), *Action.GetActionTypeName());
+
+				// Do not process temporary actions
+				if (Action.KeyX.ToString().Contains(TEXT("Input_Temporary")))
+				{
+					continue;
+				}
+
 				// Check for boolean/digital input
 				if (Action.Type == EActionType::Boolean)
 				{
@@ -1702,7 +1713,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				if (Action.Type == EActionType::Vector1 || Action.Type == EActionType::Vector2 || Action.Type == EActionType::Vector3)
 				{
 					// Set Axis Actions Linked To This Input Key
-					FString ActionAxis = Action.Name.ToString().LeftChop(7); // Remove " a_axis"  Axis indicator before doing any comparisons
+					FString ActionAxis = Action.Name.ToString();
 
 					// Parse comma delimited action names into an array
 					TArray<FString> ActionAxisArray;
@@ -1996,7 +2007,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 		for (auto& KeyMapping : KeyInputMappings)
 		{
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// Get the string version of the key id we are dealing with for analysis
 			FString CurrentKey = KeyMapping.Key.GetFName().ToString();
@@ -2018,44 +2029,76 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
 			}
-
-			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")) ||
-				KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")))
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
 			{
-				// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
-				Actions.Add(FSteamVRInputAction(
-					FString(ACTION_PATH_IN) / KeyActionName.ToString(),
-					KeyActionName,
-					KeyMapping.Key.GetFName(),
-					false));
+				continue;	// explicit on purpose
+			}
+			else
+			{
+				continue;
+			}
 
-				// Add input names here for use in the auto-generation of controller bindings
-				InOutUniqueInputs.AddUnique(KeyMapping.Key.GetFName());
-
-				// Add input to Key Bindings Cache
-				FSteamVRInputKeyMapping SteamVRInputKeyMap = FSteamVRInputKeyMapping(KeyMapping);
-				SteamVRInputKeyMap.ActionName = KeyActionName.ToString();
-				SteamVRInputKeyMap.ActionNameWithPath = FString(ACTION_PATH_IN) / KeyActionName.ToString();
-				SteamVRInputKeyMap.ControllerName = CurrentControllerType;				
-				SteamVRKeyInputMappings.Add(SteamVRInputKeyMap);
-
-				// Dynamically generate a pseudo key that matches the action name
-				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
-
-				// Create new action mapping
-				FKey NewKey;
-				if (DefineTemporaryAction(FName(KeyActionName), NewKey))
+			// Only process Motion Controller if there are no SteamVR actions
+			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
+			{
+				bool bFound = false;
+				for (FInputActionKeyMapping& KeyMappingInner : KeyInputMappings)
 				{
-					FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(KeyActionName), NewKey);
-					TempInputSettings->AddActionMapping(NewActionMapping);
+					//UE_LOG(LogTemp, Warning, TEXT("SEARCH: \nActionName: %s \nActionNameInner:%s \n%s \n%s"), 
+					//	*AxisMapping.InputAxisKeyMapping.AxisName.ToString(), 
+					//	*AxisMappingInner.InputAxisKeyMapping.AxisName.ToString(),
+					//	*AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString(),
+					//	*AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString());
 
-					// Save temporary mapping
-					TempInputSettings->SaveKeyMappings();
+					if (KeyMapping.Key.GetFName().ToString().Contains(KeyMappingInner.Key.GetFName().ToString())
+						&& KeyMappingInner.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
+						&& !KeyMappingInner.Key.GetFName().ToString().Contains("Temporary"))
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("SEARCH: MOTION CONTROLLER with STEAMVR Paired action found!"));
+						bFound = true;
+						break;
+					}
 				}
-				else
+
+				if (bFound)
 				{
-					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
+					continue;
 				}
+			}
+
+			// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
+			Actions.Add(FSteamVRInputAction(
+				FString(ACTION_PATH_IN) / KeyActionName.ToString(),
+				KeyActionName,
+				KeyMapping.Key.GetFName(),
+				false));
+
+			// Add input names here for use in the auto-generation of controller bindings
+			InOutUniqueInputs.AddUnique(KeyMapping.Key.GetFName());
+
+			// Add input to Key Bindings Cache
+			FSteamVRInputKeyMapping SteamVRInputKeyMap = FSteamVRInputKeyMapping(KeyMapping);
+			SteamVRInputKeyMap.ActionName = KeyActionName.ToString();
+			SteamVRInputKeyMap.ActionNameWithPath = FString(ACTION_PATH_IN) / KeyActionName.ToString();
+			SteamVRInputKeyMap.ControllerName = CurrentControllerType;				
+			SteamVRKeyInputMappings.Add(SteamVRInputKeyMap);
+
+			// Dynamically generate a pseudo key that matches the action name
+			UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+			// Create new action mapping
+			FKey NewKey;
+			if (DefineTemporaryAction(FName(KeyActionName), NewKey))
+			{
+				FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(KeyActionName), NewKey);
+				TempInputSettings->AddActionMapping(NewActionMapping);
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
+			}
+			else
+			{
+				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define digital action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
 			}
 		}
 	}
@@ -2092,7 +2135,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			InOutUniqueInputs.AddUnique(AxisMapping.InputAxisKeyMapping.Key.GetFName());
 
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
 			uint32 KeyHand = 0;
@@ -2116,6 +2159,14 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			else if (CurrentKey.Contains(TEXT("Windows_MR")))
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
+			}
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
+			{
+				continue;	// explicit on purpose
+			}
+			else
+			{
+				continue;
 			}
 
 			// Set the Controller Type for this axis mapping
@@ -2181,11 +2232,13 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						{
 							YAxisName = FName(KeyAxisNameInner);
 							YAxisNameKey = FName(*KeyString_Y);
+							AxisMapping.bIsPartofVector2 = true;
 						}
 						else if (KeyString_Z.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Z))
 						{
 							ZAxisName = KeyAxisNameInner;
 							ZAxisNameKey = AxisMappingInner.Key.GetFName();
+							AxisMapping.bIsPartofVector3 = true;
 						}
 					}
 				}
@@ -2231,7 +2284,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			InOutUniqueInputs.AddUnique(AxisMapping.InputAxisKeyMapping.Key.GetFName());
 
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
 			uint32 KeyHand = 0;
@@ -2252,9 +2305,17 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Oculus_Touch"));
 			}
-			else if (CurrentKey.Contains(TEXT("WindowsMR")))
+			else if (CurrentKey.Contains(TEXT("Windows_MR")))
 			{
-				CurrentControllerType = FString(TEXT("WindowsMR"));
+				CurrentControllerType = FString(TEXT("Windows_MR"));
+			} 
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
+			{
+				continue;
+			}
+			else
+			{
+				continue;
 			}
 
 			// Set the Controller Type for this axis mapping
@@ -2320,101 +2381,125 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				}
 			}
 		}
+	}
 
-		// STEP 3: Create the axis action names
-		for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings) 
+	// STEP 3: Create the axis action names
+	for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings)
+	{
+		// Only process valid controllers
+		if ((!AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains("SteamVR")
+			&& !AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController"))) 
+			|| AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains("Temporary"))
 		{
-			if (AxisMapping.bIsPartofVector2)
+			continue;
+		} 
+
+		// Only process Motion Controller if there are no SteamVR actions
+		if (AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
+		{
+			bool bFound = false;
+			for (FSteamVRAxisKeyMapping& AxisMappingInner : SteamVRKeyAxisMappings)
 			{
-				// Check for empty actions
-				if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
-					AxisMapping.YAxisName == NAME_None
-					)
+				//UE_LOG(LogTemp, Warning, TEXT("SEARCH: \nActionName: %s \nActionNameInner:%s \n%s \n%s"), 
+				//	*AxisMapping.InputAxisKeyMapping.AxisName.ToString(), 
+				//	*AxisMappingInner.InputAxisKeyMapping.AxisName.ToString(),
+				//	*AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString(),
+				//	*AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString());
+
+				if (AxisMapping.InputAxisKeyMapping.AxisName.ToString().Contains(AxisMappingInner.InputAxisKeyMapping.AxisName.ToString())
+					&& AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
+					&& !AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString().Contains("Temporary"))
 				{
-					AxisMapping.bIsPartofVector2 = false;
-				}
-				else
-				{
-					// Add a Vector 2 Action to our Actions list
-					FString AxisName2D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() +
-						TEXT(",") +
-						AxisMapping.YAxisName.ToString() +
-						TEXT(" X Y_axis2d");
-					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
-					
-					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), AxisMapping.XAxisKey, AxisMapping.YAxisKey, FVector2D()));
-					AxisMapping.ActionName = FString(AxisName2D);
-					AxisMapping.ActionNameWithPath = FString(ActionPath2D);
-
-					// Dynamically generate a pseudo key that matches the action name
-					UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
-
-					// Create new action mapping
-					FKey NewKey;
-					if (DefineTemporaryAction(FName(*AxisName2D), NewKey))
-					{
-						FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(*AxisName2D), NewKey);
-						TempInputSettings->AddActionMapping(NewActionMapping);
-
-						// Save temporary mapping
-						TempInputSettings->SaveKeyMappings();
-					}
-					else
-					{
-						UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString());
-					}
+					//UE_LOG(LogTemp, Warning, TEXT("SEARCH: MOTION CONTROLLER with STEAMVR Paired action found!"));
+					bFound = true;
+					break;
 				}
 			}
-			else if (AxisMapping.bIsPartofVector3)
+
+			if (bFound)
 			{
-				// Check for empty actions
-				if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
-					AxisMapping.YAxisName == NAME_None ||
-					AxisMapping.ZAxisName == NAME_None
-					)
-				{
-					AxisMapping.bIsPartofVector3 = false;
-				}
-				else
-				{
-					// Add a Vector 3 Action to our Actions list
-					FString AxisName3D = XAxisName.ToString() +
-						TEXT(",") +
-						AxisMapping.YAxisName.ToString() + TEXT(",") +
-						AxisMapping.ZAxisName.ToString() +
-						TEXT(" X Y Z_axis3d");
-					FString ActionPath3D = FString(ACTION_PATH_IN) / AxisName3D;
-					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisNameKey, YAxisNameKey, ZAxisNameKey, FVector()));
-					AxisMapping.ActionName = FString(AxisName3D);
-					AxisMapping.ActionNameWithPath = FString(ActionPath3D);
-				}
+				continue;
+			}
+		}
+
+		if (AxisMapping.bIsPartofVector2)
+		{
+			// Check for empty actions
+			if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
+				AxisMapping.YAxisName == NAME_None
+				)
+			{
+				AxisMapping.bIsPartofVector2 = false;
 			}
 			else
 			{
-				// Add a Vector 1 to our Actions List
-				FString AxisName1D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() + TEXT(" axis");
-				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
-				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), AxisMapping.InputAxisKeyMapping.Key.GetFName(), 0.0f));
-				AxisMapping.ActionName = FString(AxisName1D);
-				AxisMapping.ActionNameWithPath = FString(ActionPath);
+				// Add a Vector 2 Action to our Actions list
+				FString AxisName2D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() +
+					TEXT(",") +
+					AxisMapping.YAxisName.ToString() +
+					TEXT(" X Y_axis2d");
+				FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
+
+				Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), AxisMapping.XAxisKey, AxisMapping.YAxisKey, FVector2D()));
+				AxisMapping.ActionName = FString(AxisName2D);
+				AxisMapping.ActionNameWithPath = FString(ActionPath2D);
 
 				// Dynamically generate a pseudo key that matches the action name
 				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
 
 				// Create new action mapping
 				FKey NewKey;
-				if (DefineTemporaryAction(FName(*AxisName1D), NewKey))
+				if (DefineTemporaryAction(FName(*AxisName2D), NewKey))
 				{
-					FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(*AxisName1D), NewKey);
-					TempInputSettings->AddActionMapping(NewActionMapping);
+					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
+					TempInputSettings->AddAxisMapping(NewAxisMapping);
 
 					// Save temporary mapping
 					TempInputSettings->SaveKeyMappings();
 				}
 				else
 				{
-					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString());
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
+						*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
 				}
+			}
+		}
+		else if (AxisMapping.bIsPartofVector3)
+		{
+			// Check for empty actions
+			if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
+				AxisMapping.YAxisName == NAME_None ||
+				AxisMapping.ZAxisName == NAME_None
+				)
+			{
+				AxisMapping.bIsPartofVector3 = false;
+			}
+		}
+		else
+		{
+			// Add a Vector 1 to our Actions List
+			FString AxisName1D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() + TEXT(" axis");
+			FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
+			Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), AxisMapping.InputAxisKeyMapping.Key.GetFName(), 0.0f));
+			AxisMapping.ActionName = FString(AxisName1D);
+			AxisMapping.ActionNameWithPath = FString(ActionPath);
+
+			// Dynamically generate a pseudo key that matches the action name
+			UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+			// Create new action mapping
+			FKey NewKey;
+			if (DefineTemporaryAction(FName(*AxisName1D), NewKey))
+			{
+				FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
+				TempInputSettings->AddAxisMapping(NewAxisMapping);
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
+			}
+			else
+			{
+				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector1 action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.AxisName.ToString());
 			}
 		}
 	}
@@ -2425,6 +2510,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 void FSteamVRInputDevice::SanitizeActions()
 {
+	return;
 	for (int32 i = 0; i < Actions.Num(); i++)
 	{
 		if (!Actions[i].KeyX.IsNone() && !Actions[i].KeyY.IsNone() && Actions[i].KeyZ.IsNone())
@@ -2996,6 +3082,24 @@ void FSteamVRInputDevice::MirrorSteamVRSkeleton(VRBoneTransform_t* BoneTransform
 
 void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 {
+	// Delete existing temporary mappings
+	UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();
+
+	for (auto& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Contains(TEXT("axis")))
+		{
+			TempInputSettings->RemoveAxisMapping(TemporaryAction.UE4Key.GetFName());
+		}
+		else
+		{
+			TempInputSettings->RemoveActionMapping(TemporaryAction.UE4Key.GetFName());
+		}
+	}
+
+	// Save temporary mapping
+	TempInputSettings->SaveKeyMappings();
+
 	SteamVRTemporaryActions.Empty();
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, NAME_None));
@@ -3007,6 +3111,17 @@ void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_11, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_12, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_13, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_14, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_15, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_16, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_17, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_18, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_19, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_20, NAME_None));
 
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_21, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_22, NAME_None));
@@ -3030,17 +3145,6 @@ void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_39, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_40, NAME_None));
 
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, NAME_None));
-	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, NAME_None));
-
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_41, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_42, NAME_None));
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_43, NAME_None));
@@ -3061,7 +3165,8 @@ bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedK
 		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
 		{
 			// Already defined, let's not create a duplicate
-			return true;
+			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Attempt to define temporary action [%s] unsuccessful! Duplicate."), *TemporaryAction.ActionName.ToString());
+			return false;
 		}
 
 		if (TemporaryAction.ActionName.IsNone())
