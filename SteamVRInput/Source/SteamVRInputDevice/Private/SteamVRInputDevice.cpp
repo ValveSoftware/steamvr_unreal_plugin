@@ -926,12 +926,9 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 	return true;
 }
-#endif
 
 void FSteamVRInputDevice::ReloadActionManifest()
 {
-#if WITH_EDITOR
-
 	if (VRInput() != nullptr && VRApplications() !=nullptr)
 	{
 		// Restart SteamVR
@@ -968,8 +965,8 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 		}
 	}
-#endif
 }
+#endif
 
 void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping, bool bDeleteIfExists)
 {
