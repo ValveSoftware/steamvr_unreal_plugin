@@ -437,23 +437,109 @@ void FSteamVRInputDevice::SendControllerEvents()
 				{
 					// Find the temporary action key (X)
 					FKey FoundKeyX;
-					if (FindTemporaryActionKey(Action.Name, FoundKeyX) && (AnalogData.x != 0.f))
+					if (FindTemporaryActionKey(Action.Name, FoundKeyX))
 					{
 						// Test what we're receiving from SteamVR
-						UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
 
-						Action.Value.X = AnalogData.x;
+						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
+						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
+						int ActionCount = 0;
+						auto InputSettings = GetDefault<UInputSettings>();
+						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+						{
+							if (Action.Type == EActionType::Vector1)
+							{
+								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
+									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+								{
+									ActionCount++;
+								}
+							}
+							else if (Action.Type == EActionType::Vector2)
+							{
+								FString ActionName2D = Action.Name.ToString().LeftChop(11);
+								FString XAction, YAction;
+								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
+								{
+									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(XAction)
+										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+									{
+										ActionCount++;
+									}
+								}
+							}
+						}
+
+						// Set MinMax for the divisor gathered from testing
+						if (ActionCount <= 0)
+						{
+							ActionCount = 1;
+						} 
+						else if (ActionCount > 4)
+						{
+							ActionCount = 4;
+						}
+
+						// Test how many actions the engine thinks we have mapped for this action
+						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
+
+						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
+						Action.Value.X = AnalogData.x / ActionCount;
 						MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
 					}
 
-					// Find the temporary action key (X)
+					// Find the temporary action key (Y)
 					FKey FoundKeyY;
-					if (FindTemporaryActionKey(Action.Name, FoundKeyY, true) && (AnalogData.y != 0.f))
+					if (FindTemporaryActionKey(Action.Name, FoundKeyY, true))
 					{
 						// Test what we're receiving from SteamVR
-						UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
 
-						Action.Value.Y = AnalogData.y;
+						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
+						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
+						int ActionCount = 0;
+						auto InputSettings = GetDefault<UInputSettings>();
+						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+						{
+							if (Action.Type == EActionType::Vector1)
+							{
+								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
+									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+								{
+									ActionCount++;
+								}
+							}
+							else if (Action.Type == EActionType::Vector2)
+							{
+								FString ActionName2D = Action.Name.ToString().LeftChop(11);
+								FString XAction, YAction;
+								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
+								{
+									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(YAction)
+										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+									{
+										ActionCount++;
+									}
+								}
+							}
+						}
+
+						// Set MinMax for the divisor gathered from testing
+						if (ActionCount <= 0)
+						{
+							ActionCount = 1;
+						}
+						else if (ActionCount > 4)
+						{
+							ActionCount = 4;
+						}
+
+						// Test how many actions the engine thinks we have mapped for this action
+						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
+
+						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
+						Action.Value.Y = AnalogData.y / ActionCount;
 						MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
 					}
 				}
@@ -2490,8 +2576,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				FKey NewKeyX;
 				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyX))
 				{
-					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyX);
-					TempInputSettings->AddAxisMapping(NewAxisMapping);
+					if (NewKeyX.GetFName() != NAME_None && FName(*AxisName2D) != NAME_None)
+					{
+						FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyX);
+						TempInputSettings->AddAxisMapping(NewAxisMapping);
+					}
 				}
 				else
 				{
@@ -2502,8 +2591,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				FKey NewKeyY;
 				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyY, true))
 				{
-					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyY);
-					TempInputSettings->AddAxisMapping(NewAxisMapping);
+					if (NewKeyY.GetFName() != NAME_None && FName(*AxisName2D) != NAME_None)
+					{
+						FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.YAxisName.ToString()), NewKeyY);
+						TempInputSettings->AddAxisMapping(NewAxisMapping);
+					}
 				}
 				else
 				{
@@ -2542,8 +2634,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			FKey NewKey;
 			if (DefineTemporaryAction(FName(*AxisName1D), NewKey))
 			{
-				FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
-				TempInputSettings->AddAxisMapping(NewAxisMapping);
+				if (NewKey.GetFName() != NAME_None && FName(*AxisName1D) != NAME_None)
+				{
+					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
+					TempInputSettings->AddAxisMapping(NewAxisMapping);
+				}
 
 				// Save temporary mapping
 				TempInputSettings->SaveKeyMappings();
