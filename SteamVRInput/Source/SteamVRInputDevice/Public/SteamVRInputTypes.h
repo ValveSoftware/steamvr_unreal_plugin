@@ -320,6 +320,20 @@ struct FSteamVRInputAction
 		, LastError(VRInputError_None)
 	{}
 
+	FSteamVRInputAction(const FString& inPath, const FName& inName, bool inRequirement, const FName& inKeyName, bool inState)
+		: Path(inPath)
+		, Name(inName)
+		, Type(Boolean)
+		, KeyX(inKeyName)
+		, KeyY()
+		, KeyZ()
+		, Value()
+		, bState(inState)
+		, bRequirement(inRequirement)
+		, Handle()
+		, LastError(VRInputError_None)
+	{}
+
 	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName, float inValue1D)
 		: Path(inPath)
 		, Name(inName)
