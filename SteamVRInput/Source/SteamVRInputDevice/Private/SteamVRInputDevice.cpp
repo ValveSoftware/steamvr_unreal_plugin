@@ -913,92 +913,75 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
 			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
 
-			// Add Controller Pose Mappings
-			TArray<TSharedPtr<FJsonValue>> ControllerPoseArray;
-
-			// Add Pose: Left Controller 
-			TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
-			ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
-			ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-			TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
-			ControllerPoseArray.Add(ControllerLeftJsonValueObject);
-
-			// Add Pose: Right Controller
-			TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
-			ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
-			ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
-			ControllerPoseArray.Add(ControllerRightJsonValueObject);
-
-			if (SupportedController.Name.ToString().Equals(TEXT("tracker")))
+			// Add tracker poses
+			if (SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker")))
 			{
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
 				// Add Pose: Special 1
 				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
 				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
 				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
 				Special1JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
-				ControllerPoseArray.Add(Special1JsonValueObject);
-	
+				TrackerPoseArray.Add(Special1JsonValueObject);
+
 				// Add Pose: Special 2
 				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
 				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
 				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
 				Special2JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
-				ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
-	
+				TrackerPoseArray.Add(Special2JsonObjectJsonValueObject);
+
 				// Add Pose: Special 3
 				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
 				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
 				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
 				Special3JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
-				ControllerPoseArray.Add(Special3JsonValueObject);
-	
+				TrackerPoseArray.Add(Special3JsonValueObject);
+
 				// Add Pose: Special 4
 				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
 				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
 				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
 				Special4JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
-				ControllerPoseArray.Add(Special4JsonValueObject);
-	
+				TrackerPoseArray.Add(Special4JsonValueObject);
+
 				// Add Pose: Special 5
 				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
 				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
 				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
 				Special5JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
-				ControllerPoseArray.Add(Special5JsonValueObject);
-	
+				TrackerPoseArray.Add(Special5JsonValueObject);
+
 				// Add Pose: Special 6
 				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
 				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
 				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
 				Special6JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
-				ControllerPoseArray.Add(Special6JsonValueObject);
-	
+				TrackerPoseArray.Add(Special6JsonValueObject);
+
 				// Add Pose: Special 7
 				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
 				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
 				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
 				Special7JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
-				ControllerPoseArray.Add(Special7JsonValueObject);
-	
+				TrackerPoseArray.Add(Special7JsonValueObject);
+
 				// Add Pose: Special 8
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
 				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
@@ -1006,55 +989,87 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				Special8JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
-				ControllerPoseArray.Add(Special8JsonValueObject);
+				TrackerPoseArray.Add(Special8JsonValueObject);
+
+				// Add Controller Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 
-			// Add Controller Input Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
-
-			// Add Skeleton Mappings
-			TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
-
-			// Add Skeleton: Left Hand 
-			TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
-			SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
-			SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
-
-			TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
-			SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
-
-			// Add Skeleton: Right Hand
-			TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
-			SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
-			SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
-
-			TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
-			SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
-
-			// Add Skeleton Input Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
-
-			// Add Haptic Mappings
-			TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
-
-			// Add Haptic: Left Hand 
-			TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
-			HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
-			HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
-
-			TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
-			HapticValuesArray.Add(HapticLeftJsonValueObject);
-
-			// Add Haptic: Right Hand
-			TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
-			HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
-			HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
-
-			TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
-			HapticValuesArray.Add(HapticRightJsonValueObject);
-
-			// Add Haptic Output Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
+			// Do not add any bindings for headsets and misc devices
+			if (!SupportedController.KeyEquivalent.Equals(TEXT("Valve_Index_Headset"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Gamepads"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker"))
+				)
+			{
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> ControllerPoseArray;
+	
+				// Add Pose: Left Controller 
+				TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
+				ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
+				ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+	
+				TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
+				ControllerPoseArray.Add(ControllerLeftJsonValueObject);
+	
+				// Add Pose: Right Controller
+				TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
+				ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
+				ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+	
+				TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
+				ControllerPoseArray.Add(ControllerRightJsonValueObject);
+	
+				// Add Controller Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
+	
+				// Add Skeleton Mappings
+				TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
+	
+				// Add Skeleton: Left Hand 
+				TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
+				SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
+				SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
+	
+				TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
+				SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
+	
+				// Add Skeleton: Right Hand
+				TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
+				SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
+				SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
+	
+				TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
+				SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
+	
+				// Add Skeleton Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
+	
+				// Add Haptic Mappings
+				TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
+	
+				// Add Haptic: Left Hand 
+				TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
+				HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
+				HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
+	
+				TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
+				HapticValuesArray.Add(HapticLeftJsonValueObject);
+	
+				// Add Haptic: Right Hand
+				TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
+				HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
+				HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
+	
+				TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
+				HapticValuesArray.Add(HapticRightJsonValueObject);
+	
+				// Add Haptic Output Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
+			}
 
 			// Create Bindings File that includes all Action Sets
 			TSharedRef<FJsonObject> BindingsJsonObject = MakeShareable(new FJsonObject());
@@ -1095,7 +1110,14 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller)
 {
-	//UE_LOG(LogTemp, Warning, TEXT(""));
+	// Check for headsets, they shouldn't have any bindings
+	if (Controller.KeyEquivalent.Equals(TEXT("Valve_Index_Headset")) 
+		|| Controller.KeyEquivalent.Equals(TEXT("Gamepads"))
+		|| Controller.KeyEquivalent.Equals(TEXT("Vive"))
+		)
+	{
+		return;
+	}
 
 	// Process Key Input Mappings
 	for (FSteamVRInputKeyMapping SteamVRKeyInputMapping : SteamVRKeyInputMappings)
