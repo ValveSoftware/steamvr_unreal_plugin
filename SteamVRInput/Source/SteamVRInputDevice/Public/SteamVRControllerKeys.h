@@ -83,6 +83,20 @@ namespace TemporaryActionKeys
 	FKey SteamVR_Input_Temporary_Action_48("SteamVR_Input_Temporary_Action_48");
 	FKey SteamVR_Input_Temporary_Action_49("SteamVR_Input_Temporary_Action_49");
 	FKey SteamVR_Input_Temporary_Action_50("SteamVR_Input_Temporary_Action_50");
+	FKey SteamVR_Input_Temporary_Action_51("SteamVR_Input_Temporary_Action_51");
+	FKey SteamVR_Input_Temporary_Action_52("SteamVR_Input_Temporary_Action_52");
+	FKey SteamVR_Input_Temporary_Action_53("SteamVR_Input_Temporary_Action_53");
+	FKey SteamVR_Input_Temporary_Action_54("SteamVR_Input_Temporary_Action_54");
+	FKey SteamVR_Input_Temporary_Action_55("SteamVR_Input_Temporary_Action_55");
+	FKey SteamVR_Input_Temporary_Action_56("SteamVR_Input_Temporary_Action_56");
+	FKey SteamVR_Input_Temporary_Action_57("SteamVR_Input_Temporary_Action_57");
+	FKey SteamVR_Input_Temporary_Action_58("SteamVR_Input_Temporary_Action_58");
+	FKey SteamVR_Input_Temporary_Action_59("SteamVR_Input_Temporary_Action_59");
+	FKey SteamVR_Input_Temporary_Action_60("SteamVR_Input_Temporary_Action_60");
+	FKey SteamVR_Input_Temporary_Action_61("SteamVR_Input_Temporary_Action_61");
+	FKey SteamVR_Input_Temporary_Action_62("SteamVR_Input_Temporary_Action_62");
+	FKey SteamVR_Input_Temporary_Action_63("SteamVR_Input_Temporary_Action_63");
+	FKey SteamVR_Input_Temporary_Action_64("SteamVR_Input_Temporary_Action_64");
 }
 
 namespace IndexControllerKeys
