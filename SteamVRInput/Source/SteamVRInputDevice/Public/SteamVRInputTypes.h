@@ -228,6 +228,7 @@ struct FControllerType
 	FName	Name;
 	FString	Description;
 	FString KeyEquivalent;
+	bool bIsActive;
 
 	FControllerType() {}
 	FControllerType(const FName& inName, const FString& inDescription, const FString& inKeyEquivalent)
@@ -235,7 +236,9 @@ struct FControllerType
 		, Name(inName)
 		, Description(inDescription)
 		, KeyEquivalent(inKeyEquivalent)
-	{}
+	{
+		bIsActive = false;
+	}
 };
 
 struct FActionPath
@@ -388,4 +391,16 @@ struct FSteamVRInputState
 	bool bIsPinchGrab;
 
 	FSteamVRInputState() {}
+};
+
+struct FSteamVRTemporaryAction
+{
+	FKey UE4Key;
+	FName ActionName;
+
+	FSteamVRTemporaryAction(const FKey& inUE4Key, const FName& inActionName)
+		: UE4Key(inUE4Key)
+		, ActionName(inActionName)
+	{
+	}
 };

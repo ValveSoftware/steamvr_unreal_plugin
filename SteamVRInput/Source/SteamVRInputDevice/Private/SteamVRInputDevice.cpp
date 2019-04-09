@@ -402,15 +402,17 @@ void FSteamVRInputDevice::SendControllerEvents()
 					Action.bState = DigitalData.bState;
 
 					// Sent event back to Engine
-					if (Action.bState && !Action.KeyX.IsNone())
+					// Find the temporary action key
+					FKey FoundKey;
+					if (FindTemporaryActionKey(Action.Name, FoundKey))
 					{
-						MessageHandler->OnControllerButtonPressed(Action.KeyX, 0, false);
-					}
-					else
-					{
-						if (!Action.KeyX.IsNone())
+						if (Action.bState)
 						{
-							MessageHandler->OnControllerButtonReleased(Action.KeyX, 0, false);
+							MessageHandler->OnControllerButtonPressed(FoundKey.GetFName(), 0, false);
+						}
+						else
+						{
+							MessageHandler->OnControllerButtonReleased(FoundKey.GetFName(), 0, false);
 						}
 					}
 				}
@@ -429,25 +431,17 @@ void FSteamVRInputDevice::SendControllerEvents()
 				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
-					// Test what we're receiving from SteamVR
-					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %f"), *Action.Path, *Action.KeyX.ToString(), AnalogData.x);
-					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Value %f"), *Action.Path, *Action.KeyY.ToString(), AnalogData.y);
+					// Find the temporary action key
+					FKey FoundKey;
+					if (FindTemporaryActionKey(Action.Name, FoundKey) && (AnalogData.x != 0.f || AnalogData.y != 0.f))
+					{
+						// Test what we're receiving from SteamVR
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %f"), *Action.Path, *FoundKey.GetFName().ToString(), AnalogData.x);
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Value %f"), *Action.Path, *FoundKey.GetFName().ToString(), AnalogData.y);
 
-					// Send individual float axis value back to the Engine
-					if (!Action.KeyX.IsNone() && AnalogData.x != Action.Value.X)
-					{
 						Action.Value.X = AnalogData.x;
-						MessageHandler->OnControllerAnalog(Action.KeyX, 0, Action.Value.X);
-					}
-					if (!Action.KeyY.IsNone() && AnalogData.y != Action.Value.Y)
-					{
 						Action.Value.Y = AnalogData.y;
-						MessageHandler->OnControllerAnalog(Action.KeyY, 0, Action.Value.Y);
-					}
-					if (!Action.KeyZ.IsNone() && AnalogData.z != Action.Value.Z)
-					{
-						Action.Value.Z = AnalogData.z;
-						MessageHandler->OnControllerAnalog(Action.KeyZ, 0, Action.Value.Z);
+						MessageHandler->OnControllerAnalog(FoundKey.GetFName(), 0, Action.Value.Y);
 					}
 				}
 				else if (ActionStateError != Action.LastError)
@@ -833,6 +827,7 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 	return true;
 }
+#endif
 
 void FSteamVRInputDevice::ReloadActionManifest()
 {
@@ -1528,7 +1523,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 		}
 	}
 }
-#endif
 
 void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
 {
@@ -1664,6 +1658,9 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 		// Add base actions to the action manifest
 		ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
+
+		// Initialize Temporary Actions
+		InitSteamVRTemporaryActions();
 
 		// Add project's input key mappings to SteamVR's Input Actions
 		ProcessKeyInputMappings(InputSettings, UniqueInputs);
@@ -2038,6 +2035,24 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 				SteamVRInputKeyMap.ActionNameWithPath = FString(ACTION_PATH_IN) / KeyActionName.ToString();
 				SteamVRInputKeyMap.ControllerName = CurrentControllerType;				
 				SteamVRKeyInputMappings.Add(SteamVRInputKeyMap);
+
+				// Dynamically generate a pseudo key that matches the action name
+				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+				// Create new action mapping
+				FKey NewKey;
+				if (DefineTemporaryAction(FName(KeyActionName), NewKey))
+				{
+					FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(KeyActionName), NewKey);
+					TempInputSettings->AddActionMapping(NewActionMapping);
+
+					// Save temporary mapping
+					TempInputSettings->SaveKeyMappings();
+				}
+				else
+				{
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
+				}
 			}
 		}
 	}
@@ -2327,6 +2342,24 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), AxisMapping.XAxisKey, AxisMapping.YAxisKey, FVector2D()));
 					AxisMapping.ActionName = FString(AxisName2D);
 					AxisMapping.ActionNameWithPath = FString(ActionPath2D);
+
+					// Dynamically generate a pseudo key that matches the action name
+					UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+					// Create new action mapping
+					FKey NewKey;
+					if (DefineTemporaryAction(FName(*AxisName2D), NewKey))
+					{
+						FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(*AxisName2D), NewKey);
+						TempInputSettings->AddActionMapping(NewActionMapping);
+
+						// Save temporary mapping
+						TempInputSettings->SaveKeyMappings();
+					}
+					else
+					{
+						UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString());
+					}
 				}
 			}
 			else if (AxisMapping.bIsPartofVector3)
@@ -2361,6 +2394,24 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), AxisMapping.InputAxisKeyMapping.Key.GetFName(), 0.0f));
 				AxisMapping.ActionName = FString(AxisName1D);
 				AxisMapping.ActionNameWithPath = FString(ActionPath);
+
+				// Dynamically generate a pseudo key that matches the action name
+				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+				// Create new action mapping
+				FKey NewKey;
+				if (DefineTemporaryAction(FName(*AxisName1D), NewKey))
+				{
+					FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(*AxisName1D), NewKey);
+					TempInputSettings->AddActionMapping(NewActionMapping);
+
+					// Save temporary mapping
+					TempInputSettings->SaveKeyMappings();
+				}
+				else
+				{
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString());
+				}
 			}
 		}
 	}
@@ -2520,12 +2571,13 @@ bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& 
 void FSteamVRInputDevice::InitControllerKeys() 
 {
 #pragma region INDEX CONTROLLER
+
 		// Buttons
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Left", "SteamVR Valve Index Controller (L) A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Right", "SteamVR Valve Index Controller (R) A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Left", "SteamVR Valve Index Controller (L) B Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Right", "SteamVR Valve Index Controller (R) B Touch"), FKeyDetails::GamepadKey));
-
+	
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Left", "SteamVR Valve Index Controller (L) A Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Right", "SteamVR Valve Index Controller (R) A Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Left", "SteamVR Valve Index Controller (L) B Press"), FKeyDetails::GamepadKey));
@@ -2767,6 +2819,60 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Right", "SteamVR Windows MR Controller (R) Application Press"), FKeyDetails::GamepadKey));
 
 #pragma endregion
+
+#pragma region TEMPORARY ACTIONS
+		// Temporary Actions
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, LOCTEXT("SteamVR_Input_Temporary_Action_1", "[STEAM VR INTERNAL] Temporary Action 1"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, LOCTEXT("SteamVR_Input_Temporary_Action_2", "[STEAM VR INTERNAL] Temporary Action 2"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, LOCTEXT("SteamVR_Input_Temporary_Action_3", "[STEAM VR INTERNAL] Temporary Action 3"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, LOCTEXT("SteamVR_Input_Temporary_Action_4", "[STEAM VR INTERNAL] Temporary Action 4"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, LOCTEXT("SteamVR_Input_Temporary_Action_5", "[STEAM VR INTERNAL] Temporary Action 5"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, LOCTEXT("SteamVR_Input_Temporary_Action_6", "[STEAM VR INTERNAL] Temporary Action 6"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, LOCTEXT("SteamVR_Input_Temporary_Action_7", "[STEAM VR INTERNAL] Temporary Action 7"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, LOCTEXT("SteamVR_Input_Temporary_Action_8", "[STEAM VR INTERNAL] Temporary Action 8"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, LOCTEXT("SteamVR_Input_Temporary_Action_9", "[STEAM VR INTERNAL] Temporary Action 9"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, LOCTEXT("SteamVR_Input_Temporary_Action_10", "[STEAM VR INTERNAL] Temporary Action 10"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_11, LOCTEXT("SteamVR_Input_Temporary_Action_11", "[STEAM VR INTERNAL] Temporary Action 11"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_12, LOCTEXT("SteamVR_Input_Temporary_Action_12", "[STEAM VR INTERNAL] Temporary Action 12"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_13, LOCTEXT("SteamVR_Input_Temporary_Action_13", "[STEAM VR INTERNAL] Temporary Action 13"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_14, LOCTEXT("SteamVR_Input_Temporary_Action_14", "[STEAM VR INTERNAL] Temporary Action 14"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_15, LOCTEXT("SteamVR_Input_Temporary_Action_15", "[STEAM VR INTERNAL] Temporary Action 15"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_16, LOCTEXT("SteamVR_Input_Temporary_Action_16", "[STEAM VR INTERNAL] Temporary Action 16"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_17, LOCTEXT("SteamVR_Input_Temporary_Action_17", "[STEAM VR INTERNAL] Temporary Action 17"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_18, LOCTEXT("SteamVR_Input_Temporary_Action_18", "[STEAM VR INTERNAL] Temporary Action 18"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_19, LOCTEXT("SteamVR_Input_Temporary_Action_19", "[STEAM VR INTERNAL] Temporary Action 19"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_20, LOCTEXT("SteamVR_Input_Temporary_Action_20", "[STEAM VR INTERNAL] Temporary Action 20"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_21, LOCTEXT("SteamVR_Input_Temporary_Action_21", "[STEAM VR INTERNAL] Temporary Action 21"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_22, LOCTEXT("SteamVR_Input_Temporary_Action_22", "[STEAM VR INTERNAL] Temporary Action 22"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_23, LOCTEXT("SteamVR_Input_Temporary_Action_23", "[STEAM VR INTERNAL] Temporary Action 23"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_24, LOCTEXT("SteamVR_Input_Temporary_Action_24", "[STEAM VR INTERNAL] Temporary Action 24"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_25, LOCTEXT("SteamVR_Input_Temporary_Action_25", "[STEAM VR INTERNAL] Temporary Action 25"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_26, LOCTEXT("SteamVR_Input_Temporary_Action_26", "[STEAM VR INTERNAL] Temporary Action 26"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_27, LOCTEXT("SteamVR_Input_Temporary_Action_27", "[STEAM VR INTERNAL] Temporary Action 27"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_28, LOCTEXT("SteamVR_Input_Temporary_Action_28", "[STEAM VR INTERNAL] Temporary Action 28"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_29, LOCTEXT("SteamVR_Input_Temporary_Action_29", "[STEAM VR INTERNAL] Temporary Action 29"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_30, LOCTEXT("SteamVR_Input_Temporary_Action_30", "[STEAM VR INTERNAL] Temporary Action 30"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_31, LOCTEXT("SteamVR_Input_Temporary_Action_31", "[STEAM VR INTERNAL] Temporary Action 31"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_32, LOCTEXT("SteamVR_Input_Temporary_Action_32", "[STEAM VR INTERNAL] Temporary Action 32"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_33, LOCTEXT("SteamVR_Input_Temporary_Action_33", "[STEAM VR INTERNAL] Temporary Action 33"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_34, LOCTEXT("SteamVR_Input_Temporary_Action_34", "[STEAM VR INTERNAL] Temporary Action 34"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_35, LOCTEXT("SteamVR_Input_Temporary_Action_35", "[STEAM VR INTERNAL] Temporary Action 35"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_36, LOCTEXT("SteamVR_Input_Temporary_Action_36", "[STEAM VR INTERNAL] Temporary Action 36"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_37, LOCTEXT("SteamVR_Input_Temporary_Action_37", "[STEAM VR INTERNAL] Temporary Action 37"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_38, LOCTEXT("SteamVR_Input_Temporary_Action_38", "[STEAM VR INTERNAL] Temporary Action 38"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_39, LOCTEXT("SteamVR_Input_Temporary_Action_39", "[STEAM VR INTERNAL] Temporary Action 39"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_40, LOCTEXT("SteamVR_Input_Temporary_Action_40", "[STEAM VR INTERNAL] Temporary Action 40"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_41, LOCTEXT("SteamVR_Input_Temporary_Action_41", "[STEAM VR INTERNAL] Temporary Action 41"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_42, LOCTEXT("SteamVR_Input_Temporary_Action_42", "[STEAM VR INTERNAL] Temporary Action 42"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_43, LOCTEXT("SteamVR_Input_Temporary_Action_43", "[STEAM VR INTERNAL] Temporary Action 43"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_44, LOCTEXT("SteamVR_Input_Temporary_Action_44", "[STEAM VR INTERNAL] Temporary Action 44"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_45, LOCTEXT("SteamVR_Input_Temporary_Action_45", "[STEAM VR INTERNAL] Temporary Action 45"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_46, LOCTEXT("SteamVR_Input_Temporary_Action_46", "[STEAM VR INTERNAL] Temporary Action 46"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_47, LOCTEXT("SteamVR_Input_Temporary_Action_47", "[STEAM VR INTERNAL] Temporary Action 47"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_48, LOCTEXT("SteamVR_Input_Temporary_Action_48", "[STEAM VR INTERNAL] Temporary Action 48"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_49, LOCTEXT("SteamVR_Input_Temporary_Action_49", "[STEAM VR INTERNAL] Temporary Action 49"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_50, LOCTEXT("SteamVR_Input_Temporary_Action_50", "[STEAM VR INTERNAL] Temporary Action 50"), FKeyDetails::GamepadKey));
+#pragma endregion
 }
 
 void FSteamVRInputDevice::GetInputError(EVRInputError InputError, FString InputAction)
@@ -2883,6 +2989,102 @@ void FSteamVRInputDevice::MirrorSteamVRSkeleton(VRBoneTransform_t* BoneTransform
 			BoneTransform.orientation.z *= -1.f;
 		}
 	}
+}
+
+void FSteamVRInputDevice::InitSteamVRTemporaryActions()
+{
+	SteamVRTemporaryActions.Empty();
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_21, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_22, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_23, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_24, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_25, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_26, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_27, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_28, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_29, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_30, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_31, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_32, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_33, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_34, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_35, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_36, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_37, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_38, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_39, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_40, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_41, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_42, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_43, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_44, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_45, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_46, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_47, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_48, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_49, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_50, NAME_None));
+}
+
+
+bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedKey)
+{
+	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
+		{
+			// Already defined, let's not create a duplicate
+			return true;
+		}
+
+		if (TemporaryAction.ActionName.IsNone())
+		{
+			TemporaryAction.ActionName = FName(ActionName);
+			DefinedKey = TemporaryAction.UE4Key;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKey)
+{
+	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
+		{
+			FoundKey = TemporaryAction.UE4Key;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE //"SteamVRInputDevice"

@@ -31,6 +31,60 @@ POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #include "InputCoreTypes.h"
 
+namespace TemporaryActionKeys
+{
+	FKey SteamVR_Input_Temporary_Action_1("SteamVR_Input_Temporary_Action_1");
+	FKey SteamVR_Input_Temporary_Action_2("SteamVR_Input_Temporary_Action_2");
+	FKey SteamVR_Input_Temporary_Action_3("SteamVR_Input_Temporary_Action_3");
+	FKey SteamVR_Input_Temporary_Action_4("SteamVR_Input_Temporary_Action_4");
+	FKey SteamVR_Input_Temporary_Action_5("SteamVR_Input_Temporary_Action_5");
+	FKey SteamVR_Input_Temporary_Action_6("SteamVR_Input_Temporary_Action_6");
+	FKey SteamVR_Input_Temporary_Action_7("SteamVR_Input_Temporary_Action_7");
+	FKey SteamVR_Input_Temporary_Action_8("SteamVR_Input_Temporary_Action_8");
+	FKey SteamVR_Input_Temporary_Action_9("SteamVR_Input_Temporary_Action_9");
+	FKey SteamVR_Input_Temporary_Action_10("SteamVR_Input_Temporary_Action_10");
+	FKey SteamVR_Input_Temporary_Action_11("SteamVR_Input_Temporary_Action_11");
+	FKey SteamVR_Input_Temporary_Action_12("SteamVR_Input_Temporary_Action_12");
+	FKey SteamVR_Input_Temporary_Action_13("SteamVR_Input_Temporary_Action_13");
+	FKey SteamVR_Input_Temporary_Action_14("SteamVR_Input_Temporary_Action_14");
+	FKey SteamVR_Input_Temporary_Action_15("SteamVR_Input_Temporary_Action_15");
+	FKey SteamVR_Input_Temporary_Action_16("SteamVR_Input_Temporary_Action_16");
+	FKey SteamVR_Input_Temporary_Action_17("SteamVR_Input_Temporary_Action_17");
+	FKey SteamVR_Input_Temporary_Action_18("SteamVR_Input_Temporary_Action_18");
+	FKey SteamVR_Input_Temporary_Action_19("SteamVR_Input_Temporary_Action_19");
+	FKey SteamVR_Input_Temporary_Action_20("SteamVR_Input_Temporary_Action_20");
+	FKey SteamVR_Input_Temporary_Action_21("SteamVR_Input_Temporary_Action_21");
+	FKey SteamVR_Input_Temporary_Action_22("SteamVR_Input_Temporary_Action_22");
+	FKey SteamVR_Input_Temporary_Action_23("SteamVR_Input_Temporary_Action_23");
+	FKey SteamVR_Input_Temporary_Action_24("SteamVR_Input_Temporary_Action_24");
+	FKey SteamVR_Input_Temporary_Action_25("SteamVR_Input_Temporary_Action_25");
+	FKey SteamVR_Input_Temporary_Action_26("SteamVR_Input_Temporary_Action_26");
+	FKey SteamVR_Input_Temporary_Action_27("SteamVR_Input_Temporary_Action_27");
+	FKey SteamVR_Input_Temporary_Action_28("SteamVR_Input_Temporary_Action_28");
+	FKey SteamVR_Input_Temporary_Action_29("SteamVR_Input_Temporary_Action_29");
+	FKey SteamVR_Input_Temporary_Action_30("SteamVR_Input_Temporary_Action_30");
+	FKey SteamVR_Input_Temporary_Action_31("SteamVR_Input_Temporary_Action_31");
+	FKey SteamVR_Input_Temporary_Action_32("SteamVR_Input_Temporary_Action_32");
+	FKey SteamVR_Input_Temporary_Action_33("SteamVR_Input_Temporary_Action_33");
+	FKey SteamVR_Input_Temporary_Action_34("SteamVR_Input_Temporary_Action_34");
+	FKey SteamVR_Input_Temporary_Action_35("SteamVR_Input_Temporary_Action_35");
+	FKey SteamVR_Input_Temporary_Action_36("SteamVR_Input_Temporary_Action_36");
+	FKey SteamVR_Input_Temporary_Action_37("SteamVR_Input_Temporary_Action_37");
+	FKey SteamVR_Input_Temporary_Action_38("SteamVR_Input_Temporary_Action_38");
+	FKey SteamVR_Input_Temporary_Action_39("SteamVR_Input_Temporary_Action_39");
+	FKey SteamVR_Input_Temporary_Action_40("SteamVR_Input_Temporary_Action_40");
+	FKey SteamVR_Input_Temporary_Action_41("SteamVR_Input_Temporary_Action_41");
+	FKey SteamVR_Input_Temporary_Action_42("SteamVR_Input_Temporary_Action_42");
+	FKey SteamVR_Input_Temporary_Action_43("SteamVR_Input_Temporary_Action_43");
+	FKey SteamVR_Input_Temporary_Action_44("SteamVR_Input_Temporary_Action_44");
+	FKey SteamVR_Input_Temporary_Action_45("SteamVR_Input_Temporary_Action_45");
+	FKey SteamVR_Input_Temporary_Action_46("SteamVR_Input_Temporary_Action_46");
+	FKey SteamVR_Input_Temporary_Action_47("SteamVR_Input_Temporary_Action_47");
+	FKey SteamVR_Input_Temporary_Action_48("SteamVR_Input_Temporary_Action_48");
+	FKey SteamVR_Input_Temporary_Action_49("SteamVR_Input_Temporary_Action_49");
+	FKey SteamVR_Input_Temporary_Action_50("SteamVR_Input_Temporary_Action_50");
+}
+
 namespace IndexControllerKeys
 {
 	// Button A
