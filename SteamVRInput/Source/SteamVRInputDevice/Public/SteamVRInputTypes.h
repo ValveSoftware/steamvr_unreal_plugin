@@ -92,6 +92,8 @@ using namespace vr;
 #define ACTION_PATH_THUMBSTICK_RIGHT	"/user/hand/right/input/thumbstick"
 #define ACTION_PATH_TRACKPAD_LEFT		"/user/hand/left/input/trackpad"
 #define ACTION_PATH_TRACKPAD_RIGHT		"/user/hand/right/input/trackpad"
+#define ACTION_PATH_JOYSTICK_LEFT		"/user/hand/left/input/joystick"
+#define ACTION_PATH_JOYSTICK_RIGHT		"/user/hand/right/input/joystick"
 #define ACTION_PATH_GRIP_LEFT			"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_RIGHT			"/user/hand/right/input/grip"
 #define ACTION_PATH_BTN_A_LEFT			"/user/hand/left/input/a"
@@ -381,6 +383,7 @@ struct FSteamVRInputState
 	bool bIsAxis3;
 	bool bIsTrigger;
 	bool bIsThumbstick;
+	bool bIsJoystick;
 	bool bIsTrackpad;
 	bool bIsGrip;
 	bool bIsCapSense;
