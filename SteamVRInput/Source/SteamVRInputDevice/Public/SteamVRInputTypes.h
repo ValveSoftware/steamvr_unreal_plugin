@@ -389,6 +389,7 @@ struct FSteamVRInputState
 	bool bIsFaceButton2;
 	bool bIsGripGrab;
 	bool bIsPinchGrab;
+	bool bIsPress;
 
 	FSteamVRInputState() {}
 };
