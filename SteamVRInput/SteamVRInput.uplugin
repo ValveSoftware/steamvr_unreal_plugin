@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
   "Version": 1,
-  "VersionName": "0,1 Alpha",
+  "VersionName": "0.5 Alpha",
   "FriendlyName": "SteamVR Input Plugin",
   "Description": "Official SteamVR Input Plugin for Unreal Engine",
   "Category": "Virtual Reality",
