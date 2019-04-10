@@ -101,13 +101,16 @@ static const int32 kMirrorTranslationOnlyBones[] = {
 FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 	: MessageHandler(InMessageHandler)
 {
-	FMemory::Memzero(ControllerStates, sizeof(ControllerStates));
-	NumControllersMapped = 0;
-	NumTrackersMapped = 0;
+	// Setup controller states
+	//FMemory::Memzero(ControllerStates, sizeof(ControllerStates));
+	//NumControllersMapped = 0;
+	//NumTrackersMapped = 0;
 
 	InitialButtonRepeatDelay = 0.2f;
 	ButtonRepeatDelay = 0.1f;
 
+	// Initializations
+	InitSteamVRSystem();
 	InitControllerMappings();
 	InitControllerKeys();
 	GenerateActionManifest();
@@ -117,23 +120,22 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	bIsSkeletalControllerRightPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), VRSkeletalHandleRight);
 
 #if WITH_EDITOR
-	// Auto-enable SteamVR Input Developer Mode 
-	if (VRSettings() != nullptr)
-	{
-		EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
-		SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Overlay);
+	// TODO: Auto-enable SteamVR Input Developer Mode (reload hmd module)
+	//if (VRSettings() != nullptr)
+	//{
+	//	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
+	//	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Overlay);
 
-		EVRSettingsError BindingFlagError = VRSettingsError_None;
-		VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
-		//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
-		//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+	//	EVRSettingsError BindingFlagError = VRSettingsError_None;
+	//	VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
+	//	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+	//	//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
+	//	//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
 
-		VR_Shutdown();
-	}
+	//	//VR_Shutdown();
+	//}
 #endif
 
-	InitSteamVRSystem();
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 }
 
@@ -144,9 +146,11 @@ FSteamVRInputDevice::~FSteamVRInputDevice()
 
 void FSteamVRInputDevice::InitSteamVRSystem()
 {
-	// Initialize OpenVR
 	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
-	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Scene);
+	SteamVRSystem = (IVRSystem*)VR_GetGenericInterface(IVRSystem_Version, &SteamVRInitError);
+
+	EVRInitError SteamVRInputError = VRInitError_Driver_NotLoaded;
+	VRInput = (IVRInput*)VR_GetGenericInterface(IVRInput_Version, &SteamVRInputError);
 
 	if (SteamVRInitError != VRInitError_None)
 	{
@@ -162,7 +166,7 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 		for (unsigned int id = 0; id < k_unMaxTrackedDeviceCount; ++id)
 		{
 			ETrackedDeviceClass trackedDeviceClass = SteamVRSystem->GetTrackedDeviceClass(id);
-			char buf[32];
+			char buf[k_unMaxPropertyStringSize];
 
 			if (trackedDeviceClass != ETrackedDeviceClass::TrackedDeviceClass_Invalid)
 			{
@@ -173,15 +177,15 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 		}
 
 		// Get Haptic Handles
-		if (VRInput() != nullptr)
+		if (SteamVRInputError == VRInitError_None)
 		{
-			LastInputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &VRVibrationLeft);
+			LastInputError = VRInput->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_LEFT))), &VRVibrationLeft);
 			if (LastInputError != VRInputError_None)
 			{
 				VRVibrationLeft = k_ulInvalidActionHandle;
 			}
 
-			LastInputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &VRVibrationRight);
+			LastInputError = VRInput->GetActionHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_VIBRATE_RIGHT))), &VRVibrationRight);
 			if (LastInputError != VRInputError_None)
 			{
 				VRVibrationRight = k_ulInvalidActionHandle;
@@ -271,7 +275,7 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bMirror, EVRSkele
 		return false;
 	}
 
-	if (VRInput() != nullptr && SteamVRSystem != nullptr)
+	if (VRInput != nullptr && SteamVRSystem != nullptr)
 	{
 		// Get the handle for the skeletal action.  If its invalid (the necessary skeletal action is not in the manifest) then return false
 		vr::VRActionHandle_t ActionHandle = (bLeftHand) ? VRSkeletalHandleLeft : VRSkeletalHandleRight;
@@ -282,7 +286,7 @@ bool FSteamVRInputDevice::GetSkeletalData(bool bLeftHand, bool bMirror, EVRSkele
 
 		// Get skeletal data
 		VRBoneTransform_t SteamVRBoneTransforms[STEAMVR_SKELETON_BONE_COUNT];
-		EVRInputError Err = VRInput()->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
+		EVRInputError Err = VRInput->GetSkeletalBoneData(ActionHandle, vr::EVRSkeletalTransformSpace::VRSkeletalTransformSpace_Parent, MotionRange, SteamVRBoneTransforms, STEAMVR_SKELETON_BONE_COUNT);
 		if (Err != VRInputError_None)
 		{
 			return false;
@@ -367,7 +371,7 @@ void FSteamVRInputDevice::SendAnalogMessage(const ETrackedControllerRole Tracked
 
 void FSteamVRInputDevice::SendControllerEvents()
 {
-	if (SteamVRSystem && VRInput())
+	if (SteamVRSystem != NULL && VRInput != NULL)
 	{
 		// Set our active action set here
 		VRActiveActionSet_t ActiveActionSets[] = {
@@ -378,7 +382,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 			}
 		};
 
-		EVRInputError ActionStateError = VRInput()->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
+		EVRInputError ActionStateError = VRInput->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
 		if (ActionStateError != VRInputError_None)
 		{
 			GetInputError(LastInputError, TEXT("Error encountered when trying to update the action state"));
@@ -388,11 +392,11 @@ void FSteamVRInputDevice::SendControllerEvents()
 		// Go through Actions
 		for (auto& Action : Actions)
 		{
-			if (Action.Type == EActionType::Boolean)
+			if (Action.Type == EActionType::Boolean && !Action.Path.Contains(TEXT(" axis")) && !Action.Path.Contains(TEXT("_axis")))
 			{
 				// Get digital data from SteamVR
 				InputDigitalActionData_t DigitalData;
-				ActionStateError = VRInput()->GetDigitalActionData(Action.Handle, &DigitalData, sizeof(DigitalData), k_ulInvalidInputValueHandle);
+				ActionStateError = VRInput->GetDigitalActionData(Action.Handle, &DigitalData, sizeof(DigitalData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None &&
 					DigitalData.bActive &&
 					DigitalData.bState != Action.bState
@@ -402,21 +406,27 @@ void FSteamVRInputDevice::SendControllerEvents()
 					Action.bState = DigitalData.bState;
 
 					// Sent event back to Engine
-					if (Action.bState && !Action.KeyX.IsNone())
+					// Find the temporary action key
+					FKey FoundKey;
+					if (FindTemporaryActionKey(Action.Name, FoundKey))
 					{
-						MessageHandler->OnControllerButtonPressed(Action.KeyX, 0, false);
-					}
-					else
-					{
-						if (!Action.KeyX.IsNone())
+						// Test what we're receiving from SteamVR
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %i"), *Action.Path, *FoundKey.GetFName().ToString(), DigitalData.bState);
+
+						if (Action.bState)
 						{
-							MessageHandler->OnControllerButtonReleased(Action.KeyX, 0, false);
+							MessageHandler->OnControllerButtonPressed(FoundKey.GetFName(), 0, false);
+						}
+						else
+						{
+							MessageHandler->OnControllerButtonReleased(FoundKey.GetFName(), 0, false);
 						}
 					}
 				}
 				else if (ActionStateError != Action.LastError)
 				{
 					GetInputError(ActionStateError, TEXT("Error encountered retrieving digital data from SteamVR"));
+					UE_LOG(LogSteamVRInputDevice, Error, TEXT("%s"), *Action.Path);
 				}
 				Action.LastError = ActionStateError;
 			}
@@ -426,24 +436,115 @@ void FSteamVRInputDevice::SendControllerEvents()
 			{
 				// Get analog data from SteamVR
 				InputAnalogActionData_t AnalogData;
-				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
+				ActionStateError = VRInput->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
 				if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
-					// Send individual float axis value back to the Engine
-					if (!Action.KeyX.IsNone() && AnalogData.x != Action.Value.X)
+					// Find the temporary action key (X)
+					FKey FoundKeyX;
+					if (FindTemporaryActionKey(Action.Name, FoundKeyX))
 					{
-						Action.Value.X = AnalogData.x;
-						MessageHandler->OnControllerAnalog(Action.KeyX, 0, Action.Value.X);
+						// Test what we're receiving from SteamVR
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
+
+						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
+						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
+						int ActionCount = 0;
+						auto InputSettings = GetDefault<UInputSettings>();
+						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+						{
+							if (Action.Type == EActionType::Vector1)
+							{
+								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
+									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+								{
+									ActionCount++;
+								}
+							}
+							else if (Action.Type == EActionType::Vector2)
+							{
+								FString ActionName2D = Action.Name.ToString().LeftChop(11);
+								FString XAction, YAction;
+								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
+								{
+									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(XAction)
+										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+									{
+										ActionCount++;
+									}
+								}
+							}
+						}
+
+						// Set MinMax for the divisor gathered from testing
+						if (ActionCount <= 0)
+						{
+							ActionCount = 1;
+						} 
+						else if (ActionCount > 4)
+						{
+							ActionCount = 4;
+						}
+
+						// Test how many actions the engine thinks we have mapped for this action
+						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
+
+						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
+						Action.Value.X = AnalogData.x / ActionCount;
+						MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
 					}
-					if (!Action.KeyY.IsNone() && AnalogData.y != Action.Value.Y)
+
+					// Find the temporary action key (Y)
+					FKey FoundKeyY;
+					if (FindTemporaryActionKey(Action.Name, FoundKeyY, true))
 					{
-						Action.Value.Y = AnalogData.y;
-						MessageHandler->OnControllerAnalog(Action.KeyY, 0, Action.Value.Y);
-					}
-					if (!Action.KeyZ.IsNone() && AnalogData.z != Action.Value.Z)
-					{
-						Action.Value.Z = AnalogData.z;
-						MessageHandler->OnControllerAnalog(Action.KeyZ, 0, Action.Value.Z);
+						// Test what we're receiving from SteamVR
+						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
+
+						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
+						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
+						int ActionCount = 0;
+						auto InputSettings = GetDefault<UInputSettings>();
+						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+						{
+							if (Action.Type == EActionType::Vector1)
+							{
+								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
+									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+								{
+									ActionCount++;
+								}
+							}
+							else if (Action.Type == EActionType::Vector2)
+							{
+								FString ActionName2D = Action.Name.ToString().LeftChop(11);
+								FString XAction, YAction;
+								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
+								{
+									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(YAction)
+										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
+									{
+										ActionCount++;
+									}
+								}
+							}
+						}
+
+						// Set MinMax for the divisor gathered from testing
+						if (ActionCount <= 0)
+						{
+							ActionCount = 1;
+						}
+						else if (ActionCount > 4)
+						{
+							ActionCount = 4;
+						}
+
+						// Test how many actions the engine thinks we have mapped for this action
+						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
+
+						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
+						Action.Value.Y = AnalogData.y / ActionCount;
+						MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
 					}
 				}
 				else if (ActionStateError != Action.LastError)
@@ -468,7 +569,7 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 
 bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
 {
-	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
+	if (VRInput !=NULL && VRCompositor() !=NULL)
 	{
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
@@ -481,7 +582,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		case EControllerHand::Left:
 			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
 			{
-				InputError = VRInput()->GetPoseActionData(LeftActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput->GetPoseActionData(LeftActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
@@ -492,7 +593,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			
 			if (RightActionHandle != vr::k_ulInvalidActionHandle)
 			{
-				InputError = VRInput()->GetPoseActionData(RightActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput->GetPoseActionData(RightActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
@@ -500,28 +601,28 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			}
 			break;
 		case EControllerHand::Special_1:
-			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_2:
-			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_3:
-			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_4:
-			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_5:
-			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_6:
-			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_7:
-			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_8:
-			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		default:
 			break;
@@ -566,7 +667,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
 
-	if (VRInput() != nullptr && VRCompositor() != nullptr)
+	if (VRInput != NULL && VRCompositor() != NULL)
 	{
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
@@ -574,34 +675,34 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 		switch (DeviceHand)
 		{
 		case EControllerHand::Left:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Right:
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_1:
-			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_2:
-			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_3:
-			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_4:
-			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_5:
-			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_6:
-			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_7:
-			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		case EControllerHand::Special_8:
-			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			break;
 		default:
 			break;
@@ -618,15 +719,15 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 
 void FSteamVRInputDevice::GetControllerFidelity()
 {
-	if (VRInput() !=nullptr && VRCompositor() !=nullptr)
+	if (VRInput !=NULL && VRCompositor() !=NULL)
 	{
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
 
-		InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected)
 		{
-			VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &LeftControllerFidelity);
+			VRInput->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &LeftControllerFidelity);
 			bIsSkeletalControllerLeftPresent = (LeftControllerFidelity >= VRSkeletalTracking_Partial);
 		}
 		else
@@ -635,10 +736,10 @@ void FSteamVRInputDevice::GetControllerFidelity()
 			LeftControllerFidelity = EVRSkeletalTrackingLevel::VRSkeletalTracking_Estimated;
 		}
 
-		InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected)
 		{
-			VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleRight, &RightControllerFidelity);
+			VRInput->GetSkeletalTrackingLevel(VRSkeletalHandleRight, &RightControllerFidelity);
 			bIsSkeletalControllerRightPresent = (RightControllerFidelity >= VRSkeletalTracking_Partial);
 		} 
 		else
@@ -654,9 +755,9 @@ void FSteamVRInputDevice::GetLeftHandPoseData(FVector& Position, FRotator& Orien
 	InputPoseActionData_t PoseData = {};
 	EVRInputError InputError = VRInputError_NoData;
 
-	if (bIsSkeletalControllerRightPresent && VRInput() != nullptr)
+	if (bIsSkeletalControllerRightPresent && VRInput != NULL)
 	{
-		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput->GetPoseActionData(VRSkeletalHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected && InputError == VRInputError_None)
 		{
 			GetUETransform(PoseData, Position, Orientation);
@@ -679,9 +780,9 @@ void FSteamVRInputDevice::GetRightHandPoseData(FVector& Position, FRotator& Orie
 	InputPoseActionData_t PoseData = {};
 	EVRInputError InputError = VRInputError_NoData;
 
-	if (bIsSkeletalControllerRightPresent && VRInput() != nullptr)
+	if (bIsSkeletalControllerRightPresent && VRInput != NULL)
 	{
-		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput->GetPoseActionData(VRSkeletalHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected && InputError == VRInputError_None)
 		{
 			GetUETransform(PoseData, Position, Orientation);
@@ -832,15 +933,13 @@ bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString Proj
 
 void FSteamVRInputDevice::ReloadActionManifest()
 {
-#if WITH_EDITOR
-
-	if (VRInput() != nullptr && VRApplications() !=nullptr)
+	if (VRInput != NULL && VRApplications() !=NULL)
 	{
 		// Restart SteamVR
-		if (SteamVRSystem)
-		{
-			VR_Shutdown();
-		}
+		//if (SteamVRSystem)
+		//{
+		//	VR_Shutdown();
+		//}
 		InitSteamVRSystem();
 
 		if (SteamVRSystem != nullptr)
@@ -866,12 +965,12 @@ void FSteamVRInputDevice::ReloadActionManifest()
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *SteamVRAppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 
 			// Set Action Manifest
-			EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
+			EVRInputError InputError = VRInput->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
 			GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
 		}
 	}
-#endif
 }
+#endif
 
 void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath, TArray<FControllerType>& InOutControllerTypes, TArray<TSharedPtr<FJsonValue>>& DefaultBindings, TArray<FSteamVRInputAction>& InActionsArray, TArray<FInputMapping>& InInputMapping, bool bDeleteIfExists)
 {
@@ -901,92 +1000,75 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
 			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
 
-			// Add Controller Pose Mappings
-			TArray<TSharedPtr<FJsonValue>> ControllerPoseArray;
-
-			// Add Pose: Left Controller 
-			TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
-			ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
-			ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-			TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
-			ControllerPoseArray.Add(ControllerLeftJsonValueObject);
-
-			// Add Pose: Right Controller
-			TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
-			ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
-			ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-			ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-			TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
-			ControllerPoseArray.Add(ControllerRightJsonValueObject);
-
-			if (SupportedController.Name.ToString().Equals(TEXT("tracker")))
+			// Add tracker poses
+			if (SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker")))
 			{
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
 				// Add Pose: Special 1
 				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
 				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
 				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
 				Special1JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
-				ControllerPoseArray.Add(Special1JsonValueObject);
-	
+				TrackerPoseArray.Add(Special1JsonValueObject);
+
 				// Add Pose: Special 2
 				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
 				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
 				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
 				Special2JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
-				ControllerPoseArray.Add(Special2JsonObjectJsonValueObject);
-	
+				TrackerPoseArray.Add(Special2JsonObjectJsonValueObject);
+
 				// Add Pose: Special 3
 				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
 				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
 				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
 				Special3JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
-				ControllerPoseArray.Add(Special3JsonValueObject);
-	
+				TrackerPoseArray.Add(Special3JsonValueObject);
+
 				// Add Pose: Special 4
 				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
 				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
 				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
 				Special4JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
-				ControllerPoseArray.Add(Special4JsonValueObject);
-	
+				TrackerPoseArray.Add(Special4JsonValueObject);
+
 				// Add Pose: Special 5
 				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
 				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
 				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
 				Special5JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
-				ControllerPoseArray.Add(Special5JsonValueObject);
-	
+				TrackerPoseArray.Add(Special5JsonValueObject);
+
 				// Add Pose: Special 6
 				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
 				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
 				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
 				Special6JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
-				ControllerPoseArray.Add(Special6JsonValueObject);
-	
+				TrackerPoseArray.Add(Special6JsonValueObject);
+
 				// Add Pose: Special 7
 				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
 				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
 				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
 				Special7JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
-	
+
 				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
-				ControllerPoseArray.Add(Special7JsonValueObject);
-	
+				TrackerPoseArray.Add(Special7JsonValueObject);
+
 				// Add Pose: Special 8
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
 				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
@@ -994,55 +1076,87 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				Special8JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
-				ControllerPoseArray.Add(Special8JsonValueObject);
+				TrackerPoseArray.Add(Special8JsonValueObject);
+
+				// Add Controller Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 
-			// Add Controller Input Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
-
-			// Add Skeleton Mappings
-			TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
-
-			// Add Skeleton: Left Hand 
-			TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
-			SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
-			SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
-
-			TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
-			SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
-
-			// Add Skeleton: Right Hand
-			TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
-			SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
-			SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
-
-			TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
-			SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
-
-			// Add Skeleton Input Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
-
-			// Add Haptic Mappings
-			TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
-
-			// Add Haptic: Left Hand 
-			TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
-			HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
-			HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
-
-			TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
-			HapticValuesArray.Add(HapticLeftJsonValueObject);
-
-			// Add Haptic: Right Hand
-			TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
-			HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
-			HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
-
-			TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
-			HapticValuesArray.Add(HapticRightJsonValueObject);
-
-			// Add Haptic Output Array To Action Set
-			ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
+			// Do not add any bindings for headsets and misc devices
+			if (!SupportedController.KeyEquivalent.Equals(TEXT("Valve_Index_Headset"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Gamepads"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker"))
+				)
+			{
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> ControllerPoseArray;
+	
+				// Add Pose: Left Controller 
+				TSharedRef<FJsonObject> ControllerLeftJsonObject = MakeShareable(new FJsonObject());
+				ControllerLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_LEFT));
+				ControllerLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+	
+				TSharedRef<FJsonValueObject> ControllerLeftJsonValueObject = MakeShareable(new FJsonValueObject(ControllerLeftJsonObject));
+				ControllerPoseArray.Add(ControllerLeftJsonValueObject);
+	
+				// Add Pose: Right Controller
+				TSharedRef<FJsonObject> ControllerRightJsonObject = MakeShareable(new FJsonObject());
+				ControllerRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_CONTROLLER_RIGHT));
+				ControllerRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				ControllerLeftJsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+	
+				TSharedRef<FJsonValueObject> ControllerRightJsonValueObject = MakeShareable(new FJsonValueObject(ControllerRightJsonObject));
+				ControllerPoseArray.Add(ControllerRightJsonValueObject);
+	
+				// Add Controller Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), ControllerPoseArray);
+	
+				// Add Skeleton Mappings
+				TArray<TSharedPtr<FJsonValue>> SkeletonValuesArray;
+	
+				// Add Skeleton: Left Hand 
+				TSharedRef<FJsonObject> SkeletonLeftJsonObject = MakeShareable(new FJsonObject());
+				SkeletonLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_LEFT));
+				SkeletonLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_LEFT));
+	
+				TSharedRef<FJsonValueObject> SkeletonLeftJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonLeftJsonObject));
+				SkeletonValuesArray.Add(SkeletonLeftJsonValueObject);
+	
+				// Add Skeleton: Right Hand
+				TSharedRef<FJsonObject> SkeletonRightJsonObject = MakeShareable(new FJsonObject());
+				SkeletonRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SKELETON_RIGHT));
+				SkeletonRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_SKEL_RIGHT));
+	
+				TSharedRef<FJsonValueObject> SkeletonRightJsonValueObject = MakeShareable(new FJsonValueObject(SkeletonRightJsonObject));
+				SkeletonValuesArray.Add(SkeletonRightJsonValueObject);
+	
+				// Add Skeleton Input Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("skeleton"), SkeletonValuesArray);
+	
+				// Add Haptic Mappings
+				TArray<TSharedPtr<FJsonValue>> HapticValuesArray;
+	
+				// Add Haptic: Left Hand 
+				TSharedRef<FJsonObject> HapticLeftJsonObject = MakeShareable(new FJsonObject());
+				HapticLeftJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_LEFT));
+				HapticLeftJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_LEFT));
+	
+				TSharedRef<FJsonValueObject> HapticLeftJsonValueObject = MakeShareable(new FJsonValueObject(HapticLeftJsonObject));
+				HapticValuesArray.Add(HapticLeftJsonValueObject);
+	
+				// Add Haptic: Right Hand
+				TSharedRef<FJsonObject> HapticRightJsonObject = MakeShareable(new FJsonObject());
+				HapticRightJsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_VIBRATE_RIGHT));
+				HapticRightJsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_USER_VIB_RIGHT));
+	
+				TSharedRef<FJsonValueObject> HapticRightJsonValueObject = MakeShareable(new FJsonValueObject(HapticRightJsonObject));
+				HapticValuesArray.Add(HapticRightJsonValueObject);
+	
+				// Add Haptic Output Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("haptics"), HapticValuesArray);
+			}
 
 			// Create Bindings File that includes all Action Sets
 			TSharedRef<FJsonObject> BindingsJsonObject = MakeShareable(new FJsonObject());
@@ -1052,8 +1166,16 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			// Set description of Bindings file to the Project Name
 			BindingsObject->SetStringField(TEXT("description"), GameProjectName);
 
-			// Save controller binding
+			// Set Bindings File Path
 			FString BindingsFilePath = BindingsPath / SupportedController.Name.ToString() + TEXT(".json");
+
+			// Delete if it exists
+			if (FileManager.FileExists(*BindingsFilePath) && bDeleteIfExists)
+			{
+				FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BindingsFilePath);
+			}
+
+			// Save controller binding
 			FString OutputJsonString;
 			TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&OutputJsonString);
 			FJsonSerializer::Serialize(BindingsObject, JsonWriter);
@@ -1075,12 +1197,21 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller)
 {
+	// Check for headsets, they shouldn't have any bindings
+	if (Controller.KeyEquivalent.Equals(TEXT("Valve_Index_Headset")) 
+		|| Controller.KeyEquivalent.Equals(TEXT("Gamepads"))
+		|| Controller.KeyEquivalent.Equals(TEXT("Vive"))
+		)
+	{
+		return;
+	}
+
 	// Process Key Input Mappings
 	for (FSteamVRInputKeyMapping SteamVRKeyInputMapping : SteamVRKeyInputMappings)
 	{
 		// Check if this is a generic UE motion controller key
 		bool bHasSteamVRInputs = false;
-		if (Controller.KeyEquivalent.Contains(TEXT("Motion_Controller")))
+		if (Controller.KeyEquivalent.Contains(TEXT("MotionController")))
 		{
 			// Let's check if there's any SteamVR specific key that already exists for this action
 			for (FSteamVRInputKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyInputMappings)
@@ -1116,16 +1247,54 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				InputState.bIsAxis2 = false;
 				InputState.bIsAxis3 = false;
 
+				// Reset Dpad States
+				InputState.bIsDpadUp = false;
+				InputState.bIsDpadDown = false;
+				InputState.bIsDpadLeft = false;
+				InputState.bIsDpadRight = false;
+
 				// Set Input State
 				FString CurrentInputKeyName = SteamVRKeyInputMapping.InputKeyMapping.Key.ToString();
 				InputState.bIsTrigger = CurrentInputKeyName.Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				InputState.bIsPress = CurrentInputKeyName.Contains(TEXT("Press"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsThumbstick = CurrentInputKeyName.Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsTrackpad = CurrentInputKeyName.Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				InputState.bIsJoystick = CurrentInputKeyName.Contains(TEXT("Joystick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsGrip = CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsLeft = CurrentInputKeyName.Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+
+				// Check for DPad Keys
+				if (CurrentInputKeyName.Contains(TEXT("_Up_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+				{
+					InputState.bIsDpadUp = true;
+					InputState.bIsDpadDown = false;
+					InputState.bIsDpadLeft = false;
+					InputState.bIsDpadRight = false;
+				}
+				else if (CurrentInputKeyName.Contains(TEXT("_Down_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+				{
+					InputState.bIsDpadUp = false;
+					InputState.bIsDpadDown = true;
+					InputState.bIsDpadLeft = false;
+					InputState.bIsDpadRight = false;
+				}
+				else if (CurrentInputKeyName.Contains(TEXT("_L_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+				{
+					InputState.bIsDpadUp = false;
+					InputState.bIsDpadDown = false;
+					InputState.bIsDpadLeft = true;
+					InputState.bIsDpadRight = false;
+				}
+				else if (CurrentInputKeyName.Contains(TEXT("_R_"), ESearchCase::CaseSensitive, ESearchDir::FromEnd))
+				{
+					InputState.bIsDpadUp = false;
+					InputState.bIsDpadDown = false;
+					InputState.bIsDpadLeft = false;
+					InputState.bIsDpadRight = true;
+				}
 
 				// Handle Special Actions for Knuckles Keys
 				if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
@@ -1155,10 +1324,12 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 
 				// Set Cache Mode
 				CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
+				CacheMode = InputState.bIsPress ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
-				CacheMode = InputState.bIsTrackpad && !InputState.bIsAxis ? FName(TEXT("button")) : CacheMode;
-				CacheMode = InputState.bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
-				CacheMode = InputState.bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
+				CacheMode = InputState.bIsJoystick ? FName(TEXT("joystick")) : CacheMode;
+				CacheMode = (InputState.bIsTrackpad || InputState.bIsJoystick) && !InputState.bIsAxis ? FName(TEXT("button")) : CacheMode;
+				CacheMode = InputState.bIsGrip ? FName(TEXT("button")) : CacheMode;
+				CacheMode = InputState.bIsThumbstick ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
 
 				// Set Cache Path
@@ -1173,6 +1344,10 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsTrackpad)
 				{
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_TRACKPAD_LEFT)) : FString(TEXT(ACTION_PATH_TRACKPAD_RIGHT));
+				}
+				else if (InputState.bIsJoystick)
+				{
+					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_JOYSTICK_LEFT)) : FString(TEXT(ACTION_PATH_JOYSTICK_RIGHT));
 				}
 				else if (InputState.bIsGrip)
 				{
@@ -1197,6 +1372,12 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_GRAB_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_GRAB_RIGHT));
 				}
 
+				// Override mode if Dpad
+				if (InputState.bIsDpadUp || InputState.bIsDpadDown || InputState.bIsDpadLeft || InputState.bIsDpadRight)
+				{
+					CacheMode = FName(TEXT("dpad"));
+				}
+
 				// Create Action Source
 				FActionSource ActionSource = FActionSource(CacheMode, CachePath);
 				TSharedRef<FJsonObject> ActionSourceJsonObject = MakeShareable(new FJsonObject());
@@ -1210,6 +1391,20 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else
 				{
 					continue;
+				}
+
+				// Add parameters if Dpad
+				if (InputState.bIsDpadUp || InputState.bIsDpadDown || InputState.bIsDpadLeft || InputState.bIsDpadRight)
+				{
+					// Create Submode
+					TSharedRef<FJsonObject> SubmodeJsonObject = MakeShareable(new FJsonObject());
+					SubmodeJsonObject->SetStringField(TEXT("sub_mode"), TEXT("click"));
+					
+					// Create Parameter
+					TSharedPtr<FJsonObject> ParametersJsonObject = MakeShareable(new FJsonObject());
+
+					// Set Submode as a parameter
+					ActionSourceJsonObject->SetObjectField(TEXT("parameters"), SubmodeJsonObject);
 				}
 
 				// Set Key Mappings
@@ -1260,6 +1455,24 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else
 				{
 					CacheType = "";
+				}
+
+				// Handle Dpad values
+				if (InputState.bIsDpadUp)
+				{
+					CacheType = "north";
+				}
+				else if (InputState.bIsDpadDown)
+				{
+					CacheType = "south";
+				}
+				else if (InputState.bIsDpadLeft)
+				{
+					CacheType = "west";
+				}
+				else if (InputState.bIsDpadRight)
+				{
+					CacheType = "east";
 				}
 
 				// Handle special actions
@@ -1336,11 +1549,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				{
 					InputState.bIsAxis2 = true;
 				}
-				else if (SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.ToString().Contains(TEXT("_axis3d")))
+				else if (SteamVRAxisKeyMapping.ActionName.Contains(TEXT("_axis3d")))
 				{
 					InputState.bIsAxis3 = true;
 				}
-				else if (SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.ToString().Contains(TEXT("_axis")))
+				else if (SteamVRAxisKeyMapping.ActionName.Contains(TEXT(" axis")))
 				{
 					InputState.bIsAxis = true;
 				}
@@ -1350,6 +1563,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				InputState.bIsTrigger = CurrentInputKeyName.Contains(TEXT("Trigger"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsThumbstick = CurrentInputKeyName.Contains(TEXT("Thumbstick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsTrackpad = CurrentInputKeyName.Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				InputState.bIsJoystick = CurrentInputKeyName.Contains(TEXT("Joystick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsGrip = CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsLeft = CurrentInputKeyName.Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
@@ -1385,6 +1599,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				// Set Cache Mode
 				CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
 				CacheMode = InputState.bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
+				CacheMode = InputState.bIsJoystick ? FName(TEXT("joystick")) : CacheMode;
 				CacheMode = InputState.bIsGrip ? FName(TEXT("force_sensor")) : CacheMode;
 				CacheMode = InputState.bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
 				CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
@@ -1401,6 +1616,10 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsTrackpad)
 				{
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_TRACKPAD_LEFT)) : FString(TEXT(ACTION_PATH_TRACKPAD_RIGHT));
+				}
+				else if (InputState.bIsJoystick)
+				{
+					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_JOYSTICK_LEFT)) : FString(TEXT(ACTION_PATH_JOYSTICK_RIGHT));
 				}
 				else if (InputState.bIsGrip)
 				{
@@ -1516,7 +1735,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 		}
 	}
 }
-#endif
 
 void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
 {
@@ -1605,7 +1823,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		}
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
-			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, true,
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 6 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
 		}
 		{
@@ -1636,7 +1854,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			const FKey* ConsoleKey = InputSettings->ConsoleKeys.FindByPredicate([](FKey& Key) { return Key.IsValid(); });
 			if (ConsoleKey != nullptr)
 			{
-				Actions.Add(FSteamVRInputAction(FString(TEXT(ACTION_PATH_OPEN_CONSOLE)), FName(TEXT("Open Console")), ConsoleKey->GetFName(), false));
+				Actions.Add(FSteamVRInputAction(FString(TEXT(ACTION_PATH_OPEN_CONSOLE)), FName(TEXT("Open Console")), false, ConsoleKey->GetFName(), false));
 			}
 		}
 
@@ -1652,6 +1870,9 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 		// Add base actions to the action manifest
 		ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
+
+		// Initialize Temporary Actions
+		InitSteamVRTemporaryActions();
 
 		// Add project's input key mappings to SteamVR's Input Actions
 		ProcessKeyInputMappings(InputSettings, UniqueInputs);
@@ -1671,6 +1892,14 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			// Go through all the project actions
 			for (FSteamVRInputAction& Action : Actions)
 			{
+				//UE_LOG(LogTemp, Warning, TEXT("Action: %s Type: [%s]"), *Action.KeyX.ToString(), *Action.GetActionTypeName());
+
+				// Do not process temporary actions
+				if (Action.KeyX.ToString().Contains(TEXT("Input_Temporary")))
+				{
+					continue;
+				}
+
 				// Check for boolean/digital input
 				if (Action.Type == EActionType::Boolean)
 				{
@@ -1690,7 +1919,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				if (Action.Type == EActionType::Vector1 || Action.Type == EActionType::Vector2 || Action.Type == EActionType::Vector3)
 				{
 					// Set Axis Actions Linked To This Input Key
-					FString ActionAxis = Action.Name.ToString().LeftChop(7); // Remove " a_axis"  Axis indicator before doing any comparisons
+					FString ActionAxis = Action.Name.ToString();
 
 					// Parse comma delimited action names into an array
 					TArray<FString> ActionAxisArray;
@@ -1763,7 +1992,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 					// Set localization text for this action
 					FString ActionName = Action.Name.ToString();
-					if (ActionName.Contains("_axis"))
+					if (ActionName.Contains("axis"))
 					{
 						if (ActionName.Contains(","))
 						{
@@ -1772,12 +2001,16 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 							if (ActionNameArray.Num() > 0)
 							{
-								ActionName = FString(ActionNameArray[0]); // Grab only the first action name
+								// Grab only the first action name & remove _X
+								ActionName = FString(ActionNameArray[0]).Replace(TEXT("_X"), TEXT("")); 
 							}
 						}
 						else
 						{
-							ActionName = ActionName.LeftChop(7); // Remove " a_axis" for the localization string
+							if (ActionName.Right(5).Equals(" axis"))
+							{
+								ActionName = ActionName.LeftChop(5); // Remove " axis" for the localization string
+							}	
 						}
 					}
 					FString LocalizationArray[] = { Action.Path, ActionName };
@@ -1980,7 +2213,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 		for (auto& KeyMapping : KeyInputMappings)
 		{
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// Get the string version of the key id we are dealing with for analysis
 			FString CurrentKey = KeyMapping.Key.GetFName().ToString();
@@ -2002,26 +2235,76 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
 			}
-
-			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")) ||
-				KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")))
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
 			{
-				// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
-				Actions.Add(FSteamVRInputAction(
-					FString(ACTION_PATH_IN) / KeyActionName.ToString(),
-					KeyActionName,
-					KeyMapping.Key.GetFName(),
-					false));
+				continue;	// explicit on purpose
+			}
+			else
+			{
+				continue;
+			}
 
-				// Add input names here for use in the auto-generation of controller bindings
-				InOutUniqueInputs.AddUnique(KeyMapping.Key.GetFName());
+			// Only process Motion Controller if there are no SteamVR actions
+			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
+			{
+				bool bFound = false;
+				for (FInputActionKeyMapping& KeyMappingInner : KeyInputMappings)
+				{
+					//UE_LOG(LogTemp, Warning, TEXT("SEARCH: \nActionName: %s \nActionNameInner:%s \n%s \n%s"), 
+					//	*AxisMapping.InputAxisKeyMapping.AxisName.ToString(), 
+					//	*AxisMappingInner.InputAxisKeyMapping.AxisName.ToString(),
+					//	*AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString(),
+					//	*AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString());
 
-				// Add input to Key Bindings Cache
-				FSteamVRInputKeyMapping SteamVRInputKeyMap = FSteamVRInputKeyMapping(KeyMapping);
-				SteamVRInputKeyMap.ActionName = KeyActionName.ToString();
-				SteamVRInputKeyMap.ActionNameWithPath = FString(ACTION_PATH_IN) / KeyActionName.ToString();
-				SteamVRInputKeyMap.ControllerName = CurrentControllerType;				
-				SteamVRKeyInputMappings.Add(SteamVRInputKeyMap);
+					if (KeyMapping.Key.GetFName().ToString().Contains(KeyMappingInner.Key.GetFName().ToString())
+						&& KeyMappingInner.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
+						&& !KeyMappingInner.Key.GetFName().ToString().Contains("Temporary"))
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("SEARCH: MOTION CONTROLLER with STEAMVR Paired action found!"));
+						bFound = true;
+						break;
+					}
+				}
+
+				if (bFound)
+				{
+					continue;
+				}
+			}
+
+			// If there's a Motion Controller or valid device input, add to the SteamVR Input Actions
+			Actions.Add(FSteamVRInputAction(
+				FString(ACTION_PATH_IN) / KeyActionName.ToString(),
+				KeyActionName,
+				KeyMapping.Key.GetFName(),
+				false));
+
+			// Add input names here for use in the auto-generation of controller bindings
+			InOutUniqueInputs.AddUnique(KeyMapping.Key.GetFName());
+
+			// Add input to Key Bindings Cache
+			FSteamVRInputKeyMapping SteamVRInputKeyMap = FSteamVRInputKeyMapping(KeyMapping);
+			SteamVRInputKeyMap.ActionName = KeyActionName.ToString();
+			SteamVRInputKeyMap.ActionNameWithPath = FString(ACTION_PATH_IN) / KeyActionName.ToString();
+			SteamVRInputKeyMap.ControllerName = CurrentControllerType;				
+			SteamVRKeyInputMappings.Add(SteamVRInputKeyMap);
+
+			// Dynamically generate a pseudo key that matches the action name
+			UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+			// Create new action mapping
+			FKey NewKey;
+			if (DefineTemporaryAction(FName(KeyActionName), NewKey))
+			{
+				FInputActionKeyMapping NewActionMapping = FInputActionKeyMapping(FName(KeyActionName), NewKey);
+				TempInputSettings->AddActionMapping(NewActionMapping);
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
+			}
+			else
+			{
+				UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define digital action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
 			}
 		}
 	}
@@ -2052,13 +2335,13 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 		GetSteamVRMappings(KeyAxisMappings, SteamVRKeyAxisMappings);
 
 		// STEP 1: Go through all X axis mappings, checking for which type of Vector this is (1, 2 or 3)
-		for (auto& AxisMapping : SteamVRKeyAxisMappings)
+		for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings)
 		{
 			// Add axes names here for use in the auto-generation of controller bindings
 			InOutUniqueInputs.AddUnique(AxisMapping.InputAxisKeyMapping.Key.GetFName());
 
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
 			uint32 KeyHand = 0;
@@ -2083,9 +2366,21 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
 			}
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
+			{
+				continue;	// explicit on purpose
+			}
+			else
+			{
+				continue;
+			}
 
 			// Set the Controller Type for this axis mapping
 			AxisMapping.ControllerName = CurrentControllerType;
+
+			// Create a Y Equivalent of the X Action to ensure we are matching the action and not just the controller type
+			FString CurrentActionName_Y = AxisMapping.InputAxisKeyMapping.AxisName.ToString().Replace(TEXT("_X"), TEXT("_Y"));
+			FString CurrentActionName_Z = AxisMapping.InputAxisKeyMapping.AxisName.ToString().Replace(TEXT("_X"), TEXT("_Z"));
 
 			// Convert the controller key id name to a string we can do some quick checks on it
 			FString KeyString_X = AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString();
@@ -2116,6 +2411,9 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			// Check if this controller is meant to be a float X axis key
 			if (bIsXAxis)
 			{
+				// Set X Axis
+				XAxisNameKey = FName(*KeyString_X);
+
 				// Go through all the axis names again looking for Y and Z inputs that correspond to this X input
 				for (const FName& KeyAxisNameInner : KeyAxisNames)
 				{
@@ -2136,15 +2434,17 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						}
 
 						// Check if this is an equivalent Y Axis key for our current X Axis key
-						if (KeyString_Y.Equals(KeyNameString))
+						if (KeyString_Y.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Y))
 						{
-							YAxisName = KeyAxisNameInner;
-							YAxisNameKey = AxisMappingInner.Key.GetFName();
+							YAxisName = FName(KeyAxisNameInner);
+							YAxisNameKey = FName(*KeyString_Y);
+							AxisMapping.bIsPartofVector2 = true;
 						}
-						else if (KeyString_Z.Equals(KeyNameString))
+						else if (KeyString_Z.Equals(KeyNameString) && AxisMappingInner.AxisName.ToString().Equals(CurrentActionName_Z))
 						{
 							ZAxisName = KeyAxisNameInner;
 							ZAxisNameKey = AxisMappingInner.Key.GetFName();
+							AxisMapping.bIsPartofVector3 = true;
 						}
 					}
 				}
@@ -2155,6 +2455,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					// [2D] There's a Y Axis but no Z, this must be a Vector2
 					AxisMapping.XAxisName = FName(AxisMapping.InputAxisKeyMapping.AxisName);
 					AxisMapping.YAxisName = FName(YAxisName);
+					
+					AxisMapping.XAxisKey = FName(XAxisNameKey);
+					AxisMapping.YAxisKey = FName(YAxisNameKey);
+					
 					AxisMapping.bIsPartofVector2 = true;
 				}
 				else if (YAxisName != NAME_None && ZAxisName != NAME_None)
@@ -2163,6 +2467,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					AxisMapping.XAxisName = FName(AxisMapping.InputAxisKeyMapping.AxisName);
 					AxisMapping.YAxisName = FName(YAxisName);
 					AxisMapping.ZAxisName = FName(ZAxisName);
+					
+					AxisMapping.XAxisKey = FName(XAxisNameKey);
+					AxisMapping.YAxisKey = FName(YAxisNameKey);
+					AxisMapping.ZAxisKey = FName(ZAxisNameKey);
+
 					AxisMapping.bIsPartofVector3 = true;
 				}
 
@@ -2181,7 +2490,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			InOutUniqueInputs.AddUnique(AxisMapping.InputAxisKeyMapping.Key.GetFName());
 
 			// Default to "MotionController" Generic UE type
-			FString CurrentControllerType = FString(TEXT("Motion_Controller"));
+			FString CurrentControllerType = FString(TEXT("MotionController"));
 
 			// If this is an X Axis key, check for the corresponding Y & Z Axes as well
 			uint32 KeyHand = 0;
@@ -2202,9 +2511,17 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Oculus_Touch"));
 			}
-			else if (CurrentKey.Contains(TEXT("WindowsMR")))
+			else if (CurrentKey.Contains(TEXT("Windows_MR")))
 			{
-				CurrentControllerType = FString(TEXT("WindowsMR"));
+				CurrentControllerType = FString(TEXT("Windows_MR"));
+			} 
+			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
+			{
+				continue;
+			}
+			else
+			{
+				continue;
 			}
 
 			// Set the Controller Type for this axis mapping
@@ -2270,65 +2587,147 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				}
 			}
 		}
+	}
 
-		// STEP 3: Create the axis action names
-		for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings) 
+	// STEP 3: Create the axis action names
+	for (FSteamVRAxisKeyMapping& AxisMapping : SteamVRKeyAxisMappings)
+	{
+		// Only process valid controllers
+		if ((!AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains("SteamVR")
+			&& !AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController"))) 
+			|| AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains("Temporary"))
 		{
-			if (AxisMapping.bIsPartofVector2)
+			continue;
+		} 
+
+		// Only process Motion Controller if there are no SteamVR actions
+		if (AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
+		{
+			bool bFound = false;
+			for (FSteamVRAxisKeyMapping& AxisMappingInner : SteamVRKeyAxisMappings)
 			{
-				// Check for empty actions
-				if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
-					AxisMapping.YAxisName == NAME_None
-					)
+				//UE_LOG(LogTemp, Warning, TEXT("SEARCH: \nActionName: %s \nActionNameInner:%s \n%s \n%s"), 
+				//	*AxisMapping.InputAxisKeyMapping.AxisName.ToString(), 
+				//	*AxisMappingInner.InputAxisKeyMapping.AxisName.ToString(),
+				//	*AxisMapping.InputAxisKeyMapping.Key.GetFName().ToString(),
+				//	*AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString());
+
+				if (AxisMapping.InputAxisKeyMapping.AxisName.ToString().Contains(AxisMappingInner.InputAxisKeyMapping.AxisName.ToString())
+					&& AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
+					&& !AxisMappingInner.InputAxisKeyMapping.Key.GetFName().ToString().Contains("Temporary"))
 				{
-					AxisMapping.bIsPartofVector2 = false;
-				}
-				else
-				{
-					// Add a Vector 2 Action to our Actions list
-					FString AxisName2D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() +
-						TEXT(",") +
-						AxisMapping.YAxisName.ToString() +
-						TEXT(" X Y_axis2d");
-					FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
-					Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), XAxisNameKey, YAxisNameKey, FVector2D()));
-					AxisMapping.ActionName = FString(AxisName2D);
-					AxisMapping.ActionNameWithPath = FString(ActionPath2D);
+					//UE_LOG(LogTemp, Warning, TEXT("SEARCH: MOTION CONTROLLER with STEAMVR Paired action found!"));
+					bFound = true;
+					break;
 				}
 			}
-			else if (AxisMapping.bIsPartofVector3)
+
+			if (bFound)
 			{
-				// Check for empty actions
-				if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
-					AxisMapping.YAxisName == NAME_None ||
-					AxisMapping.ZAxisName == NAME_None
-					)
-				{
-					AxisMapping.bIsPartofVector3 = false;
-				}
-				else
-				{
-					// Add a Vector 3 Action to our Actions list
-					FString AxisName3D = XAxisName.ToString() +
-						TEXT(",") +
-						AxisMapping.YAxisName.ToString() + TEXT(",") +
-						AxisMapping.ZAxisName.ToString() +
-						TEXT(" X Y Z_axis3d");
-					FString ActionPath3D = FString(ACTION_PATH_IN) / AxisName3D;
-					Actions.Add(FSteamVRInputAction(ActionPath3D, FName(*AxisName3D), XAxisNameKey, YAxisNameKey, ZAxisNameKey, FVector()));
-					AxisMapping.ActionName = FString(AxisName3D);
-					AxisMapping.ActionNameWithPath = FString(ActionPath3D);
-				}
+				continue;
+			}
+		}
+
+		if (AxisMapping.bIsPartofVector2)
+		{
+			// Check for empty actions
+			if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
+				AxisMapping.YAxisName == NAME_None
+				)
+			{
+				AxisMapping.bIsPartofVector2 = false;
 			}
 			else
 			{
-				// Add a Vector 1 to our Actions List
-				FString AxisName1D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() + TEXT(" axis");
-				FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
-				Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), XAxisNameKey, 0.0f));
-				AxisMapping.ActionName = FString(AxisName1D);
-				AxisMapping.ActionNameWithPath = FString(ActionPath);
+				// Add a Vector 2 Action to our Actions list
+				FString AxisName2D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() +
+					TEXT(",") +
+					AxisMapping.YAxisName.ToString() +
+					TEXT(" X Y_axis2d");
+				FString ActionPath2D = FString(ACTION_PATH_IN) / AxisName2D;
+
+				Actions.Add(FSteamVRInputAction(ActionPath2D, FName(*AxisName2D), AxisMapping.XAxisKey, AxisMapping.YAxisKey, FVector2D()));
+				AxisMapping.ActionName = FString(AxisName2D);
+				AxisMapping.ActionNameWithPath = FString(ActionPath2D);
+
+				// Dynamically generate a pseudo key that matches the action name
+				UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+				// Create new action mapping
+				FKey NewKeyX;
+				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyX))
+				{
+					if (NewKeyX.GetFName() != NAME_None && FName(*AxisName2D) != NAME_None)
+					{
+						FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKeyX);
+						TempInputSettings->AddAxisMapping(NewAxisMapping);
+					}
+				}
+				//else
+				//{
+				//	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define temporary Vector2 X-action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
+				//		*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+				//}
+
+				FKey NewKeyY;
+				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyY, true))
+				{
+					if (NewKeyY.GetFName() != NAME_None && FName(*AxisName2D) != NAME_None)
+					{
+						FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.YAxisName.ToString()), NewKeyY);
+						TempInputSettings->AddAxisMapping(NewAxisMapping);
+					}
+				}
+				else
+				//{
+				//	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 Y-action [%s] unsuccessful! May have reached maximum limit of 50 actions."),
+				//		*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+				//}
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
 			}
+		}
+		else if (AxisMapping.bIsPartofVector3)
+		{
+			// Check for empty actions
+			if (AxisMapping.InputAxisKeyMapping.AxisName == NAME_None ||
+				AxisMapping.YAxisName == NAME_None ||
+				AxisMapping.ZAxisName == NAME_None
+				)
+			{
+				AxisMapping.bIsPartofVector3 = false;
+			}
+		}
+		else
+		{
+			// Add a Vector 1 to our Actions List
+			FString AxisName1D = AxisMapping.InputAxisKeyMapping.AxisName.ToString() + TEXT(" axis");
+			FString ActionPath = FString(ACTION_PATH_IN) / AxisName1D;
+			Actions.Add(FSteamVRInputAction(ActionPath, FName(*AxisName1D), AxisMapping.InputAxisKeyMapping.Key.GetFName(), 0.0f));
+			AxisMapping.ActionName = FString(AxisName1D);
+			AxisMapping.ActionNameWithPath = FString(ActionPath);
+
+			// Dynamically generate a pseudo key that matches the action name
+			UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();		// Create new Input Settings
+
+			// Create new action mapping
+			FKey NewKey;
+			if (DefineTemporaryAction(FName(*AxisName1D), NewKey))
+			{
+				if (NewKey.GetFName() != NAME_None && FName(*AxisName1D) != NAME_None)
+				{
+					FInputAxisKeyMapping NewAxisMapping = FInputAxisKeyMapping(FName(*AxisMapping.InputAxisKeyMapping.AxisName.ToString()), NewKey);
+					TempInputSettings->AddAxisMapping(NewAxisMapping);
+				}
+
+				// Save temporary mapping
+				TempInputSettings->SaveKeyMappings();
+			}
+			//else
+			//{
+			//	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector1 action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+			//}
 		}
 	}
 
@@ -2338,6 +2737,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 void FSteamVRInputDevice::SanitizeActions()
 {
+	return;
 	for (int32 i = 0; i < Actions.Num(); i++)
 	{
 		if (!Actions[i].KeyX.IsNone() && !Actions[i].KeyY.IsNone() && Actions[i].KeyZ.IsNone())
@@ -2355,7 +2755,8 @@ void FSteamVRInputDevice::SanitizeActions()
 
 void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 {
-	if (VRApplications() != nullptr && VRInput() != nullptr)
+
+	if (VRInput != NULL)
 	{
 		// Get Project Name this plugin is used in
 		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
@@ -2379,42 +2780,54 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		}
 
 		// Restart SteamVR
-		if (SteamVRSystem)
-		{
-			VR_Shutdown();
-		}
+		//if (SteamVRSystem)
+		//{
+		//	//VR_Shutdown();
+		//}
 		InitSteamVRSystem();
 
 #if WITH_EDITOR
-		// Generate Application Manifest
-		FString AppKey, AppManifestPath;
-
-		GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath);
-
-		char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
-
-		// Load application manifest
-		EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
-
-		// Set AppKey for this Editor Session
-		AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		if (VRApplications() != NULL)
+		{
+			// Generate Application Manifest
+			FString AppKey, AppManifestPath;
+	
+			GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath);
+	
+			char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
+	
+			// Load application manifest
+			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+	
+			// Set AppKey for this Editor Session
+			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		}
 #endif
 
 		// Set Action Manifest
-		EVRInputError InputError = VRInput()->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-		GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
+		FString TheActionManifestPath;
+		
+		#if WITH_EDITOR
+			TheActionManifestPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath);
+		#else
+			TheActionManifestPath = FPaths::ConvertRelativePathToFull(FPaths::GameDir() / TEXT("Config") / TEXT("SteamVRBindings") / TEXT(ACTION_MANIFEST)).Replace(TEXT("/"), TEXT("\\"));
+		#endif
+		
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Trying to load Action Manifest from: %s"), *TheActionManifestPath);
+		EVRInputError InputError = VRInput->SetActionManifestPath(TCHAR_TO_UTF8(*TheActionManifestPath));
+		GetInputError(InputError, FString(TEXT("Setting Action Manifest Path Result")));
 
 		// Set Main Action Set
-		InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
+		InputError = VRInput->GetActionSetHandle(ACTION_SET, &MainActionSet);
 		GetInputError(InputError, FString(TEXT("Setting main action set")));
 
 		// Fill in Action handles for each registered action
 		for (auto& Action : Actions)
 		{
 			VRActionHandle_t Handle;
-			InputError = VRInput()->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
+			InputError = VRInput->GetActionHandle(TCHAR_TO_UTF8(*Action.Path), &Handle);
 			Action.Handle = Handle;
 
 			// Test if this is a pose
@@ -2467,10 +2880,10 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 
 bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle)
 {
-	if (VRInput() != nullptr)
+	if (VRInput != nullptr)
 	{
 		// Get Skeletal Handle
-		EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
+		EVRInputError Err = VRInput->GetActionHandle(ActionPath, &SkeletalHandle);
 		if ((Err != VRInputError_None || !SkeletalHandle) && Err != LastInputError)
 		{
 			GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
@@ -2487,12 +2900,13 @@ bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& 
 void FSteamVRInputDevice::InitControllerKeys() 
 {
 #pragma region INDEX CONTROLLER
+
 		// Buttons
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Left", "SteamVR Valve Index Controller (L) A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Right", "SteamVR Valve Index Controller (R) A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Left", "SteamVR Valve Index Controller (L) B Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Right", "SteamVR Valve Index Controller (R) B Touch"), FKeyDetails::GamepadKey));
-
+	
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Left", "SteamVR Valve Index Controller (L) A Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Right", "SteamVR Valve Index Controller (R) A Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Left", "SteamVR Valve Index Controller (L) B Press"), FKeyDetails::GamepadKey));
@@ -2734,6 +3148,74 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Right", "SteamVR Windows MR Controller (R) Application Press"), FKeyDetails::GamepadKey));
 
 #pragma endregion
+
+#pragma region TEMPORARY ACTIONS
+		// Temporary Actions
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, LOCTEXT("SteamVR_Input_Temporary_Action_1", "[STEAMVR INTERNAL] Temporary Action 1"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, LOCTEXT("SteamVR_Input_Temporary_Action_2", "[STEAMVR INTERNAL] Temporary Action 2"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, LOCTEXT("SteamVR_Input_Temporary_Action_3", "[STEAMVR INTERNAL] Temporary Action 3"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, LOCTEXT("SteamVR_Input_Temporary_Action_4", "[STEAMVR INTERNAL] Temporary Action 4"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, LOCTEXT("SteamVR_Input_Temporary_Action_5", "[STEAMVR INTERNAL] Temporary Action 5"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, LOCTEXT("SteamVR_Input_Temporary_Action_6", "[STEAMVR INTERNAL] Temporary Action 6"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, LOCTEXT("SteamVR_Input_Temporary_Action_7", "[STEAMVR INTERNAL] Temporary Action 7"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, LOCTEXT("SteamVR_Input_Temporary_Action_8", "[STEAMVR INTERNAL] Temporary Action 8"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, LOCTEXT("SteamVR_Input_Temporary_Action_9", "[STEAMVR INTERNAL] Temporary Action 9"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, LOCTEXT("SteamVR_Input_Temporary_Action_10", "[STEAMVR INTERNAL] Temporary Action 10"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_11, LOCTEXT("SteamVR_Input_Temporary_Action_11", "[STEAMVR INTERNAL] Temporary Action 11"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_12, LOCTEXT("SteamVR_Input_Temporary_Action_12", "[STEAMVR INTERNAL] Temporary Action 12"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_13, LOCTEXT("SteamVR_Input_Temporary_Action_13", "[STEAMVR INTERNAL] Temporary Action 13"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_14, LOCTEXT("SteamVR_Input_Temporary_Action_14", "[STEAMVR INTERNAL] Temporary Action 14"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_15, LOCTEXT("SteamVR_Input_Temporary_Action_15", "[STEAMVR INTERNAL] Temporary Action 15"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_16, LOCTEXT("SteamVR_Input_Temporary_Action_16", "[STEAMVR INTERNAL] Temporary Action 16"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_17, LOCTEXT("SteamVR_Input_Temporary_Action_17", "[STEAMVR INTERNAL] Temporary Action 17"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_18, LOCTEXT("SteamVR_Input_Temporary_Action_18", "[STEAMVR INTERNAL] Temporary Action 18"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_19, LOCTEXT("SteamVR_Input_Temporary_Action_19", "[STEAMVR INTERNAL] Temporary Action 19"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_20, LOCTEXT("SteamVR_Input_Temporary_Action_20", "[STEAMVR INTERNAL] Temporary Action 20"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_21, LOCTEXT("SteamVR_Input_Temporary_Action_21", "[STEAMVR INTERNAL] Temporary Action 21"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_22, LOCTEXT("SteamVR_Input_Temporary_Action_22", "[STEAMVR INTERNAL] Temporary Action 22"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_23, LOCTEXT("SteamVR_Input_Temporary_Action_23", "[STEAMVR INTERNAL] Temporary Action 23"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_24, LOCTEXT("SteamVR_Input_Temporary_Action_24", "[STEAMVR INTERNAL] Temporary Action 24"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_25, LOCTEXT("SteamVR_Input_Temporary_Action_25", "[STEAMVR INTERNAL] Temporary Action 25"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_26, LOCTEXT("SteamVR_Input_Temporary_Action_26", "[STEAMVR INTERNAL] Temporary Action 26"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_27, LOCTEXT("SteamVR_Input_Temporary_Action_27", "[STEAMVR INTERNAL] Temporary Action 27"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_28, LOCTEXT("SteamVR_Input_Temporary_Action_28", "[STEAMVR INTERNAL] Temporary Action 28"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_29, LOCTEXT("SteamVR_Input_Temporary_Action_29", "[STEAMVR INTERNAL] Temporary Action 29"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_30, LOCTEXT("SteamVR_Input_Temporary_Action_30", "[STEAMVR INTERNAL] Temporary Action 30"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_31, LOCTEXT("SteamVR_Input_Temporary_Action_31", "[STEAMVR INTERNAL] Temporary Action 31"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_32, LOCTEXT("SteamVR_Input_Temporary_Action_32", "[STEAMVR INTERNAL] Temporary Action 32"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_33, LOCTEXT("SteamVR_Input_Temporary_Action_33", "[STEAMVR INTERNAL] Temporary Action 33"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_34, LOCTEXT("SteamVR_Input_Temporary_Action_34", "[STEAMVR INTERNAL] Temporary Action 34"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_35, LOCTEXT("SteamVR_Input_Temporary_Action_35", "[STEAMVR INTERNAL] Temporary Action 35"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_36, LOCTEXT("SteamVR_Input_Temporary_Action_36", "[STEAMVR INTERNAL] Temporary Action 36"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_37, LOCTEXT("SteamVR_Input_Temporary_Action_37", "[STEAMVR INTERNAL] Temporary Action 37"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_38, LOCTEXT("SteamVR_Input_Temporary_Action_38", "[STEAMVR INTERNAL] Temporary Action 38"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_39, LOCTEXT("SteamVR_Input_Temporary_Action_39", "[STEAMVR INTERNAL] Temporary Action 39"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_40, LOCTEXT("SteamVR_Input_Temporary_Action_40", "[STEAMVR INTERNAL] Temporary Action 40"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_41, LOCTEXT("SteamVR_Input_Temporary_Action_41", "[STEAMVR INTERNAL] Temporary Action 41"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_42, LOCTEXT("SteamVR_Input_Temporary_Action_42", "[STEAMVR INTERNAL] Temporary Action 42"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_43, LOCTEXT("SteamVR_Input_Temporary_Action_43", "[STEAMVR INTERNAL] Temporary Action 43"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_44, LOCTEXT("SteamVR_Input_Temporary_Action_44", "[STEAMVR INTERNAL] Temporary Action 44"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_45, LOCTEXT("SteamVR_Input_Temporary_Action_45", "[STEAMVR INTERNAL] Temporary Action 45"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_46, LOCTEXT("SteamVR_Input_Temporary_Action_46", "[STEAMVR INTERNAL] Temporary Action 46"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_47, LOCTEXT("SteamVR_Input_Temporary_Action_47", "[STEAMVR INTERNAL] Temporary Action 47"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_48, LOCTEXT("SteamVR_Input_Temporary_Action_48", "[STEAMVR INTERNAL] Temporary Action 48"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_49, LOCTEXT("SteamVR_Input_Temporary_Action_49", "[STEAMVR INTERNAL] Temporary Action 49"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_50, LOCTEXT("SteamVR_Input_Temporary_Action_50", "[STEAMVR INTERNAL] Temporary Action 50"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_51, LOCTEXT("SteamVR_Input_Temporary_Action_51", "[STEAMVR INTERNAL] Temporary Action 51"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_52, LOCTEXT("SteamVR_Input_Temporary_Action_52", "[STEAMVR INTERNAL] Temporary Action 52"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_53, LOCTEXT("SteamVR_Input_Temporary_Action_53", "[STEAMVR INTERNAL] Temporary Action 53"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_54, LOCTEXT("SteamVR_Input_Temporary_Action_54", "[STEAMVR INTERNAL] Temporary Action 54"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_55, LOCTEXT("SteamVR_Input_Temporary_Action_55", "[STEAMVR INTERNAL] Temporary Action 55"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_56, LOCTEXT("SteamVR_Input_Temporary_Action_56", "[STEAMVR INTERNAL] Temporary Action 56"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_57, LOCTEXT("SteamVR_Input_Temporary_Action_57", "[STEAMVR INTERNAL] Temporary Action 57"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_58, LOCTEXT("SteamVR_Input_Temporary_Action_58", "[STEAMVR INTERNAL] Temporary Action 58"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_59, LOCTEXT("SteamVR_Input_Temporary_Action_59", "[STEAMVR INTERNAL] Temporary Action 59"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_60, LOCTEXT("SteamVR_Input_Temporary_Action_60", "[STEAMVR INTERNAL] Temporary Action 60"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_61, LOCTEXT("SteamVR_Input_Temporary_Action_61", "[STEAMVR INTERNAL] Temporary Action 61"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_62, LOCTEXT("SteamVR_Input_Temporary_Action_62", "[STEAMVR INTERNAL] Temporary Action 62"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_63, LOCTEXT("SteamVR_Input_Temporary_Action_63", "[STEAMVR INTERNAL] Temporary Action 63"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_64, LOCTEXT("SteamVR_Input_Temporary_Action_64", "[STEAMVR INTERNAL] Temporary Action 64"), FKeyDetails::GamepadKey));
+#pragma endregion
 }
 
 void FSteamVRInputDevice::GetInputError(EVRInputError InputError, FString InputAction)
@@ -2850,6 +3332,157 @@ void FSteamVRInputDevice::MirrorSteamVRSkeleton(VRBoneTransform_t* BoneTransform
 			BoneTransform.orientation.z *= -1.f;
 		}
 	}
+}
+
+void FSteamVRInputDevice::InitSteamVRTemporaryActions()
+{
+	// Delete existing temporary mappings
+	UInputSettings* TempInputSettings = GetMutableDefault<UInputSettings>();
+
+	for (auto& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Contains(TEXT("axis")))
+		{
+			TempInputSettings->RemoveAxisMapping(TemporaryAction.UE4Key.GetFName());
+		}
+		else
+		{
+			TempInputSettings->RemoveActionMapping(TemporaryAction.UE4Key.GetFName());
+		}
+	}
+
+	// Save temporary mapping
+	TempInputSettings->SaveKeyMappings();
+
+	SteamVRTemporaryActions.Empty();
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_1, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_2, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_3, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_4, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_5, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_6, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_7, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_8, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_9, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_10, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_11, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_12, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_13, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_14, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_15, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_16, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_17, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_18, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_19, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_20, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_21, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_22, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_23, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_24, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_25, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_26, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_27, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_28, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_29, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_30, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_31, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_32, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_33, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_34, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_35, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_36, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_37, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_38, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_39, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_40, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_41, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_42, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_43, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_44, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_45, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_46, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_47, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_48, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_49, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_50, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_51, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_52, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_53, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_54, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_55, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_56, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_57, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_58, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_59, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_60, NAME_None));
+
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_61, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_62, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_63, NAME_None));
+	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_64, NAME_None));
+}
+
+
+bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedKey, bool bIsY)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Defining: %s %i"), *ActionName.ToString(), bIsY);
+
+	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()) 
+			&& (TemporaryAction.bIsY == bIsY)
+			)
+		{
+			// Already defined, let's not create a duplicate
+			//UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define temporary action [%s] unsuccessful! Duplicate."), *TemporaryAction.ActionName.ToString());
+			return false;
+		}
+
+		//UE_LOG(LogTemp, Warning, TEXT("%s %i"), *ActionName.ToString(), bIsY);
+
+		if (TemporaryAction.ActionName.IsNone())
+		{
+			TemporaryAction.ActionName = FName(ActionName);
+			DefinedKey = TemporaryAction.UE4Key;
+			TemporaryAction.bIsY = bIsY;
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Temporary action [%s] defined."), *TemporaryAction.ActionName.ToString());
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY)
+{
+	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
+	{
+		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
+		{
+			if (bIsY)
+			{
+				if (TemporaryAction.bIsY)
+				{
+					FoundKey = TemporaryAction.UE4Key;
+					return true;
+				}
+			}
+			else
+			{
+				FoundKey = TemporaryAction.UE4Key;
+				return true;
+			}
+			
+		}
+	}
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE //"SteamVRInputDevice"

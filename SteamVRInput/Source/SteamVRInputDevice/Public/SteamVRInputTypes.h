@@ -92,6 +92,8 @@ using namespace vr;
 #define ACTION_PATH_THUMBSTICK_RIGHT	"/user/hand/right/input/thumbstick"
 #define ACTION_PATH_TRACKPAD_LEFT		"/user/hand/left/input/trackpad"
 #define ACTION_PATH_TRACKPAD_RIGHT		"/user/hand/right/input/trackpad"
+#define ACTION_PATH_JOYSTICK_LEFT		"/user/hand/left/input/joystick"
+#define ACTION_PATH_JOYSTICK_RIGHT		"/user/hand/right/input/joystick"
 #define ACTION_PATH_GRIP_LEFT			"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_RIGHT			"/user/hand/right/input/grip"
 #define ACTION_PATH_BTN_A_LEFT			"/user/hand/left/input/a"
@@ -173,6 +175,9 @@ struct FSteamVRAxisKeyMapping
 	FName XAxisName;
 	FName YAxisName;
 	FName ZAxisName;
+	FName XAxisKey;
+	FName YAxisKey;
+	FName ZAxisKey;
 	FString ActionName;
 	FString ActionNameWithPath;
 	FString ControllerName;
@@ -185,6 +190,9 @@ struct FSteamVRAxisKeyMapping
 		XAxisName = NAME_None;
 		YAxisName = NAME_None;
 		ZAxisName = NAME_None;
+		XAxisKey = NAME_None;
+		YAxisKey = NAME_None;
+		ZAxisKey = NAME_None;
 		ActionName = "";
 		ControllerName = "";
 	}
@@ -222,6 +230,7 @@ struct FControllerType
 	FName	Name;
 	FString	Description;
 	FString KeyEquivalent;
+	bool bIsActive;
 
 	FControllerType() {}
 	FControllerType(const FName& inName, const FString& inDescription, const FString& inKeyEquivalent)
@@ -229,7 +238,9 @@ struct FControllerType
 		, Name(inName)
 		, Description(inDescription)
 		, KeyEquivalent(inKeyEquivalent)
-	{}
+	{
+		bIsActive = false;
+	}
 };
 
 struct FActionPath
@@ -311,6 +322,20 @@ struct FSteamVRInputAction
 		, LastError(VRInputError_None)
 	{}
 
+	FSteamVRInputAction(const FString& inPath, const FName& inName, bool inRequirement, const FName& inKeyName, bool inState)
+		: Path(inPath)
+		, Name(inName)
+		, Type(Boolean)
+		, KeyX(inKeyName)
+		, KeyY()
+		, KeyZ()
+		, Value()
+		, bState(inState)
+		, bRequirement(inRequirement)
+		, Handle()
+		, LastError(VRInputError_None)
+	{}
+
 	FSteamVRInputAction(const FString& inPath, const FName& inName, const FName& inKeyName, float inValue1D)
 		: Path(inPath)
 		, Name(inName)
@@ -372,7 +397,12 @@ struct FSteamVRInputState
 	bool bIsAxis3;
 	bool bIsTrigger;
 	bool bIsThumbstick;
+	bool bIsJoystick;
 	bool bIsTrackpad;
+	bool bIsDpadUp;
+	bool bIsDpadDown;
+	bool bIsDpadLeft;
+	bool bIsDpadRight;
 	bool bIsGrip;
 	bool bIsCapSense;
 	bool bIsLeft;
@@ -380,6 +410,21 @@ struct FSteamVRInputState
 	bool bIsFaceButton2;
 	bool bIsGripGrab;
 	bool bIsPinchGrab;
+	bool bIsPress;
 
 	FSteamVRInputState() {}
+};
+
+struct FSteamVRTemporaryAction
+{
+	FKey UE4Key;
+	FName ActionName;
+	bool bIsY;
+
+	FSteamVRTemporaryAction(const FKey& inUE4Key, const FName& inActionName)
+		: UE4Key(inUE4Key)
+		, ActionName(inActionName)
+	{
+		bIsY = false;
+	}
 };
