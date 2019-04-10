@@ -101,12 +101,13 @@ static const int32 kMirrorTranslationOnlyBones[] = {
 FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 	: MessageHandler(InMessageHandler)
 {
+	// Setup controller states
 	//FMemory::Memzero(ControllerStates, sizeof(ControllerStates));
 	//NumControllersMapped = 0;
 	//NumTrackersMapped = 0;
 
-	//InitialButtonRepeatDelay = 0.2f;
-	//ButtonRepeatDelay = 0.1f;
+	InitialButtonRepeatDelay = 0.2f;
+	ButtonRepeatDelay = 0.1f;
 
 	// Initializations
 	InitSteamVRSystem();
@@ -1324,7 +1325,8 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				CacheMode = InputState.bIsTrigger || InputState.bIsGrip ? FName(TEXT("trigger")) : FName(TEXT("button"));
 				CacheMode = InputState.bIsPress ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsTrackpad ? FName(TEXT("trackpad")) : CacheMode;
-				CacheMode = InputState.bIsTrackpad && !InputState.bIsAxis ? FName(TEXT("button")) : CacheMode;
+				CacheMode = InputState.bIsJoystick ? FName(TEXT("joystick")) : CacheMode;
+				CacheMode = (InputState.bIsTrackpad || InputState.bIsJoystick) && !InputState.bIsAxis ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsGrip ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsThumbstick ? FName(TEXT("button")) : CacheMode;
 				CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
@@ -1341,6 +1343,10 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsTrackpad)
 				{
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_TRACKPAD_LEFT)) : FString(TEXT(ACTION_PATH_TRACKPAD_RIGHT));
+				}
+				else if (InputState.bIsJoystick)
+				{
+					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_JOYSTICK_LEFT)) : FString(TEXT(ACTION_PATH_JOYSTICK_RIGHT));
 				}
 				else if (InputState.bIsGrip)
 				{
