@@ -101,13 +101,15 @@ static const int32 kMirrorTranslationOnlyBones[] = {
 FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 	: MessageHandler(InMessageHandler)
 {
-	FMemory::Memzero(ControllerStates, sizeof(ControllerStates));
-	NumControllersMapped = 0;
-	NumTrackersMapped = 0;
+	//FMemory::Memzero(ControllerStates, sizeof(ControllerStates));
+	//NumControllersMapped = 0;
+	//NumTrackersMapped = 0;
 
-	InitialButtonRepeatDelay = 0.2f;
-	ButtonRepeatDelay = 0.1f;
+	//InitialButtonRepeatDelay = 0.2f;
+	//ButtonRepeatDelay = 0.1f;
 
+	// Initializations
+	InitSteamVRSystem();
 	InitControllerMappings();
 	InitControllerKeys();
 	GenerateActionManifest();
@@ -133,7 +135,6 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	}
 #endif
 
-	InitSteamVRSystem();
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 }
 
@@ -2296,7 +2297,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 			}
 			else
 			{
-				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define digital action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
+				UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define digital action %s unsuccessful! Possibly reached limit of 50 actions."), *KeyActionName.ToString());
 			}
 		}
 	}
@@ -2655,11 +2656,11 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 						TempInputSettings->AddAxisMapping(NewAxisMapping);
 					}
 				}
-				else
-				{
-					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 X-action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
-						*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
-				}
+				//else
+				//{
+				//	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define temporary Vector2 X-action [%s] unsuccessful! May have reached maximum limit of 50 actions."), 
+				//		*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+				//}
 
 				FKey NewKeyY;
 				if (DefineTemporaryAction(FName(*AxisName2D), NewKeyY, true))
@@ -2671,10 +2672,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 					}
 				}
 				else
-				{
-					UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 Y-action [%s] unsuccessful! May have reached maximum limit of 50 actions."),
-						*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
-				}
+				//{
+				//	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector2 Y-action [%s] unsuccessful! May have reached maximum limit of 50 actions."),
+				//		*AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+				//}
 
 				// Save temporary mapping
 				TempInputSettings->SaveKeyMappings();
@@ -2716,10 +2717,10 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				// Save temporary mapping
 				TempInputSettings->SaveKeyMappings();
 			}
-			else
-			{
-				UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector1 action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.AxisName.ToString());
-			}
+			//else
+			//{
+			//	UE_LOG(LogSteamVRInputDevice, Error, TEXT("Attempt to define temporary Vector1 action %s unsuccessful! Possibly reached limit of 50 actions."), *AxisMapping.InputAxisKeyMapping.AxisName.ToString());
+			//}
 		}
 	}
 
@@ -2748,7 +2749,7 @@ void FSteamVRInputDevice::SanitizeActions()
 void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 {
 
-	if (VRApplications() != nullptr && VRInput != nullptr)
+	if (VRInput != NULL)
 	{
 		// Get Project Name this plugin is used in
 		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
@@ -2779,20 +2780,23 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		InitSteamVRSystem();
 
 #if WITH_EDITOR
-		// Generate Application Manifest
-		FString AppKey, AppManifestPath;
-
-		GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath);
-
-		char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
-
-		// Load application manifest
-		EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
-
-		// Set AppKey for this Editor Session
-		AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		if (VRApplications() != NULL)
+		{
+			// Generate Application Manifest
+			FString AppKey, AppManifestPath;
+	
+			GenerateAppManifest(ManifestPath, GameFileName, AppKey, AppManifestPath);
+	
+			char* SteamVRAppKey = TCHAR_TO_UTF8(*AppKey);
+	
+			// Load application manifest
+			EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+	
+			// Set AppKey for this Editor Session
+			AppError = VRApplications()->IdentifyApplication(AppProcessId, SteamVRAppKey);
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Editor Application [%d][%s] identified to SteamVR: %s"), AppProcessId, *AppKey, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
+		}
 #endif
 
 		// Set Action Manifest
@@ -3419,7 +3423,7 @@ bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedK
 			)
 		{
 			// Already defined, let's not create a duplicate
-			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Attempt to define temporary action [%s] unsuccessful! Duplicate."), *TemporaryAction.ActionName.ToString());
+			//UE_LOG(LogSteamVRInputDevice, Display, TEXT("Attempt to define temporary action [%s] unsuccessful! Duplicate."), *TemporaryAction.ActionName.ToString());
 			return false;
 		}
 
@@ -3430,6 +3434,7 @@ bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedK
 			TemporaryAction.ActionName = FName(ActionName);
 			DefinedKey = TemporaryAction.UE4Key;
 			TemporaryAction.bIsY = bIsY;
+			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Temporary action [%s] defined."), *TemporaryAction.ActionName.ToString());
 			return true;
 		}
 	}
