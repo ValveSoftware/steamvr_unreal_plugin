@@ -40,6 +40,16 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	static inline IModuleInterface& Get()
+	{
+		return FModuleManager::LoadModuleChecked<IModuleInterface>("SteamVRInput");
+	}
+
+	static inline bool IsAvailable()
+	{
+		return FModuleManager::Get().IsModuleLoaded("SteamVRInput");
+	}
+
 private:
 	/* Handle to the OpenVR Library */
 	void*	OpenVRSDKHandle;
