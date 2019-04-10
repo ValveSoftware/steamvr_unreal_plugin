@@ -36,6 +36,7 @@ public class SteamVRInputDevice : ModuleRules
             new string[]
             {
                 "OpenVRSDK",
+                "SteamVR",
                 "SteamVRInput",
                 "InputCore",
                 "InputDevice"

@@ -399,6 +399,10 @@ struct FSteamVRInputState
 	bool bIsThumbstick;
 	bool bIsJoystick;
 	bool bIsTrackpad;
+	bool bIsDpadUp;
+	bool bIsDpadDown;
+	bool bIsDpadLeft;
+	bool bIsDpadRight;
 	bool bIsGrip;
 	bool bIsCapSense;
 	bool bIsLeft;

@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
   "Version": 1,
-  "VersionName": "1.0 Beta",
+  "VersionName": "0,1 Alpha",
   "FriendlyName": "SteamVR Input Plugin",
   "Description": "Official SteamVR Input Plugin for Unreal Engine",
   "Category": "Virtual Reality",
@@ -12,12 +12,12 @@
   "SupportURL": "",
   "CanContainContent": true,
   "IsBetaVersion": true,
-  "Installed": false,
+  "Installed": true,
   "Modules": [
     {
       "Name": "SteamVRInput",
       "Type": "Runtime",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "PostEngineInit",
       "WhitelistPlatforms": [
         "Win64"
       ]
@@ -25,7 +25,7 @@
     {
       "Name": "SteamVRInputDevice",
       "Type": "Runtime",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "PostEngineInit",
       "WhitelistPlatforms": [
         "Win64"
       ]
@@ -33,7 +33,7 @@
     {
       "Name": "SteamVREditor",
       "Type": "Editor",
-      "LoadingPhase": "PostDefault",
+      "LoadingPhase": "PostEngineInit",
       "WhitelistPlatforms": [
         "Win64"
       ]

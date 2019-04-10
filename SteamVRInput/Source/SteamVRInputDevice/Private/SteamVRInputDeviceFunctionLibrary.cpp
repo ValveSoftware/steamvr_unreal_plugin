@@ -39,7 +39,7 @@ using namespace vr;
 void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand Hand, float StartSecondsFromNow, float DurationSeconds, float Frequency, float Amplitude)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr)
+	if (SteamVRInputDevice != nullptr && SteamVRInputDevice->VRInput != NULL)
 	{
 		if (Amplitude < 0.f)
 		{
@@ -56,11 +56,11 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand
 		if (Hand == ESteamVRHand::VR_Left && SteamVRInputDevice->VRVibrationLeft != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerLeftPresent && SteamVRInputDevice->VRSkeletalHandleLeft != k_ulInvalidActionHandle)
 		{
 			ActiveSkeletalHand = SteamVRInputDevice->VRSkeletalHandleLeft;
-			VRInput()->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationLeft, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+			SteamVRInputDevice->VRInput->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationLeft, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
 		}
 		else if (Hand == ESteamVRHand::VR_Right && SteamVRInputDevice->VRVibrationLeft != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerRightPresent && SteamVRInputDevice->VRSkeletalHandleRight != k_ulInvalidActionHandle)
 		{
-			VRInput()->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationRight, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
+			SteamVRInputDevice->VRInput->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationRight, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
 		}
 	}
 }
@@ -339,7 +339,7 @@ void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()
 void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr && VRInput() != nullptr)
+	if (SteamVRInputDevice != nullptr && SteamVRInputDevice->VRInput != NULL)
 	{
 		// Get action state this frame
 		VRActiveActionSet_t ActiveActionSets[] = {
@@ -350,7 +350,7 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 			}
 		};
 
-		EVRInputError Err = VRInput()->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
+		EVRInputError Err = SteamVRInputDevice->VRInput->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
 		if (Err != VRInputError_None)
 		{
 			FingerCurls = {};
@@ -374,7 +374,7 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 		VRSkeletalSummaryData_t ActiveSkeletalSummaryData;
 		if (ActiveSkeletalHand != k_ulInvalidActionHandle)
 		{
-			Err = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
+			Err = SteamVRInputDevice->VRInput->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
 		}
 		else
 		{

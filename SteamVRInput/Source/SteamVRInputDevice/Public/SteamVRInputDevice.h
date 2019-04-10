@@ -117,6 +117,9 @@ public:
 	/** The SteamVR System Handler, will be valid if there's an active SteamVR session */
 	IVRSystem* SteamVRSystem = nullptr;
 
+	/** The SteamVR Input Handler, will be valid if there's an active SteamVR session */
+	IVRInput* VRInput = nullptr;
+
 	/** Whether or not Curls and Splay values for the LEFT HAND are fed to the game every frame */
 	bool bCurlsAndSplaysEnabled_L = true;
 
