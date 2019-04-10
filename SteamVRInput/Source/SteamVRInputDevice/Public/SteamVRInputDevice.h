@@ -118,6 +118,9 @@ public:
 	/** The SteamVR System Handler, will be valid if there's an active SteamVR session */
 	IVRSystem* SteamVRSystem = nullptr;
 
+	/** The SteamVR Input Handler, will be valid if there's an active SteamVR session */
+	IVRInput* VRInput = nullptr;
+
 	/** Whether or not Curls and Splay values for the LEFT HAND are fed to the game every frame */
 	bool bCurlsAndSplaysEnabled_L = true;
 
@@ -266,7 +269,6 @@ public:
 	int32 DeviceSignature = 0;
 
 private:
-#if WITH_EDITOR
 	/** 
 	 * Generate the controller bindings for SteamVR supported controllers
 	 * @param BindingsPath - Where the controller input profile json files will be generated (by default, this is Config\SteamVRBindings)
@@ -287,7 +289,6 @@ private:
 
 	/** Delegate called when an action mapping has been modified in the editor  */
 	FDelegateHandle ActionMappingsChangedHandle;
-#endif
 
 	/** Provides a user-friendly version of the results of a SteamVR Input call in English to the Output Log */
 	void GetInputError(EVRInputError InputError, FString InputAction);
@@ -413,13 +414,36 @@ private:
 	/** Input Axis (Analog/Float) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
 	TArray<FInputAxisKeyMapping> KeyAxisMappings;
 
+	/** Input Key (Digital/Boolean) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
+	TArray<FInputActionKeyMapping> KeyMappings;
+
 	/** Input Axis (Analog/Float) action mappings defined for this project with extra metadata */
 	TArray<FSteamVRAxisKeyMapping> SteamVRKeyAxisMappings;
 
 	/** Input keys (Digital/Boolean) action mappings defined for this project with extra metadata */
 	TArray<FSteamVRInputKeyMapping> SteamVRKeyInputMappings;
 
-	/** Input Key (Digital/Boolean) action mappings defined for this project. Available in DefaultInput.ini or via the Editor UI ProjectSettings > Engine > Input  */
-	TArray<FInputActionKeyMapping> KeyMappings;
+	/** Temporary Action Mappings, used to map action events from SteamVR to an internal key so it can be triggered without triggering other actions */
+	TArray<FSteamVRTemporaryAction> SteamVRTemporaryActions;
 
+	/** Initialize temporary actions  */
+	void InitSteamVRTemporaryActions();
+
+	/** 
+	*	Utility function to match a Temporary Action with this project's action
+	*	@param ActionName - The name of the action to match the next available key to
+	*	@param bIsY - Set a Y Axis key
+	*	@return DefinedKey - The key that this action was mapped to (if successful, check return bool)
+	*	@return bool - Whether or not an available action key was set
+	*/
+	bool DefineTemporaryAction(FName ActionName, FKey& DefinedKey, bool bIsY=false);
+
+	/**
+	*	Utility function to look for the temporary key that matches this action
+	*	@param ActionName - The name of the action that will be used to find the temporary key
+	*   @param bIsY - Look for a Y Axis key
+	*	@return FoundKey - The matching temporary key for this action (if successful, check return bool)
+	*	@return bool - Whether or not a matching key was found for this action
+	*/
+	bool FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY=false);
 };
