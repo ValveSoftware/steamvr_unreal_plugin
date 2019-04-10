@@ -120,20 +120,20 @@ FSteamVRInputDevice::FSteamVRInputDevice(const TSharedRef<FGenericApplicationMes
 	bIsSkeletalControllerRightPresent = SetSkeletalHandle(TCHAR_TO_UTF8(*FString(TEXT(ACTION_PATH_SKELETON_RIGHT))), VRSkeletalHandleRight);
 
 #if WITH_EDITOR
-	// Auto-enable SteamVR Input Developer Mode 
-	if (VRSettings() != nullptr)
-	{
-		EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
-		SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Overlay);
+	// TODO: Auto-enable SteamVR Input Developer Mode (reload hmd module)
+	//if (VRSettings() != nullptr)
+	//{
+	//	EVRInitError SteamVRInitError = VRInitError_Driver_NotLoaded;
+	//	SteamVRSystem = vr::VR_Init(&SteamVRInitError, vr::VRApplication_Overlay);
 
-		EVRSettingsError BindingFlagError = VRSettingsError_None;
-		VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
-		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
-		//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
-		//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+	//	EVRSettingsError BindingFlagError = VRSettingsError_None;
+	//	VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInputBinding, true, &BindingFlagError);
+	//	UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Input Developer Mode: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
+	//	//VRSettings()->SetBool(k_pch_SteamVR_Section, k_pch_SteamVR_DebugInput, true, &BindingFlagError);
+	//	//UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Enable SteamVR Debug Input: %s"), *FString(UTF8_TO_TCHAR(VRSettings()->GetSettingsErrorNameFromEnum(BindingFlagError))));
 
-		//VR_Shutdown();
-	}
+	//	//VR_Shutdown();
+	//}
 #endif
 
 	IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
@@ -2806,8 +2806,17 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 #endif
 
 		// Set Action Manifest
-		EVRInputError InputError = VRInput->SetActionManifestPath(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath)));
-		GetInputError(InputError, FString(TEXT("Setting Action Manifest Path")));
+		FString TheActionManifestPath;
+		
+		#if WITH_EDITOR
+			TheActionManifestPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath);
+		#else
+			TheActionManifestPath = FPaths::ConvertRelativePathToFull(FPaths::GameDir() / TEXT("Config") / TEXT("SteamVRBindings") / TEXT(ACTION_MANIFEST)).Replace(TEXT("/"), TEXT("\\"));
+		#endif
+		
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Trying to load Action Manifest from: %s"), *TheActionManifestPath);
+		EVRInputError InputError = VRInput->SetActionManifestPath(TCHAR_TO_UTF8(*TheActionManifestPath));
+		GetInputError(InputError, FString(TEXT("Setting Action Manifest Path Result")));
 
 		// Set Main Action Set
 		InputError = VRInput->GetActionSetHandle(ACTION_SET, &MainActionSet);
