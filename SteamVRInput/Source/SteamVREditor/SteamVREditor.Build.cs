@@ -23,6 +23,7 @@ public class SteamVREditor : ModuleRules
 			{
 				"Core",
                 "InputCore",
+                "ApplicationCore",
                 "InputDevice",
                 "OpenVRSDK",
                 "SteamVRInput",
