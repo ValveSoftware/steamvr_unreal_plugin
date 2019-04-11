@@ -996,12 +996,16 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			TArray<TSharedPtr<FJsonValue>> JsonValuesArray;
 			GenerateActionBindings(InInputMapping, JsonValuesArray, SupportedController);
 
+			// Ensure we also handle generic UE4 Motion Controllers
+			FControllerType GenericController = FControllerType(TEXT("MotionController"), TEXT("MotionController"), TEXT("MotionController"));
+			GenerateActionBindings(InInputMapping, JsonValuesArray, SupportedController, true);
+
 			// Create Action Set
 			TSharedRef<FJsonObject> ActionSetJsonObject = MakeShareable(new FJsonObject());
 			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
 
 			// Add tracker poses
-			if (SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker")))
+			if (SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Vive_Tracker")))
 			{
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
@@ -1083,10 +1087,10 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			}
 
 			// Do not add any bindings for headsets and misc devices
-			if (!SupportedController.KeyEquivalent.Equals(TEXT("Valve_Index_Headset"))
-				&& !SupportedController.KeyEquivalent.Equals(TEXT("Gamepads"))
-				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive"))
-				&& !SupportedController.KeyEquivalent.Equals(TEXT("Vive_Tracker"))
+			if (!SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Valve_Index_Headset"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Gamepads"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Vive"))
+				&& !SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Vive_Tracker"))
 				)
 			{
 				// Add Controller Pose Mappings
@@ -1195,47 +1199,46 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 	}
 }
 
-void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller)
+void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller, bool bIsGenericController)
 {
 	// Check for headsets, they shouldn't have any bindings
-	if (Controller.KeyEquivalent.Equals(TEXT("Valve_Index_Headset")) 
-		|| Controller.KeyEquivalent.Equals(TEXT("Gamepads"))
-		|| Controller.KeyEquivalent.Equals(TEXT("Vive"))
+	if (Controller.KeyEquivalent.Equals(TEXT("SteamVR_Valve_Index_Headset")) 
+		|| Controller.KeyEquivalent.Equals(TEXT("SteamVR_Gamepads"))
+		|| Controller.KeyEquivalent.Equals(TEXT("SteamVR_Vive"))
 		)
 	{
 		return;
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("{X} STARTING: Controller %s"), *Controller.Name.ToString());
 	// Process Key Input Mappings
 	for (FSteamVRInputKeyMapping SteamVRKeyInputMapping : SteamVRKeyInputMappings)
 	{
 		// Check if this is a generic UE motion controller key
 		bool bHasSteamVRInputs = false;
-		if (Controller.KeyEquivalent.Contains(TEXT("MotionController")))
-		{
-			// Let's check if there's any SteamVR specific key that already exists for this action
+		if (bIsGenericController)
+		{		
+			// Let's check if there're any SteamVR specific key that already exists for this action
 			for (FSteamVRInputKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyInputMappings)
 			{
-				if (SteamVRKeyInputMapping.ActionName == SteamVRKeyInputMappingInner.ActionName)
-				{
-					if (SteamVRKeyInputMappingInner.ControllerName.Contains(TEXT("SteamVR")))
-					{
-						bHasSteamVRInputs = true;
-						break;
-					}
+				if (SteamVRKeyInputMapping.InputKeyMapping.ActionName.ToString().Equals(SteamVRKeyInputMappingInner.InputKeyMapping.ActionName.ToString())
+					&& SteamVRKeyInputMappingInner.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
+					)
+				{				
+					bHasSteamVRInputs = true;
+					break;
 				}
 			}
 		}
 
-		if (!bHasSteamVRInputs || Controller.KeyEquivalent.Contains(TEXT("SteamVR")))
+		if ((bIsGenericController && !bHasSteamVRInputs) || (!bIsGenericController && Controller.KeyEquivalent.Contains(TEXT("SteamVR")) && !SteamVRKeyInputMapping.ControllerName.Contains(TEXT("MotionController"))))
 		{
 			// Check this input mapping is of the correct controller type
-			if (!SteamVRKeyInputMapping.ControllerName.Contains(Controller.KeyEquivalent))
+			if (!Controller.KeyEquivalent.Contains(SteamVRKeyInputMapping.ControllerName) && !SteamVRKeyInputMapping.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
 			{
 				continue;
 			}
 			else
-			{
+			{				
 				// Process the Key Mapping
 				FSteamVRInputState InputState;
 				FName CacheMode;
@@ -1510,26 +1513,24 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 	{
 		// Check if this is a generic UE motion controller key
 		bool bHasSteamVRInputs = false;
-		if (Controller.KeyEquivalent.Contains(TEXT("Motion_Controller")))
+		if (bIsGenericController)
 		{
-			// Let's check if there's any SteamVR specific key that already exists for this action
-			for (FSteamVRInputKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyInputMappings)
+			// Let's check if there're any SteamVR specific key that already exists for this action
+			for (FSteamVRAxisKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyAxisMappings)
 			{
-				if (SteamVRAxisKeyMapping.ActionName == SteamVRKeyInputMappingInner.ActionName)
+				if (SteamVRAxisKeyMapping.InputAxisKeyMapping.AxisName.ToString().Equals(SteamVRKeyInputMappingInner.InputAxisKeyMapping.AxisName.ToString())
+					&& SteamVRKeyInputMappingInner.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR")))
 				{
-					if (SteamVRKeyInputMappingInner.ControllerName.Contains(TEXT("SteamVR")))
-					{
-						bHasSteamVRInputs = true;
-						break;
-					}
+					bHasSteamVRInputs = true;
+					break;
 				}
 			}
 		}
 
-		if (!bHasSteamVRInputs || Controller.KeyEquivalent.Contains(TEXT("SteamVR")))
+		if ((bIsGenericController && !bHasSteamVRInputs) || (!bIsGenericController && Controller.KeyEquivalent.Contains(TEXT("SteamVR")) && !SteamVRAxisKeyMapping.ControllerName.Contains(TEXT("MotionController"))))
 		{
 			// Check this input mapping is of the correct controller type
-			if (!SteamVRAxisKeyMapping.ControllerName.Contains(Controller.KeyEquivalent))
+			if (!Controller.KeyEquivalent.Contains(SteamVRAxisKeyMapping.ControllerName) && !SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
 			{
 				continue;
 			}
@@ -1757,14 +1758,14 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
 	ControllerTypes.Empty();
-	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset"), TEXT("Valve_Index_Headset")));
-	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("Index_Controller")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("Vive_Controller")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers"), TEXT("Vive_Tracker")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive"), TEXT("Vive")));
-	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch"), TEXT("Oculus_Touch")));
-	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller"), TEXT("Windows_MR")));
-	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads"), TEXT("Gamepads")));
+	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset"), TEXT("SteamVR_Valve_Index_Headset")));
+	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("SteamVR_Index_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("SteamVR_Vive_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers"), TEXT("SteamVR_Vive_Tracker")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive"), TEXT("SteamVR_Vive")));
+	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch"), TEXT("SteamVR_Oculus_Touch")));
+	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller"), TEXT("SteamVR_Windows_MR")));
+	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads"), TEXT("SteamVR_Gamepads")));
 
 #pragma region ACTIONS
 	// Clear Actions cache
@@ -2235,13 +2236,17 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
 			}
+			else if (CurrentKey.Contains(TEXT("MotionController")))
+			{
+				// retain default
+			}
 			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
 			{
 				continue;	// explicit on purpose
 			}
 			else
 			{
-				continue;
+				continue; // unrecognized controller - will not process
 			}
 
 			// Only process Motion Controller if there are no SteamVR actions
