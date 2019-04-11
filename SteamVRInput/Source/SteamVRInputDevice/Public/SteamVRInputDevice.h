@@ -284,8 +284,9 @@ private:
 	* Generate the SteamVR specific action bindings that will generated for a controller
 	* @param InInputMapping - The mapping of SteamVR actions and their controller inputs
 	* @param JsonValuesArray - The generated mappings in json format
+	* @param bIsGenericController - Whether this is a Generic Controller (e.g. MotionController)
 	*/
-	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller);
+	void GenerateActionBindings(TArray<FInputMapping> &InInputMapping, TArray<TSharedPtr<FJsonValue>> &JsonValuesArray, FControllerType Controller, bool bIsGenericController = false);
 
 	/** Delegate called when an action mapping has been modified in the editor  */
 	FDelegateHandle ActionMappingsChangedHandle;
