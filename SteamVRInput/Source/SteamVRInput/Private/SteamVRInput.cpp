@@ -47,21 +47,22 @@ void FSteamVRInputModule::StartupModule()
 	FString OpenVRPath;
 #if PLATFORM_WINDOWS
 	OpenVRPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/OpenVRSDK/bin/win64/openvr_api.dll"));
-	UE_LOG(LogSteamInput, Display, TEXT("[STEAMVR INPUT] Loading OpenVR SDK %s"), *OpenVRPath);
 #elif PLATFORM_LINUX
 	OpenVRPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/OpenVRSDK/bin/linux64/libopenvr_api.so"));
-#endif // PLATFORM_WINDOWS
+#endif PLATFORM_WINDOWS
 
-	OpenVRSDKHandle = !OpenVRPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*OpenVRPath) : nullptr;
-	
-	if (OpenVRSDKHandle != nullptr)
-	{
-		UE_LOG(LogSteamInput, Display, TEXT("Latest OpenVR loaded from %s"), *OpenVRPath);
-	}
-	else
-	{
-		UE_LOG(LogSteamInput, Error, TEXT("Can't find OpenVR in %s/Source/ThirdParty/OpenVRSDK"), *BaseDir);
-	}
+	//UE_LOG(LogSteamInput, Display, TEXT("[STEAMVR INPUT] Loading OpenVR SDK %s"), *OpenVRPath);
+
+	//OpenVRSDKHandle = !OpenVRPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*OpenVRPath) : nullptr;
+	//
+	//if (OpenVRSDKHandle != nullptr)
+	//{
+	//	UE_LOG(LogSteamInput, Display, TEXT("Latest OpenVR loaded from %s"), *OpenVRPath);
+	//}
+	//else
+	//{
+	//	UE_LOG(LogSteamInput, Error, TEXT("Can't find OpenVR in %s/Source/ThirdParty/OpenVRSDK"), *BaseDir);
+	//}
 }
 
 void FSteamVRInputModule::ShutdownModule()
