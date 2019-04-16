@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Features/IModularFeatures.h"
 #include "MotionControllerComponent.h"
 #include "IMotionController.h"
+#include "Runtime/HeadMountedDisplay/Public/IXRTrackingSystem.h"
 #include "SteamVRSkeletonDefinition.h"
 
 #if PLATFORM_WINDOWS
@@ -173,6 +174,19 @@ void FSteamVRInputDevice::Tick(float DeltaTime)
 	if (!VRSystem())
 	{
 		InitSteamVRSystem();
+	}
+
+	// Cache the controller transform to ensure ResetOrientationAndPosition gets the correct values (Valid for UE4.18 upwards)
+	// https://github.com/ValveSoftware/steamvr_unreal_plugin/issues/2
+	if (GEngine->XRSystem.IsValid())
+	{
+		CachedBaseOrientation = GEngine->XRSystem->GetBaseOrientation();
+		CachedBasePosition = FVector::ZeroVector;
+	}
+	else
+	{
+		CachedBaseOrientation = FQuat::Identity;
+		CachedBasePosition = FVector::ZeroVector;
 	}
 }
 
@@ -732,13 +746,14 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			OrientationQuat.Z = Orientation.Y;
 			OrientationQuat.W = -Orientation.W;
 
+			// Return controller transform
+			FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters - CachedBasePosition);
+			OutPosition = CachedBaseOrientation.Inverse().RotateVector(Position);
 
-			FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters);
-			OutPosition = Position;
-
-			//OutOrientation = BaseOrientation.Inverse() * OutOrientation;
-			OutOrientation.Normalize();
+			OrientationQuat = CachedBaseOrientation.Inverse() * OrientationQuat;
+			OrientationQuat.Normalize();
 			OutOrientation = OrientationQuat.Rotator();
+
 		}
 	}
 
@@ -1203,11 +1218,11 @@ void FSteamVRInputDevice::ReloadActionManifest()
 	if (VRSystem() && VRInput() && VRApplications())
 	{
 		// Set Action Manifest Path
-		const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
+		const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 		UE_LOG(LogSteamVRInputDevice, Display, TEXT("Reloading Action Manifest in: %s"), *ManifestPath);
 			
 		// Load application manifest
-		FString AppManifestPath = FPaths::GameConfigDir() / APP_MANIFEST_FILE;
+		FString AppManifestPath = FPaths::ProjectConfigDir() / APP_MANIFEST_FILE;
 		EVRApplicationError AppError = VRApplications()->AddApplicationManifest(TCHAR_TO_UTF8(*IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AppManifestPath)), true);
 		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Registering Application Manifest %s : %s"), *AppManifestPath, *FString(UTF8_TO_TCHAR(VRApplications()->GetApplicationsErrorNameFromEnum(AppError))));
 		

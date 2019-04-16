@@ -441,4 +441,10 @@ private:
 	*	@return bool - Whether or not a matching key was found for this action
 	*/
 	bool FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY=false);
+
+	/** Base Orientation defined by the XRTrackingSystem */
+	FQuat CachedBaseOrientation;
+
+	/** Base Position defined by the XRTrackingSystem */
+	FVector CachedBasePosition;
 };
