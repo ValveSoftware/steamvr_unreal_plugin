@@ -4874,8 +4874,8 @@ namespace vr
 
 	inline COpenVRContext &OpenVRInternal_ModuleContext()
 	{
-		static void *ctx[ sizeof( COpenVRContext ) / sizeof( void * ) ];
-		return *( COpenVRContext * )ctx; // bypass zero-init constructor
+		static void *ctxInput[ sizeof( COpenVRContext ) / sizeof( void * ) ];
+		return *( COpenVRContext * )ctxInput; // bypass zero-init constructor
 	}
 
 	inline IVRSystem *VR_CALLTYPE VRSystem() { return OpenVRInternal_ModuleContext().VRSystem(); }
