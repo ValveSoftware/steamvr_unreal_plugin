@@ -28,8 +28,8 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "SteamVREditor.h"
 #include "SteamVREditorCommands.h"
+#include "SteamVREditor.h"
 
 #define LOCTEXT_NAMESPACE "FSteamVREditorModule"
 

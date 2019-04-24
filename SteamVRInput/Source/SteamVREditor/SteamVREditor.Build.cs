@@ -4,8 +4,9 @@ public class SteamVREditor : ModuleRules
 {
 	public SteamVREditor(TargetInfo Target)
 	{
-		
-		PublicIncludePaths.AddRange(
+        PrivatePCHHeaderFile = "Public/SteamVREditor.h";
+
+        PublicIncludePaths.AddRange(
 			new string[] {
 				"Public"
 			}

@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "SteamVRInputDevice.h"
 #include "SteamVRControllerKeys.h"
-#include "IInputInterface.h"
+#include "Runtime/Core/Public/GenericPlatform/IInputInterface.h"
 #include "HAL/FileManagerGeneric.h"
 #include "Misc/FileHelper.h"
 #include "GameFramework/PlayerInput.h"
