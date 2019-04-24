@@ -27,10 +27,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "SteamVREditor.h"
 #include "SteamVREditorStyle.h"
-#include "SlateGameResources.h"
-#include "IPluginManager.h"
+#include "SteamVREditor.h"
+#include "Runtime/Projects/Public/Interfaces/IPluginManager.h"
 
 TSharedPtr< FSlateStyleSet > FSteamVREditorStyle::StyleInstance = NULL;
 

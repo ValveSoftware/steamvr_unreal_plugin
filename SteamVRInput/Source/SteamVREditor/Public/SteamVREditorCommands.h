@@ -30,7 +30,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "SlateBasics.h"
 #include "SteamVREditorStyle.h"
 
 class FSteamVREditorCommands : public TCommands<FSteamVREditorCommands>

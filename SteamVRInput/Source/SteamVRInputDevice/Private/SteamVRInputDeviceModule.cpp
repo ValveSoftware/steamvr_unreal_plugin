@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "ISteamVRInputDeviceModule.h"
 #include "IInputDevice.h"
-#include "IPluginManager.h"
+#include "Runtime/Projects/Public/Interfaces/IPluginManager.h"
 #include "SteamVRInputDevice.h"
 
 class FSteamVRInputDeviceModule : public ISteamVRInputDeviceModule
