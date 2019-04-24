@@ -267,10 +267,10 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		RightHand.Thumb_2 = OutPose[4];
 		RightHand.Thumb_3 = OutPose[5];
 
-		RightHand.Index_0 =  OutPose[ 6 ];
-		RightHand.Index_1 =  OutPose[ 7 ];
-		RightHand.Index_2 =  OutPose[ 8 ];
-		RightHand.Index_3 =  OutPose[ 9 ];
+		RightHand.Index_0 =  OutPose[6];
+		RightHand.Index_1 =  OutPose[7];
+		RightHand.Index_2 =  OutPose[8];
+		RightHand.Index_3 =  OutPose[9];
 		RightHand.Index_4 = OutPose[10];
 
 		RightHand.Middle_0 = OutPose[11];
@@ -291,8 +291,8 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		RightHand.Pinky_3 = OutPose[24];
 		RightHand.Pinky_4 = OutPose[25];
 
-		RightHand.Aux_Thumb =  OutPose[ 26 ];
-		RightHand.Aux_Index =  OutPose[ 27 ];
+		RightHand.Aux_Thumb =  OutPose[26];
+		RightHand.Aux_Index =  OutPose[27];
 		RightHand.Aux_Middle = OutPose[28];
 		RightHand.Aux_Ring = OutPose[29];
 		RightHand.Aux_Pinky = OutPose[30];
@@ -317,6 +317,184 @@ void USteamVRInputDeviceFunctionLibrary::GetRightHandPoseData(FVector& Position,
 	{
 		SteamVRInputDevice->GetRightHandPoseData(Position, Orientation, AngularVelocity, Velocity);
 	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetSteamVR_ActionArray(TArray<FSteamVRAction>& SteamVRActions)
+{
+	bool bAlreadyExists;
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		// Get the input actions and assign them to the defined actions list for developer consumption
+		for (FSteamVRInputAction& InputAction : SteamVRInputDevice->Actions)
+		{
+			// Check for duplicates
+			bAlreadyExists = false;
+			for (FSteamVRAction& SteamVRAction : SteamVRActions)
+			{
+				if (SteamVRAction.Handle == InputAction.Handle)
+				{
+					bAlreadyExists = true;
+					break;
+				}
+			}
+
+			// Add the Input Action to the list of Defined Actions if it's unique
+			if (!bAlreadyExists)
+			{
+				SteamVRActions.Add(FSteamVRAction(InputAction.Name, InputAction.Path, InputAction.Handle, InputAction.ActiveOrigin));
+			}
+		}
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::FindSteamVR_Action(FName ActionName, bool& bResult, FSteamVRAction& FoundAction, FSteamVRActionSet& FoundActionSet, FName ActionSet)
+{
+	bool bActionFound = false;
+	bool bActionSetFound = false;
+
+	// Get current SteamVR Actions
+	TArray<FSteamVRAction> SteamVRActions;
+	GetSteamVR_ActionArray(SteamVRActions);
+
+	// Find Action
+	for (FSteamVRAction SteamVRDefinedAction : SteamVRActions)
+	{
+		if (SteamVRDefinedAction.Name.IsEqual(ActionName))
+		{
+			FoundAction = SteamVRDefinedAction;
+			bActionFound = true;
+			break;
+		}
+	}
+
+	// Get current SteamVR Action Sets
+	FString InActionSet = TEXT("/actions/") + ActionSet.ToString();
+	TArray<FSteamVRActionSet> SteamVRActionSets;
+	GetSteamVR_ActionSetArray(SteamVRActionSets);
+
+	// Find Action
+	for (FSteamVRActionSet SteamVRDefinedActionSet : SteamVRActionSets)
+	{
+		if (SteamVRDefinedActionSet.Path.Equals(InActionSet, ESearchCase::IgnoreCase))
+		{
+			FoundActionSet = SteamVRDefinedActionSet;
+			bActionSetFound = true;
+			break;
+		}
+	}
+
+	// Update search result 
+	bResult = bActionFound && bActionSetFound;
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetSteamVR_ActionSetArray(TArray<FSteamVRActionSet>& SteamVRActionSets)
+{
+	// We only have one Action Set supported for this version of the plugin, so just return that
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice != nullptr)
+	{
+		SteamVRActionSets.Add(FSteamVRActionSet(TEXT(ACTION_SET), SteamVRInputDevice->MainActionSet));
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::GetSteamVR_OriginLocalizedName(FSteamVRAction SteamVRAction, TArray<ESteamVRInputStringBits> LocalizedParts, FString& OriginLocalizedName)
+{
+	if (VRSystem() && VRInput())
+	{
+		uint32 LocalizedPartsMask = 0;
+		EVRInputStringBits SteamVREquivalentInputStringBits;
+
+		for (ESteamVRInputStringBits LocalizedPart : LocalizedParts)
+		{
+			switch (LocalizedPart)
+			{
+			case ESteamVRInputStringBits::VR_InputString_Hand:
+				SteamVREquivalentInputStringBits = EVRInputStringBits::VRInputString_Hand;
+				break;
+
+			case ESteamVRInputStringBits::VR_InputString_ControllerType:
+				SteamVREquivalentInputStringBits = EVRInputStringBits::VRInputString_ControllerType;
+				break;
+
+			case ESteamVRInputStringBits::VR_InputString_InputSource:
+				SteamVREquivalentInputStringBits = EVRInputStringBits::VRInputString_InputSource;
+				break;
+
+			case ESteamVRInputStringBits::VR_InputString_All:
+				// Falls through
+
+			default:
+				SteamVREquivalentInputStringBits = EVRInputStringBits::VRInputString_All;
+				break;
+			}
+
+			LocalizedPartsMask |= (int)SteamVREquivalentInputStringBits;
+		}
+
+		// Retrieve Localized Name
+		char buf[k_unMaxPropertyStringSize];
+		EVRInputError Err = VRInput()->GetOriginLocalizedName(SteamVRAction.ActiveOrigin, buf, sizeof(buf), LocalizedPartsMask);
+		OriginLocalizedName = *FString(UTF8_TO_TCHAR(buf));
+
+		// Provide debugging info if retrieval is unsuccessful
+		//if (Err != VRInputError_None)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("Error [%i] when retrieving Origin Localized Name for Action [%i] %s"), (int)Err, (int)SteamVRDefinedAction.Handle, *SteamVRDefinedAction.Path);
+		//}
+	}
+}
+
+void USteamVRInputDeviceFunctionLibrary::ShowSteamVR_ActionOrigin(FSteamVRAction SteamVRAction, FSteamVRActionSet SteamVRActionSet)
+{
+	if (VRSystem() && VRInput())
+	{
+		// Show the action origin in user's hmd
+		EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
+
+		// Provide debugging info if doing this is unsuccessful
+		UE_LOG(LogTemp, Warning, TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
+			(int)Err,
+			(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
+			(int)SteamVRAction.Handle, *SteamVRAction.Path);
+	}
+}
+
+bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionName, FName ActionSet)
+{
+	// Find SteamVR Action
+	bool bIsActionFound = false;
+	FSteamVRAction SteamVRAction;
+	FSteamVRActionSet SteamVRActionSet;
+	FindSteamVR_Action(ActionName, bIsActionFound, SteamVRAction, SteamVRActionSet, ActionSet);
+
+	if (bIsActionFound && VRSystem() && VRInput())
+	{
+		// Show the action origin in user's hmd
+		EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
+
+		if (Err != VRInputError_None)
+		{
+			// Provide debugging info if doing this is unsuccessful
+			UE_LOG(LogTemp, Warning, TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
+				(int)Err,
+				(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
+				(int)SteamVRAction.Handle, *SteamVRAction.Path);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
+				(int)Err,
+				(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
+				(int)SteamVRAction.Handle, *SteamVRAction.Path));
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Unable to find Action [%s] for Action Set [%s]"), *ActionName.ToString(), *ActionSet.ToString()));
+	return false;
 }
 
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
