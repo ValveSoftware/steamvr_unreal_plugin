@@ -50,7 +50,7 @@ struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRSetWristTransform : public FAnimN
 
 	/** What kind of skeleton is used in the reference pose */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EHandSkeleton HandSkeleton;
+	EHandSkeleton HandSkeleton = EHandSkeleton::VR_SteamVRHandSkeleton;
 
 	/** The pose to apply the wrist transform to */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)

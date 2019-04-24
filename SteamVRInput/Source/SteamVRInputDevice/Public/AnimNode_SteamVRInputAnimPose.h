@@ -46,19 +46,19 @@ struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRInputAnimPose : public FAnimNode_
 
 	/** Range of motion for the skeletal input values */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EMotionRange MotionRange;
+	EMotionRange MotionRange = EMotionRange::VR_WithoutController;
 
 	/** Which hand should the animation node retrieve skeletal input values for */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EHand Hand;
+	EHand Hand = EHand::VR_LeftHand;
 
 	/** What kind of skeleton are we dealing with */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (AlwaysAsPin))
-	EHandSkeleton HandSkeleton;
+	EHandSkeleton HandSkeleton = EHandSkeleton::VR_SteamVRHandSkeleton;
 
 	/** Should the pose be mirrored so it can be applied to the opposite hand */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = ( AlwaysAsPin ))
-	bool Mirror;
+	bool Mirror = false;
 
 	/** The UE4 equivalent of the SteamVR Transform values per bone */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
