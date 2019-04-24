@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Core.h"
+#include "CoreMinimal.h"
 #include "SteamVRInputDevice.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Features/IModularFeatures.h"

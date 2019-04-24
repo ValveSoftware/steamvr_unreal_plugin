@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "SteamVRInputDevice.h"
 #include "SteamVRControllerKeys.h"
-#include "IInputInterface.h"
+#include "Runtime/ApplicationCore/Public/GenericPlatform/IInputInterface.h"
 #include "HAL/FileManagerGeneric.h"
 #include "Misc/FileHelper.h"
 #include "GameFramework/PlayerInput.h"
@@ -3082,7 +3082,7 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		#if WITH_EDITOR
 			TheActionManifestPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*ManifestPath);
 		#else
-			TheActionManifestPath = FPaths::ConvertRelativePathToFull(FPaths::GameDir() / TEXT("Config") / TEXT("SteamVRBindings") / TEXT(ACTION_MANIFEST)).Replace(TEXT("/"), TEXT("\\"));
+			TheActionManifestPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("Config") / TEXT("SteamVRBindings") / TEXT(ACTION_MANIFEST)).Replace(TEXT("/"), TEXT("\\"));
 		#endif
 		
 		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Trying to load Action Manifest from: %s"), *TheActionManifestPath);

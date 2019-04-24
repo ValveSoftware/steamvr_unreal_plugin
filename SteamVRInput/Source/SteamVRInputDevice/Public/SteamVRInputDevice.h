@@ -31,9 +31,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "IInputDevice.h"
-#include "Core.h"
+#include "CoreMinimal.h"
+#include "Runtime/Core/Public/Misc/ConfigCacheIni.h"
 #include "IMotionController.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
+#include "Runtime/Core/Public/Misc/Paths.h"
+#include "Engine/Engine.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "SteamVRInputTypes.h"
