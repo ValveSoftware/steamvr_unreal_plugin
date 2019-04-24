@@ -163,6 +163,52 @@ struct STEAMVRINPUTDEVICE_API FSteamVRFingerSplays
 	float	Ring_Pinky;
 };
 
+/** SteamVR actions as defined by the developer */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRAction
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+		FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+		FString		Path;			// The path defined for the action (e.g. main/in/{ActionName})
+
+	VRActionHandle_t Handle;				// The handle to the SteamVR Action 
+	VRInputValueHandle_t ActiveOrigin;		// The input value handle of the origin of the latest input event
+
+	FSteamVRAction(const FName ActionName, const FString ActionPath, const VRActionHandle_t ActionHandle, const VRInputValueHandle_t ActionOrigin)
+		: Name(ActionName)
+		, Path(ActionPath)
+		, Handle(ActionHandle)
+		, ActiveOrigin(ActionOrigin)
+	{}
+
+	FSteamVRAction()
+	{}
+};
+
+
+/** SteamVR action set as defined by the developer */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRActionSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FString		Path;			// The path defined for this action set (e.g. /actions/main)
+	VRActionSetHandle_t Handle;	// The handle to the SteamVR Action Set
+
+	FSteamVRActionSet(const FString ActionSetPath, const VRActionHandle_t ActionSetHandle)
+		: Path(ActionSetPath)
+		, Handle(ActionSetHandle)
+	{}
+
+	FSteamVRActionSet()
+	{}
+};
+
 UENUM(BlueprintType)	
 enum class ESteamVRHand : uint8
 {
@@ -203,6 +249,23 @@ enum class EControllerFidelity : uint8
 	VR_ControllerFidelity_Partial 		UMETA(DisplayName = "Controller Fidelity Partial")
 };
 
+/** Input String Values for querying user hardware */
+UENUM(BlueprintType)
+enum class ESteamVRInputStringBits : uint8
+{
+	// Which hand the origin is in (e.g. "Left Hand")
+	VR_InputString_Hand					UMETA(DisplayName = "Hand"),
+
+	// What kind of controller the user has in that hand (e.g. "Index Controller")
+	VR_InputString_ControllerType		UMETA(DisplayName = "Controller Type"),
+
+	// What part of that controller is the origin (e.g. "Trackpad")
+	VR_InputString_InputSource			UMETA(DisplayName = "Input Source"),
+
+	// All of the above. (e.g. "Left Hand Index Controller Trackpad")
+	VR_InputString_All					UMETA(DisplayName = "All")
+};
+
 /*
  * SteamVR Input Extended Functions
  * Functions and properties defined here are safe for developer use
@@ -227,7 +290,7 @@ public:
 	/**
 	* Generate haptic feedback in the requested controller
 	* @param Hand - Which hand to send the controller feedback to
-	* @param StartSecondsFromNow - hen to start the haptic feedback
+	* @param StartSecondsFromNow - When to start the haptic feedback
 	* @param DurationSeconds - How long to have the haptic feedback active
 	* @param Frequency - Frequency used in the haptic feedback
 	* @param Amplitude - Amplitude used in the haptic feedback
@@ -311,6 +374,56 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetRightHandPoseData(FVector& Position, FRotator& Orientation, FVector& AngularVelocity, FVector& Velocity);
+
+	/**
+	* Retrieve the input actions for this project
+	* @return SteamVRActions - Input actions defined in this project
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetSteamVR_ActionArray(TArray<FSteamVRAction>& SteamVRActions);
+
+	/**
+	* Search for a valid action matching the given action name and action set
+	* @param ActionName - The name of the action to look for (e.g. TeleportLeft)
+	* @param ActionSet - The name of the action set that the action belongs to (e.g. main). Default is "main"
+	* @return bresult - The result of the search
+	* @return FoundAction - The action if found
+	* @return FoundActionSet - The action set if found
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void FindSteamVR_Action(FName ActionName, bool& bResult, FSteamVRAction& FoundAction, FSteamVRActionSet& FoundActionSet, FName ActionSet = FName("main"));
+
+	/**
+	* Retrieve the input action sets for this project
+	* @return SteamVRActionSets - Input action sets defined in this project
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetSteamVR_ActionSetArray(TArray<FSteamVRActionSet>& SteamVRActionSets);
+
+	/**
+	* Retrieve the localized name of the origin of a given action (e.g. "Left Hand Index Controller Trackpad")
+	* @param SteamVRAction - The action that we will lookup the last active origin for
+	* @param LocalizedParts - Bitfields to specify which origin parts to return
+	* @return OriginLocalizedName -  The localized name of the origin of a given action (e.g. "Left Hand Index Controller Trackpad")
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void GetSteamVR_OriginLocalizedName(FSteamVRAction SteamVRAction, TArray<ESteamVRInputStringBits> LocalizedParts, FString& OriginLocalizedName);
+
+	/**
+	* Show the current binding of a given action in the user's HMD
+	* @param SteamVRAction - The action that we will lookup the current binding for
+	* @param SteamVRActionSet - The action set that the action belongs to
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void ShowSteamVR_ActionOrigin(FSteamVRAction SteamVRAction, FSteamVRActionSet SteamVRActionSet);
+
+	/**
+	* Search and show the current binding of a provided action anme and action set in the user's HMD
+	* @param SteamVRAction - The action that we will lookup the current binding for
+	* @param SteamVRActionSet - The action set that the action belongs to. Defaults to "main"
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static bool FindSteamVR_ActionOrigin(FName ActionName, FName ActionSet = FName("main"));
 
 	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
