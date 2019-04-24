@@ -275,19 +275,20 @@ struct FInputMapping
 
 struct FSteamVRInputAction
 {
-	FString		Path;			// The SteamVR name of the action (e.g. main/in/{ActionName})
-	FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
-	EActionType	Type;			// The SteamVR input data type
-	FName		KeyX;			// The UE Key in the X axis or float axis (e.g. Motion_Controller_Thumbstick_X)
-	FName		KeyY;			// The UE Key in the Y axis
-	FName		KeyZ;			// The UE Key in the Z axis
-	FVector		Value;			// The 1D, 2D, 3D (analog) input value of this action
-	FString		StringPath;		// The string value of this action (such as for Skeleton Paths where a bool or float axis is not appropriate)
-	bool		bState;			// The bool (digital) value of this action
-	bool		bRequirement;	// Whether or not this action is required
+	FString		Path;							// The path defined for the action (e.g. main/in/{ActionName})
+	FName		Name;							// The SteamVR name of the action (e.g. Teleport, OpenConsole)
+	EActionType	Type;							// The SteamVR input data type
+	FName		KeyX;							// The UE Key in the X axis or float axis (e.g. Motion_Controller_Thumbstick_X)
+	FName		KeyY;							// The UE Key in the Y axis
+	FName		KeyZ;							// The UE Key in the Z axis
+	FVector		Value;							// The 1D, 2D, 3D (analog) input value of this action
+	FString		StringPath;						// The string value of this action (such as for Skeleton Paths where a bool or float axis is not appropriate)
+	bool		bState;							// The bool (digital) value of this action
+	bool		bRequirement;					// Whether or not this action is required
 
-	VRActionHandle_t Handle;	// The handle to the SteamVR main Action Set
-	EVRInputError LastError;	// A cache for the last Error for operations against this action (could also be "No Error")
+	VRActionHandle_t Handle;					// The handle to the SteamVR main Action Set
+	VRInputValueHandle_t ActiveOrigin = 0;		// The input value handle of the origin of the latest input event
+	EVRInputError LastError;					// A cache for the last Error for operations against this action (could also be "No Error")
 
 	FString GetActionTypeName()
 	{

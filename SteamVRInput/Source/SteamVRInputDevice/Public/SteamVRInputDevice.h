@@ -168,7 +168,7 @@ public:
 	/** Current input values of the active player controllers  */
 	FInputDeviceState ControllerStates[SteamVRInputDeviceConstants::MaxControllers];
 
-	/** Holds the actions that will be handled by the SteamVR Input Systems  */
+	/** Holds the actions that will be handled by the SteamVR Input System  */
 	TArray<FSteamVRInputAction> Actions;
 
 	/** A list of supported controller types that Controller Binding files will be generated for  */
@@ -272,7 +272,7 @@ private:
 	 * Generate the controller bindings for SteamVR supported controllers
 	 * @param BindingsPath - Where the controller input profile json files will be generated (by default, this is Config\SteamVRBindings)
 	 * @param InOutControllerTypes - Common SteamVR controller types for which the bindings will be generated (e.g. knuckles)
-	 * @param InOutDefaultBindings - Meadata associated to each controller binding
+	 * @param InOutDefaultBindings - Metadata associated to each controller binding
 	 * @param InActionsArray - The list of SteamVR actions that needs to be generated for each controller
 	 * @param InInputMapping - The mapping of SteamVR actions and their controller inputs
 	 * @param bDeleteIfExists - Flag of whether or not to overwrite an existing controller binding
