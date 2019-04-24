@@ -1,15 +1,15 @@
 {
   "FileVersion": 3,
   "Version": 1,
-  "VersionName": "0.5 Alpha",
+  "VersionName": "0.6 Alpha",
   "FriendlyName": "SteamVR Input Plugin",
   "Description": "Official SteamVR Input Plugin for Unreal Engine",
   "Category": "Virtual Reality",
   "CreatedBy": "Valve Corporation",
   "CreatedByURL": "https://www.valvesoftware.com",
-  "DocsURL": "",
+  "DocsURL": "https://github.com/ValveSoftware/steamvr_unreal_plugin/wiki",
   "MarketplaceURL": "",
-  "SupportURL": "",
+  "SupportURL": "https://github.com/ValveSoftware/steamvr_unreal_plugin/issues",
   "CanContainContent": true,
   "IsBetaVersion": true,
   "Installed": true,
@@ -40,10 +40,10 @@
     }
   ],
   "Plugins": [
-         {
-             "Name": "SteamVR",
-             "Enabled": true
-         }
-	]
+    {
+      "Name": "SteamVR",
+      "Enabled": true
+    }
+  ]
 }
 
