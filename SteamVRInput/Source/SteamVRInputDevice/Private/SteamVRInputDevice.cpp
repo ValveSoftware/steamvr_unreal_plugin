@@ -396,6 +396,9 @@ void FSteamVRInputDevice::SendControllerEvents()
 					// Update our action to the value reported by SteamVR
 					Action.bState = DigitalData.bState;
 
+					// Update the active origin
+					Action.ActiveOrigin = DigitalData.activeOrigin;
+
 					// Sent event back to Engine
 					// Find the temporary action key
 					FKey FoundKey;
@@ -430,6 +433,9 @@ void FSteamVRInputDevice::SendControllerEvents()
 				}
 				else if (ActionStateError == VRInputError_None && AnalogData.bActive)
 				{
+					// Update the active origin
+					Action.ActiveOrigin = AnalogData.activeOrigin;
+
 					// Find the temporary action key (X)
 					FKey FoundKeyX;
 					if (FindTemporaryActionKey(Action.Name, FoundKeyX))
