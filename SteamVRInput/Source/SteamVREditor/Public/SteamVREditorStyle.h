@@ -30,7 +30,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "SlateBasics.h"
+#include "Styling/SlateStyle.h"
+#include "Styling/SlateStyleRegistry.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/Commands/Commands.h"
+#include "Framework/Commands/UIAction.h"
+#include "Framework/Commands/UICommandInfo.h"
 
 /**  */
 class FSteamVREditorStyle

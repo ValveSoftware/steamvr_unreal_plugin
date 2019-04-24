@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "AnimNode_SteamVRInputAnimPose.h"
 #include "ISteamVRInputDeviceModule.h"
 #include "AnimationRuntime.h"
-#include "AnimInstanceProxy.h"
+#include "Runtime/Engine/Public/Animation/AnimInstanceProxy.h"
 #include "SteamVRInputDevice.h"
 #include "UE4HandSkeletonDefinition.h"
 
