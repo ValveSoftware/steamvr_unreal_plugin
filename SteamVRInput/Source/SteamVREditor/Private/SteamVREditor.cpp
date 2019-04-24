@@ -32,8 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVREditor.h"
 #include "IMotionController.h"
 #include "Features/IModularFeatures.h"
-#include "SlateBasics.h"
-#include "SlateExtras.h"
 #include "SteamVREditorStyle.h"
 #include "SteamVREditorCommands.h"
 #include "SteamVRControllerKeys.h"
