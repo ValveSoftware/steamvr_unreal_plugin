@@ -2015,7 +2015,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Define Controller Types supported by SteamVR
 	TArray<TSharedPtr<FJsonValue>> ControllerBindings;
 	ControllerTypes.Empty();
-	ControllerTypes.Emplace(FControllerType(TEXT("utah"), TEXT("Valve Index Headset"), TEXT("SteamVR_Valve_Index_Headset")));
+	ControllerTypes.Emplace(FControllerType(TEXT("index_hmd"), TEXT("Valve Index Headset"), TEXT("SteamVR_Valve_Index_Headset")));
 	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("SteamVR_Index_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("SteamVR_Vive_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Trackers"), TEXT("SteamVR_Vive_Tracker")));
