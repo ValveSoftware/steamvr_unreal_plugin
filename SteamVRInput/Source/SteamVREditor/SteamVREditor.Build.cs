@@ -5,6 +5,8 @@ public class SteamVREditor : ModuleRules
 {
 	public SteamVREditor(ReadOnlyTargetRules Target) : base(Target)
     {
+        PrivatePCHHeaderFile = "Public/SteamVREditor.h";
+
         PublicIncludePaths.AddRange(
             new string[] {
                 "Public"

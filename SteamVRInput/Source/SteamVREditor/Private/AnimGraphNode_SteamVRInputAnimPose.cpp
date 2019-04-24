@@ -28,8 +28,8 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "SteamVREditor.h"
 #include "AnimGraphNode_SteamVRInputAnimPose.h"
+#include "SteamVREditor.h"
 
 #define LOCTEXT_NAMESPACE "SteamVRInputAnimNode"
 

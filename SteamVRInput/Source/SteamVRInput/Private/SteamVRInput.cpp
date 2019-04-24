@@ -29,7 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "SteamVRInput.h"
-#include "Core.h"
+#include "CoreMinimal.h"
+#include "Runtime/Core/Public/Misc/Paths.h"
 #include "../../OpenVRSDK/headers/openvr.h"
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
@@ -67,7 +68,7 @@ void FSteamVRInputModule::StartupModule()
 
 void FSteamVRInputModule::ShutdownModule()
 {
-	FPlatformProcess::FreeDllHandle(OpenVRSDKHandle);
+	//FPlatformProcess::FreeDllHandle(OpenVRSDKHandle);
 	OpenVRSDKHandle = nullptr;
 }
 
