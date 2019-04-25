@@ -100,6 +100,8 @@ using namespace vr;
 #define ACTION_PATH_BTN_A_RIGHT			"/user/hand/right/input/a"
 #define ACTION_PATH_BTN_B_LEFT			"/user/hand/left/input/b"
 #define ACTION_PATH_BTN_B_RIGHT			"/user/hand/right/input/b"
+#define ACTION_PATH_BTN_X_LEFT			"/user/hand/left/input/x"
+#define ACTION_PATH_BTN_Y_LEFT			"/user/hand/left/input/y"
 #define ACTION_PATH_USER_SKEL_LEFT		"/user/hand/left/input/skeleton/left"
 #define ACTION_PATH_USER_SKEL_RIGHT		"/user/hand/right/input/skeleton/right"
 #define ACTION_PATH_USER_VIB_LEFT		"/user/hand/left/output/haptic"
@@ -410,6 +412,8 @@ struct FSteamVRInputState
 	bool bIsLeft;
 	bool bIsFaceButton1;
 	bool bIsFaceButton2;
+	bool bIsXButton;
+	bool bIsYButton;
 	bool bIsGripGrab;
 	bool bIsPinchGrab;
 	bool bIsPress;
