@@ -1523,17 +1523,28 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				InputState.bIsJoystick = CurrentInputKeyName.Contains(TEXT("Joystick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsGrip = CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsLeft = CurrentInputKeyName.Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-				InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+					CurrentInputKeyName.Contains(TEXT("_A_"));
+				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+					CurrentInputKeyName.Contains(TEXT("_B_"));
 
-				// Check for cap sense
+				// Handle Oculus Touch
+				InputState.bIsXButton = InputState.bIsYButton = false;
 				if (CurrentInputKeyName.Contains(TEXT("SteamVR_Oculus_Touch_")))
 				{
+					// Check cap sense
 					FString OculusKeyName = CurrentInputKeyName.RightChop(20);
 					InputState.bIsCapSense = OculusKeyName.Contains(TEXT("Touch"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+
+					// Check for left X & Y buttons specific to Oculus Touch
+					InputState.bIsXButton = CurrentInputKeyName.Contains(TEXT("_X_Press")) || 
+						CurrentInputKeyName.Contains(TEXT("_X_Touch"));
+					InputState.bIsYButton = CurrentInputKeyName.Contains(TEXT("_Y_Press")) ||
+						CurrentInputKeyName.Contains(TEXT("_Y_Touch"));
 				}
 				else
 				{
+					// Set cap sense input state
 					InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 						CurrentInputKeyName.Contains(TEXT("Touch"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				}
@@ -1632,6 +1643,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsFaceButton2)
 				{
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_BTN_B_LEFT)) : FString(TEXT(ACTION_PATH_BTN_B_RIGHT));
+				}
+				else if (InputState.bIsXButton)
+				{
+					CachePath = FString(TEXT(ACTION_PATH_BTN_X_LEFT));
+				}
+				else if (InputState.bIsYButton)
+				{
+					CachePath = FString(TEXT(ACTION_PATH_BTN_Y_LEFT));
 				}
 
 				// Handle Special Actions
@@ -1835,10 +1854,32 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				InputState.bIsTrackpad = CurrentInputKeyName.Contains(TEXT("Trackpad"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsJoystick = CurrentInputKeyName.Contains(TEXT("Joystick"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsGrip = CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-				InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 				InputState.bIsLeft = CurrentInputKeyName.Contains(TEXT("Left"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-				InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
-				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				InputState.bIsFaceButton1 = CurrentInputKeyName.Contains(TEXT("FaceButton1"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+					CurrentInputKeyName.Contains(TEXT("_A_"));
+				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+					CurrentInputKeyName.Contains(TEXT("_B_"));
+
+				// Handle Oculus Touch
+				InputState.bIsXButton = InputState.bIsYButton = false;
+				if (CurrentInputKeyName.Contains(TEXT("SteamVR_Oculus_Touch_")))
+				{
+					// Check cap sense
+					FString OculusKeyName = CurrentInputKeyName.RightChop(20);
+					InputState.bIsCapSense = OculusKeyName.Contains(TEXT("Touch"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+
+					// Check for left X & Y buttons specific to Oculus Touch
+					InputState.bIsXButton = CurrentInputKeyName.Contains(TEXT("_X_Press")) ||
+						CurrentInputKeyName.Contains(TEXT("_X_Touch"));
+					InputState.bIsYButton = CurrentInputKeyName.Contains(TEXT("_Y_Press")) ||
+						CurrentInputKeyName.Contains(TEXT("_Y_Touch"));
+				}
+				else
+				{
+					// Set cap sense input state
+					InputState.bIsCapSense = CurrentInputKeyName.Contains(TEXT("CapSense"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
+						CurrentInputKeyName.Contains(TEXT("Touch"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+				}
 
 				// Handle Special Actions for Knuckles Keys
 				if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
@@ -1874,6 +1915,13 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				CacheMode = InputState.bIsThumbstick ? FName(TEXT("joystick")) : CacheMode;
 				CacheMode = InputState.bIsPinchGrab || InputState.bIsGripGrab ? FName(TEXT("grab")) : CacheMode;
 
+				// If key being mapped is not an axis key (hardware-wise), set mode as an analog action (scalar_constant to 1.0f)
+				// https://github.com/ValveSoftware/steamvr_unreal_plugin/issues/12
+				if (!SteamVRAxisKeyMapping.InputAxisKeyMapping.Key.IsFloatAxis())
+				{
+					CacheMode = FName(TEXT("scalar_constant"));
+				}
+
 				// Set Cache Path
 				if (InputState.bIsTrigger)
 				{
@@ -1902,6 +1950,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsFaceButton2)
 				{
 					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_BTN_B_LEFT)) : FString(TEXT(ACTION_PATH_BTN_B_RIGHT));
+				}
+				else if (InputState.bIsXButton)
+				{
+					CachePath = FString(TEXT(ACTION_PATH_BTN_X_LEFT));
+				}
+				else if (InputState.bIsYButton)
+				{
+					CachePath = FString(TEXT(ACTION_PATH_BTN_Y_LEFT));
 				}
 
 				// Handle Special Actions
@@ -1937,7 +1993,11 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				ActionPathJsonObject->SetStringField(TEXT("output"), SteamVRAxisKeyMapping.ActionNameWithPath);
 
 				// Set Cache Type
-				if (InputState.bIsAxis && InputState.bIsAxis2)
+				if (CacheMode.IsEqual(TEXT("scalar_constant")))
+				{
+					CacheType = FString(TEXT("value"));
+				}
+				else if (InputState.bIsAxis && InputState.bIsAxis2)
 				{
 					if (InputState.bIsGrip)
 					{
