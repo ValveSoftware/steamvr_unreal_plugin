@@ -3218,11 +3218,8 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 
 bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& SkeletalHandle)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Before Token: %i"), vr::VRToken());
 	if (VRSystem() && VRInput())
 	{
-		Sleep(5000);
-		UE_LOG(LogTemp, Warning, TEXT("After Token: %i"), vr::VRToken());
 		// Get Skeletal Handle
 		EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
 		if (Err != VRInputError_None || SkeletalHandle == k_ulInvalidActionHandle)
