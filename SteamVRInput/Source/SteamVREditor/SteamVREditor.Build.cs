@@ -1,4 +1,5 @@
 using UnrealBuildTool;
+using System.IO;
 
 public class SteamVREditor : ModuleRules
 {
@@ -6,21 +7,10 @@ public class SteamVREditor : ModuleRules
 	{
         PrivatePCHHeaderFile = "Public/SteamVREditor.h";
 
-        PublicIncludePaths.AddRange(
-			new string[] {
-				"Public"
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"Private",
-			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
+        PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
+
+        PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
