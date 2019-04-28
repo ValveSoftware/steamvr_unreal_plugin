@@ -3158,12 +3158,17 @@ bool FSteamVRInputDevice::SetSkeletalHandle(char* ActionPath, VRActionHandle_t& 
 		EVRInputError Err = VRInput()->GetActionHandle(ActionPath, &SkeletalHandle);
 		if (Err != VRInputError_None || SkeletalHandle == k_ulInvalidActionHandle)
 		{
-			//GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
-			//Err = LastInputError;
+			if (Err != LastInputError)
+			{
+				GetInputError(Err, TEXT("Couldn't get skeletal action handle for Skeleton."));
+			}
+
+			Err = LastInputError;
 			return false;
 		}
 		else
 		{
+			Err = LastInputError;
 			return true;
 		}
 	}
