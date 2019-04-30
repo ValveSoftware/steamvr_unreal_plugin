@@ -369,7 +369,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 		}
 
 		// Go through Actions
-		for (auto& Action : Actions)
+		for (auto& Action : ActionEvents)
 		{
 			if (Action.Handle == k_ulInvalidActionHandle)
 			{
@@ -443,50 +443,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 						// Test what we're receiving from SteamVR
 						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
 
-						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
-						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
-						int ActionCount = 0;
-						auto InputSettings = GetDefault<UInputSettings>();
-						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
-						{
-							if (Action.Type == EActionType::Vector1)
-							{
-								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
-									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
-								{
-									ActionCount++;
-								}
-							}
-							else if (Action.Type == EActionType::Vector2)
-							{
-								FString ActionName2D = Action.Name.ToString().LeftChop(11);
-								FString XAction, YAction;
-								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
-								{
-									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(XAction)
-										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
-									{
-										ActionCount++;
-									}
-								}
-							}
-						}
-
-						// Set MinMax for the divisor gathered from testing
-						if (ActionCount <= 0)
-						{
-							ActionCount = 1;
-						} 
-						else if (ActionCount > 4)
-						{
-							ActionCount = 4;
-						}
-
-						// Test how many actions the engine thinks we have mapped for this action
-						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
-
-						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
-						Action.Value.X = AnalogData.x / ActionCount;
+						Action.Value.X = AnalogData.x; // ActionCount;
 						MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
 					}
 
@@ -497,50 +454,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 						// Test what we're receiving from SteamVR
 						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
 
-						// Calculate a divisor for the data since the engine multiplies the amount sent via the message handler dependent on how many mappings are set 
-						// likely a side effect of not using controller ids as they are not used in SteamVR anymore
-						int ActionCount = 0;
-						auto InputSettings = GetDefault<UInputSettings>();
-						for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
-						{
-							if (Action.Type == EActionType::Vector1)
-							{
-								if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(Action.Name.ToString().Replace(TEXT(" axis"), TEXT("")))
-									&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
-								{
-									ActionCount++;
-								}
-							}
-							else if (Action.Type == EActionType::Vector2)
-							{
-								FString ActionName2D = Action.Name.ToString().LeftChop(11);
-								FString XAction, YAction;
-								if (ActionName2D.Split(TEXT(","), &XAction, &YAction))
-								{
-									if (InputSettings->AxisMappings[AxisIndex].AxisName.ToString().Equals(YAction)
-										&& !InputSettings->AxisMappings[AxisIndex].Key.GetFName().ToString().Contains(TEXT("Temporary")))
-									{
-										ActionCount++;
-									}
-								}
-							}
-						}
-
-						// Set MinMax for the divisor gathered from testing
-						if (ActionCount <= 0)
-						{
-							ActionCount = 1;
-						}
-						else if (ActionCount > 4)
-						{
-							ActionCount = 4;
-						}
-
-						// Test how many actions the engine thinks we have mapped for this action
-						//UE_LOG(LogTemp, Warning, TEXT("ActionName: %s ActionCount: %i"), *Action.Name.ToString(), ActionCount);
-
-						// Finally, apply the divisor to the data from SteamVR and send it to the project to consume
-						Action.Value.Y = AnalogData.y / ActionCount;
+						Action.Value.Y = AnalogData.y;
 						MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
 					}
 				}
@@ -2504,6 +2418,28 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	if (RegisterApp)
 	{
 		RegisterApplication(ManifestPath);
+	}
+
+	// Update action events
+	ActionEvents.Empty();
+	bool bAlreadyExists = false;
+	for (FSteamVRInputAction& InputAction : Actions)
+	{
+		// Check if we've already got a similar action event as we won't need the flat action list for processing controller events
+		bAlreadyExists = false;
+		for (FSteamVRInputAction& ActionEvent : ActionEvents)
+		{
+			if (ActionEvent.Handle == InputAction.Handle)
+			{
+				bAlreadyExists = true;
+				break;
+			}
+		}
+
+		if (!bAlreadyExists && InputAction.Handle != k_ulInvalidActionHandle)
+		{
+			ActionEvents.Add(FSteamVRInputAction(InputAction));
+		}
 	}
 }
 
