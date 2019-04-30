@@ -171,6 +171,9 @@ public:
 	/** Holds the actions that will be handled by the SteamVR Input System  */
 	TArray<FSteamVRInputAction> Actions;
 
+	/** Holds the actions that will be handled by the SteamVR Input System  */
+	TArray<FSteamVRInputAction> ActionEvents;
+
 	/** A list of supported controller types that Controller Binding files will be generated for  */
 	TArray<FControllerType> ControllerTypes;
 
