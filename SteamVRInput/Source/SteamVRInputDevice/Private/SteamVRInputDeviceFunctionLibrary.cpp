@@ -326,7 +326,7 @@ void USteamVRInputDeviceFunctionLibrary::GetSteamVR_ActionArray(TArray<FSteamVRA
 	if (SteamVRInputDevice != nullptr)
 	{
 		// Get the input actions and assign them to the defined actions list for developer consumption
-		for (FSteamVRInputAction& InputAction : SteamVRInputDevice->Actions)
+		for (FSteamVRInputAction& InputAction : SteamVRInputDevice->ActionEvents)
 		{
 			// Check for duplicates
 			bAlreadyExists = false;
