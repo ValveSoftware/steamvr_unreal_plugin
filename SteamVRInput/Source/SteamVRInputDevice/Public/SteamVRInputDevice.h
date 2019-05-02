@@ -446,4 +446,11 @@ private:
 	*	@return bool - Whether or not a matching key was found for this action
 	*/
 	bool FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY=false);
+
+	/**
+	*	Utility function to clear any accidentally saved temporary actions in this project's Input ini
+	*	@param InputSettings - This project's input settings
+	*	@return uint32 - Number of temporary actions found and cleared
+	*/
+	uint32 ClearTemporaryActions();
 };
