@@ -1993,9 +1993,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 
 void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
 {
-	// Set Input Settings
-	auto InputSettings = GetDefault<UInputSettings>();
-
 	// Set Action Manifest Path
 	const FString ManifestPath = FPaths::ProjectConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
 	UE_LOG(LogSteamVRInputDevice, Display, TEXT("Action Manifest Path: %s"), *ManifestPath);
@@ -2028,6 +2025,12 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Setup Input Mappings cache
 	TArray<FInputMapping> InputMappings;
 	TArray<FName> UniqueInputs;
+
+	// Remove any existing temporary keys in the input in
+	ClearTemporaryActions();
+
+	// Set Input Settings
+	auto InputSettings = GetDefault<UInputSettings>();
 
 	// Check if this project have input settings
 	if (InputSettings->IsValidLowLevelFast())
@@ -3708,7 +3711,6 @@ void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 	SteamVRTemporaryActions.Add(FSteamVRTemporaryAction(TemporaryActionKeys::SteamVR_Input_Temporary_Action_64, NAME_None));
 }
 
-
 bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedKey, bool bIsY)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Defining: %s %i"), *ActionName.ToString(), bIsY);
@@ -3739,7 +3741,6 @@ bool FSteamVRInputDevice::DefineTemporaryAction(FName ActionName, FKey& DefinedK
 	return false;
 }
 
-
 bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKey, bool bIsY)
 {
 	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
@@ -3764,6 +3765,44 @@ bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKe
 	}
 
 	return false;
+}
+
+uint32 FSteamVRInputDevice::ClearTemporaryActions()
+{
+	UInputSettings* InputSettings = GetMutableDefault<UInputSettings>();
+	uint32 Count = 0;
+
+	if (InputSettings->IsValidLowLevelFast())
+	{
+		// Clear action mappings
+		for (const FInputActionKeyMapping& KeyMapping : InputSettings->ActionMappings)
+		{
+			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR_Input_Temporary_Action")))
+			{
+				InputSettings->RemoveActionMapping(KeyMapping);
+				Count++;
+			}
+		}
+
+		// Clear axis mappings
+		for (const FInputAxisKeyMapping& AxisKeyMapping : InputSettings->AxisMappings)
+		{
+			if (AxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR_Input_Temporary_Action")))
+			{
+				InputSettings->RemoveAxisMapping(AxisKeyMapping);
+				Count++;
+			}
+		}
+	}
+
+	// Save updated action mappings
+	if (Count > 0)
+	{
+		InputSettings->SaveKeyMappings();
+		InputSettings->UpdateDefaultConfigFile();
+	}
+
+	return Count;
 }
 
 #undef LOCTEXT_NAMESPACE //"SteamVRInputDevice"
