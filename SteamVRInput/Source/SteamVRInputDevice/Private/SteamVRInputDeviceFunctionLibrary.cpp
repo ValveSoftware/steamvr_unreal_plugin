@@ -398,6 +398,48 @@ void USteamVRInputDeviceFunctionLibrary::GetSteamVR_ActionSetArray(TArray<FSteam
 	}
 }
 
+bool USteamVRInputDeviceFunctionLibrary::GetSteamVR_OriginTrackedDeviceInfo(FSteamVRAction SteamVRAction, FSteamVRInputOriginInfo& InputOriginInfo)
+{
+	if (VRSystem() && VRInput())
+	{
+		InputOriginInfo_t OriginInfo = {};
+		EVRInputError Err = VRInput()->GetOriginTrackedDeviceInfo(SteamVRAction.ActiveOrigin, &OriginInfo, sizeof(OriginInfo));
+
+		if (Err == VRInputError_None && OriginInfo.trackedDeviceIndex != k_unTrackedDeviceIndexInvalid)
+		{
+			// Get device model information
+			char ModelBuffer[k_unMaxPropertyStringSize];
+			uint32 StringBytes = VRSystem()->GetStringTrackedDeviceProperty(OriginInfo.trackedDeviceIndex, ETrackedDeviceProperty::Prop_ModelNumber_String, ModelBuffer, sizeof(ModelBuffer));
+
+			// Set Input Origin Info
+			InputOriginInfo.TrackedDeviceIndex = OriginInfo.trackedDeviceIndex;
+			InputOriginInfo.RenderModelComponentName = *FString(UTF8_TO_TCHAR(OriginInfo.rchRenderModelComponentName));
+			InputOriginInfo.TrackedDeviceModel = *FString(UTF8_TO_TCHAR(ModelBuffer));
+			return true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error [%i] trying to retrieve Tracked Device Info or an invalid device was returned for Action [%s]"), (int)Err, *SteamVRAction.Path);
+		}
+	}
+
+	return false;
+}
+
+void USteamVRInputDeviceFunctionLibrary::FindSteamVR_OriginTrackedDeviceInfo(FName ActionName, bool& bResult, FSteamVRInputOriginInfo& InputOriginInfo, FName ActionSet /*= FName("main")*/)
+{
+	bResult = false;
+	FSteamVRAction FoundAction;
+	FSteamVRActionSet FoundActionSet;
+
+	FindSteamVR_Action(ActionName, bResult, FoundAction, FoundActionSet, ActionSet);
+
+	if (bResult)
+	{
+		bResult = GetSteamVR_OriginTrackedDeviceInfo(FoundAction, InputOriginInfo);
+	}
+}
+
 void USteamVRInputDeviceFunctionLibrary::GetSteamVR_OriginLocalizedName(FSteamVRAction SteamVRAction, TArray<ESteamVRInputStringBits> LocalizedParts, FString& OriginLocalizedName)
 {
 	if (VRSystem() && VRInput())
@@ -471,7 +513,8 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 	if (bIsActionFound && VRSystem() && VRInput())
 	{
 		// Show the action origin in user's hmd
-		EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
+		//EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
+		EVRInputError Err = VRInput()->ShowActionOrigins(0, SteamVRAction.Handle);
 
 		if (Err != VRInputError_None)
 		{
