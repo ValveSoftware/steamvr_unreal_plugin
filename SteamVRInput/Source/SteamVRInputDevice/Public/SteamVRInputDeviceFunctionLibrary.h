@@ -169,11 +169,11 @@ struct STEAMVRINPUTDEVICE_API FSteamVRAction
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-		FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-		FString		Path;			// The path defined for the action (e.g. main/in/{ActionName})
+	FString		Path;			// The path defined for the action (e.g. main/in/{ActionName})
 
 	VRActionHandle_t Handle;				// The handle to the SteamVR Action 
 	VRInputValueHandle_t ActiveOrigin;		// The input value handle of the origin of the latest input event
@@ -206,6 +206,30 @@ struct STEAMVRINPUTDEVICE_API FSteamVRActionSet
 	{}
 
 	FSteamVRActionSet()
+	{}
+};
+
+/** Information about the tracked device associated from the input source */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRInputOriginInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	int32	TrackedDeviceIndex;			// The tracked device index for the device or k_unTrackedDeviceInvalid (0xFFFFFFFF)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FString	RenderModelComponentName;	//  The name of the component of the tracked device's render model that represents this input source, or an empty string if there is no associated render model component.
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
+	FString	TrackedDeviceModel;			//  The tracked device's model info
+
+	FSteamVRInputOriginInfo(const int32 InDeviceIndex, const FString InRenderModelComponentName)
+		: TrackedDeviceIndex(InDeviceIndex)
+		, RenderModelComponentName(InRenderModelComponentName)
+	{}
+
+	FSteamVRInputOriginInfo()
 	{}
 };
 
@@ -399,6 +423,24 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void GetSteamVR_ActionSetArray(TArray<FSteamVRActionSet>& SteamVRActionSets);
+
+	/**
+	* Returns information about the tracked device associated from the input source.
+	* @param SteamVRAction - The action that's the source of the input
+	* @return InputOriginInfo - The origin info of the action
+	* @return bool - whether the operation is successful or not
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static bool GetSteamVR_OriginTrackedDeviceInfo(FSteamVRAction SteamVRAction, FSteamVRInputOriginInfo& InputOriginInfo);
+
+	/**
+	* Find and return information about the tracked device associated from the input source.
+	* @param SteamVRAction - The action that's the source of the input
+	* @return InputOriginInfo - The origin info of the action
+	* @return bool - whether the operation is successful or not
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void FindSteamVR_OriginTrackedDeviceInfo(FName ActionName, bool& bResult, FSteamVRInputOriginInfo& InputOriginInfo, FName ActionSet = FName("main"));
 
 	/**
 	* Retrieve the localized name of the origin of a given action (e.g. "Left Hand Index Controller Trackpad")
