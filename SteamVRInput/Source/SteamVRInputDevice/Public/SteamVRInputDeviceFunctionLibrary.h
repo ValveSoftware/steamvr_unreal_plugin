@@ -230,7 +230,9 @@ struct STEAMVRINPUTDEVICE_API FSteamVRInputOriginInfo
 	{}
 
 	FSteamVRInputOriginInfo()
-	{}
+	{
+		TrackedDeviceIndex = 0;
+	}
 };
 
 UENUM(BlueprintType)	
