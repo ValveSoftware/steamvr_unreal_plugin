@@ -3775,6 +3775,7 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 			{
 				InputSettings->RemoveActionMapping(KeyMapping);
 				Count++;
+				break;
 			}
 		}
 
@@ -3785,6 +3786,7 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 			{
 				InputSettings->RemoveAxisMapping(AxisKeyMapping);
 				Count++;
+				break;
 			}
 		}
 	}
@@ -3794,6 +3796,9 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 	{
 		InputSettings->SaveKeyMappings();
 		InputSettings->UpdateDefaultConfigFile();
+
+		Count = 0;
+		ClearTemporaryActions();
 	}
 
 	return Count;
