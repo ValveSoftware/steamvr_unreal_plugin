@@ -492,13 +492,19 @@ void USteamVRInputDeviceFunctionLibrary::ShowSteamVR_ActionOrigin(FSteamVRAction
 	if (VRSystem() && VRInput())
 	{
 		// Show the action origin in user's hmd
-		EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
-
-		// Provide debugging info if doing this is unsuccessful
-		UE_LOG(LogTemp, Warning, TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
-			(int)Err,
-			(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
-			(int)SteamVRAction.Handle, *SteamVRAction.Path);
+		EVRInputError Err = VRInput()->ShowActionOrigins(0, SteamVRAction.Handle);
+		FSteamVRInputOriginInfo OriginInfo;
+		
+		if (GetSteamVR_OriginTrackedDeviceInfo(SteamVRAction, OriginInfo))
+		{
+			if (GEngine)
+			{				
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, 
+					FString::Printf(TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName)
+					);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName);
+		}
 	}
 }
 
@@ -512,28 +518,8 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 
 	if (bIsActionFound && VRSystem() && VRInput())
 	{
-		// Show the action origin in user's hmd
-		//EVRInputError Err = VRInput()->ShowActionOrigins(SteamVRActionSet.Handle, SteamVRAction.Handle);
-		EVRInputError Err = VRInput()->ShowActionOrigins(0, SteamVRAction.Handle);
-
-		if (Err != VRInputError_None)
-		{
-			// Provide debugging info if doing this is unsuccessful
-			UE_LOG(LogTemp, Warning, TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
-				(int)Err,
-				(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
-				(int)SteamVRAction.Handle, *SteamVRAction.Path);
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Error [%i] while attempting to show action origin for Action Set [%i] %s and Action [%i] %s"),
-				(int)Err,
-				(int)SteamVRActionSet.Handle, *SteamVRActionSet.Path,
-				(int)SteamVRAction.Handle, *SteamVRAction.Path));
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+		ShowSteamVR_ActionOrigin(SteamVRAction, SteamVRActionSet);
+		return true;
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Unable to find Action [%s] for Action Set [%s]"), *ActionName.ToString(), *ActionSet.ToString()));
