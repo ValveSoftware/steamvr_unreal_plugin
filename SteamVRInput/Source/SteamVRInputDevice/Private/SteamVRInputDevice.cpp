@@ -1531,6 +1531,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 					CurrentInputKeyName.Contains(TEXT("_A_"));
 				InputState.bIsFaceButton2 = CurrentInputKeyName.Contains(TEXT("FaceButton2"), ESearchCase::CaseSensitive, ESearchDir::FromEnd) ||
 					CurrentInputKeyName.Contains(TEXT("_B_"));
+				InputState.bIsAppMenu = CurrentInputKeyName.Contains(TEXT("_Controller_Application_Press"));
 
 				// Handle Oculus Touch
 				InputState.bIsXButton = InputState.bIsYButton = false;
@@ -1655,6 +1656,10 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				else if (InputState.bIsYButton)
 				{
 					CachePath = FString(TEXT(ACTION_PATH_BTN_Y_LEFT));
+				}
+				else if (InputState.bIsAppMenu)
+				{
+					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_APPMENU_LEFT)) : FString(TEXT(ACTION_PATH_APPMENU_RIGHT));
 				}
 
 				// Handle Special Actions
