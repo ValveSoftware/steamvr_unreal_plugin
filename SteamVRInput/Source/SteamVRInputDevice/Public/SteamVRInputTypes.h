@@ -110,6 +110,8 @@ using namespace vr;
 #define ACTION_PATH_PINCH_GRAB_RIGHT	"/user/hand/right/input/pinch"
 #define ACTION_PATH_GRIP_GRAB_LEFT		"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_GRAB_RIGHT		"/user/hand/right/input/grip"
+#define ACTION_PATH_APPMENU_LEFT        "/user/hand/left/input/application_menu"
+#define ACTION_PATH_APPMENU_RIGHT        "/user/hand/right/input/application_menu"
 
 
 namespace SteamVRInputDeviceConstants 
@@ -417,6 +419,7 @@ struct FSteamVRInputState
 	bool bIsGripGrab;
 	bool bIsPinchGrab;
 	bool bIsPress;
+	bool bIsAppMenu;
 
 	FSteamVRInputState() {}
 };
