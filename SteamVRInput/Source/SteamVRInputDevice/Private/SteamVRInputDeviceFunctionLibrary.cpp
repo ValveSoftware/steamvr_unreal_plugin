@@ -526,6 +526,14 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 	return false;
 }
 
+void USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
+{
+	if (VRSystem() && VRInput())
+	{
+		VRSystem()->ResetSeatedZeroPose();
+	}
+}
+
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
 {
 	FTransform RetTransform;
