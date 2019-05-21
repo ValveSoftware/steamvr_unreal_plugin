@@ -522,7 +522,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				}
 			}
 		}
-		else if (MotionSource == TEXT("Special1"))
+		else if (MotionSource == TEXT("Special_1"))
 		{
 			if (VRSpecial1 == k_ulInvalidActionHandle)
 			{
@@ -536,7 +536,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 		}
-		else if (MotionSource == TEXT("Special2"))
+		else if (MotionSource == TEXT("Special_2"))
 		{
 			if (VRSpecial2 == k_ulInvalidActionHandle)
 			{
@@ -550,7 +550,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 		}
-		else if (MotionSource == TEXT("Special3"))
+		else if (MotionSource == TEXT("Special_3"))
 		{
 			if (VRSpecial3 == k_ulInvalidActionHandle)
 			{
@@ -564,7 +564,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 		}
-		else if (MotionSource == TEXT("Special4"))
+		else if (MotionSource == TEXT("Special_4"))
 		{
 			if (VRSpecial4 == k_ulInvalidActionHandle)
 			{
@@ -579,7 +579,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			}
 
 		}
-		else if (MotionSource == TEXT("Special5"))
+		else if (MotionSource == TEXT("Special_5"))
 		{
 			if (VRSpecial5 == k_ulInvalidActionHandle)
 			{
@@ -593,7 +593,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 		}
-		else if (MotionSource == TEXT("Special6"))
+		else if (MotionSource == TEXT("Special_6"))
 		{
 			if (VRSpecial6 == k_ulInvalidActionHandle)
 			{
@@ -608,7 +608,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			}
 
 		}
-		else if (MotionSource == TEXT("Special7"))
+		else if (MotionSource == TEXT("Special_7"))
 		{
 			if (VRSpecial7 == k_ulInvalidActionHandle)
 			{
@@ -622,7 +622,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 		}
-		else if (MotionSource == TEXT("Special8"))
+		else if (MotionSource == TEXT("Special_8"))
 		{
 			if (VRSpecial8 == k_ulInvalidActionHandle)
 			{
@@ -711,7 +711,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special1"))
+		else if (MotionSource == TEXT("Special_1"))
 		{
 			if (VRSpecial1 == k_ulInvalidActionHandle)
 			{
@@ -725,7 +725,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 		}
-		else if (MotionSource == TEXT("Special2"))
+		else if (MotionSource == TEXT("Special_2"))
 		{
 			if (VRSpecial2 == k_ulInvalidActionHandle)
 			{
@@ -740,7 +740,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special3"))
+		else if (MotionSource == TEXT("Special_3"))
 		{
 			if (VRSpecial3 == k_ulInvalidActionHandle)
 			{
@@ -755,7 +755,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special4"))
+		else if (MotionSource == TEXT("Special_4"))
 		{
 			if (VRSpecial4 == k_ulInvalidActionHandle)
 			{
@@ -770,7 +770,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special5"))
+		else if (MotionSource == TEXT("Special_5"))
 		{
 			if (VRSpecial5 == k_ulInvalidActionHandle)
 			{
@@ -785,7 +785,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special6"))
+		else if (MotionSource == TEXT("Special_6"))
 		{
 			if (VRSpecial6 == k_ulInvalidActionHandle)
 			{
@@ -800,7 +800,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special7"))
+		else if (MotionSource == TEXT("Special_7"))
 		{
 			if (VRSpecial7 == k_ulInvalidActionHandle)
 			{
@@ -815,7 +815,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			}
 
 		}
-		else if (MotionSource == TEXT("Special8"))
+		else if (MotionSource == TEXT("Special_8"))
 		{
 			if (VRSpecial8 == k_ulInvalidActionHandle)
 			{
