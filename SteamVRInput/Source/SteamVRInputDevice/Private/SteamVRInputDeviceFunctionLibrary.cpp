@@ -526,12 +526,22 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 	return false;
 }
 
-void USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
+bool USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
 {
 	if (VRSystem() && VRInput())
 	{
-		VRSystem()->ResetSeatedZeroPose();
+		if (VRCompositor()->GetTrackingSpace() == TrackingUniverseSeated)
+		{
+			VRSystem()->ResetSeatedZeroPose();
+			return true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Request to Reset Seated Position was ignored. Use \"Set Tracking Origin\" to \"Eye\" before calling this function."));
+		}
 	}
+
+	return false;
 }
 
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
