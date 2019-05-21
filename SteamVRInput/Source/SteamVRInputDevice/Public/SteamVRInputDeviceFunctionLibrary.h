@@ -477,7 +477,7 @@ public:
 	* Users are also able to set their seated zero pose via the SteamVR Dashboard.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void ResetSeatedPosition();
+	static bool ResetSeatedPosition();
 
 	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
