@@ -2797,9 +2797,13 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Windows_MR"));
 			} 
+			else if (CurrentKey.Contains(TEXT("MotionController")))
+			{
+				// empty on purpose (readability)
+			}
 			else if (CurrentKey.Contains(TEXT("Input_Temporary")))
 			{
-				continue;
+				continue;	// explicit on purpose (readability)
 			}
 			else
 			{
