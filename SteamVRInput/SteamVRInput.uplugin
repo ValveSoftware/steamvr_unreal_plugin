@@ -1,5 +1,6 @@
 {
   "FileVersion": 3,
+  "EngineVersion": "4.17.0",
   "Version": 1,
   "VersionName": "0.7 Alpha",
   "FriendlyName": "SteamVR Input Plugin",
