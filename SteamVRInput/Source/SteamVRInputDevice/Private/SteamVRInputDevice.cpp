@@ -169,6 +169,9 @@ void FSteamVRInputDevice::InitSteamVRSystem()
 
 void FSteamVRInputDevice::Tick(float DeltaTime)
 {
+	// Place current delta time in buffer for use in determining haptic duration
+	CurrentDeltaTime = DeltaTime;
+
 	// Watch for SteamVR availability & restarts
 	if (!VRSystem())
 	{
@@ -907,6 +910,37 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 	}
 
 	return TrackingStatus;
+}
+
+void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand, const FHapticFeedbackValues& Values)
+{
+	VRActionHandle_t VibrationAction = k_ulInvalidActionHandle;
+
+	switch (Hand)
+	{
+		case (int32)EControllerHand::Left:
+			VibrationAction = VRVibrationLeft;
+			break;
+		case (int32)EControllerHand::Right:
+			VibrationAction = VRVibrationRight;
+			break;
+	}
+
+	if (VibrationAction != k_ulInvalidActionHandle)
+	{
+		VRInput()->TriggerHapticVibrationAction(VibrationAction, 0.f, CurrentDeltaTime, Values.Frequency, Values.Amplitude, k_ulInvalidInputValueHandle);
+		//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("[HAPTIC] Hand: %i, Duration: %f, Frequency: %f, Amplitude: %f"), Hand, CurrentDeltaTime, Values.Frequency, Values.Amplitude);
+	}
+}
+
+void FSteamVRInputDevice::GetHapticFrequencyRange(float& MinFrequency, float& MaxFrequency) const
+{
+	MinFrequency = MaxFrequency = 0.f;
+}
+
+float FSteamVRInputDevice::GetHapticAmplitudeScale() const
+{
+	return 1.f;
 }
 
 void FSteamVRInputDevice::GetControllerFidelity()
