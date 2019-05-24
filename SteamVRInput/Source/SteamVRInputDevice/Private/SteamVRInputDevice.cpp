@@ -864,6 +864,9 @@ void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand
 		case (int32)EControllerHand::Right:
 			VibrationAction = VRVibrationRight;
 			break;
+		case (int32)EControllerHand::AnyHand:
+			VibrationAction = VRVibrationLeft;	// UE4.17+: Hardwire AnyHand to OpenVR's left path as it is the lowest device id to cover most use cases without triggering a duplicate vibration/rumble. TODO: May need refactor for cases where there's a left hand device set & right hand was set to AnyHand for some reason.
+			break;
 	}
 
 	if (VibrationAction != k_ulInvalidActionHandle)
