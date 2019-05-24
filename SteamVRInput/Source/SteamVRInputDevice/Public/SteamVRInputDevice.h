@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "CoreMinimal.h"
 #include "Runtime/Core/Public/Misc/ConfigCacheIni.h"
 #include "IMotionController.h"
+#include "IHapticDevice.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
 #include "Runtime/Core/Public/Misc/Paths.h"
 #include "Engine/Engine.h"
@@ -42,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRInputTypes.h"
 #include "SteamVRInputPublic.h"
 
-class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public IMotionController
+class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public IMotionController, public IHapticDevice
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -63,6 +64,13 @@ public:
 	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
 	virtual FName GetMotionControllerDeviceTypeName() const override;
 	// End of IMotionController Interface
+
+	// IHapticDevice Interface
+	IHapticDevice* GetHapticDevice() override { return (IHapticDevice*)this; }
+	virtual void SetHapticFeedbackValues(int32 ControllerId, int32 Hand, const FHapticFeedbackValues& Values) override;
+	virtual void GetHapticFrequencyRange(float& MinFrequency, float& MaxFrequency) const override;
+	virtual float GetHapticAmplitudeScale() const override;
+	// End of IHapticDevice Interface
 
 	/** Initialize the SteamVR System. Will cause a reconnect if one is already active  */
 	void InitSteamVRSystem();
@@ -466,5 +474,10 @@ private:
 	*	@return uint32 - Number of temporary actions found and cleared
 	*/
 	uint32 ClearTemporaryActions();
-	
+
+	/**
+	* Buffer for current delta time to get an accurate approximation of how long to play haptics for
+	*/
+	float CurrentDeltaTime;
+
 };
