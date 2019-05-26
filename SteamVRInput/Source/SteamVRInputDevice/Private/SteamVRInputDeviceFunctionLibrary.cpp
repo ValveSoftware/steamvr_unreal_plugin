@@ -497,12 +497,10 @@ void USteamVRInputDeviceFunctionLibrary::ShowSteamVR_ActionOrigin(FSteamVRAction
 		
 		if (GetSteamVR_OriginTrackedDeviceInfo(SteamVRAction, OriginInfo))
 		{
-			if (GEngine)
-			{				
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, 
-					FString::Printf(TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName)
-					);
-			}
+			VRActiveActionSet_t ActiveActionSets[] = {0};
+			ActiveActionSets[0].ulActionSet = SteamVRActionSet.Handle;
+			VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 1, SteamVRAction.ActiveOrigin);
+
 			UE_LOG(LogTemp, Warning, TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName);
 		}
 	}
@@ -524,6 +522,12 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Unable to find Action [%s] for Action Set [%s]"), *ActionName.ToString(), *ActionSet.ToString()));
 	return false;
+}
+
+void USteamVRInputDeviceFunctionLibrary::ShowAllSteamVR_ActionOrigins()
+{
+	VRActiveActionSet_t ActiveActionSets[1];
+	VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 0, 0);
 }
 
 bool USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
