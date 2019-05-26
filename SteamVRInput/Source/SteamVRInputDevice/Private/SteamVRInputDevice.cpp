@@ -502,7 +502,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		case EControllerHand::Left:
 			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
 			{
-				InputError = VRInput()->GetPoseActionData(LeftActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(LeftActionHandle, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 				if (InputError != VRInputError_None)
 				{
@@ -514,7 +514,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			
 			if (RightActionHandle != vr::k_ulInvalidActionHandle)
 			{
-				InputError = VRInput()->GetPoseActionData(RightActionHandle, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(RightActionHandle, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 				if (InputError != VRInputError_None)
 				{
@@ -529,7 +529,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial1, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -543,7 +543,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial2, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -557,7 +557,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial3, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -572,7 +572,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial4, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -587,7 +587,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial5, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -602,7 +602,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial6, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -617,7 +617,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial7, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -632,7 +632,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial8, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -698,7 +698,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			
 			if (InputError != VRInputError_None)
 			{
@@ -713,7 +713,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -728,7 +728,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial1, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial1, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -743,7 +743,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial2, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial2, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -758,7 +758,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial3, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial3, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -773,7 +773,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			} 
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial4, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial4, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -788,7 +788,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial5, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial5, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -803,7 +803,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			} 
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial6, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial6, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -818,7 +818,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial7, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial7, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -833,7 +833,7 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-			InputError = VRInput()->GetPoseActionData(VRSpecial8, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial8, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 			if (InputError != VRInputError_None)
 			{
@@ -871,7 +871,7 @@ void FSteamVRInputDevice::GetControllerFidelity()
 			return;
 		}
 
-		InputError = VRInput()->GetPoseActionData(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput()->GetPoseActionDataForNextFrame(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		
 		if (InputError != VRInputError_None)
 		{
@@ -905,7 +905,7 @@ void FSteamVRInputDevice::GetControllerFidelity()
 			return;
 		}
 
-		InputError = VRInput()->GetPoseActionData(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput()->GetPoseActionDataForNextFrame(VRControllerHandleRight, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		if (PoseData.bActive && PoseData.pose.bDeviceIsConnected)
 		{
 			if (VRSkeletalHandleRight == k_ulInvalidActionHandle)
@@ -942,7 +942,7 @@ void FSteamVRInputDevice::GetLeftHandPoseData(FVector& Position, FRotator& Orien
 			return;
 		}
 
-		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleLeft, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput()->GetPoseActionDataForNextFrame(VRSkeletalHandleLeft, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		
 		if (InputError != VRInputError_None || VRSkeletalHandleLeft == k_ulInvalidActionHandle)
 		{
@@ -978,7 +978,7 @@ void FSteamVRInputDevice::GetRightHandPoseData(FVector& Position, FRotator& Orie
 			return;
 		}
 
-		InputError = VRInput()->GetPoseActionData(VRSkeletalHandleRight, VRCompositor()->GetTrackingSpace(), 0, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+		InputError = VRInput()->GetPoseActionDataForNextFrame(VRSkeletalHandleRight, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 		
 		if (InputError != VRInputError_None)
 		{
