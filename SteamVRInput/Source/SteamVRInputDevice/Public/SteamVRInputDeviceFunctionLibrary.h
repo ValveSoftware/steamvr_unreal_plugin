@@ -292,6 +292,17 @@ enum class ESteamVRInputStringBits : uint8
 	VR_InputString_All					UMETA(DisplayName = "All")
 };
 
+/** Input String Values for querying user hardware */
+UENUM(BlueprintType)
+enum class ESkeletalSummaryDataType : uint8
+{
+	// The data should match the animated transforms in the skeleton transforms. This data will probably be smoothed and may be more latent
+	VR_SummaryType_FromAnimation		UMETA(DisplayName = "From Animation"),
+
+	// The data should be the unprocessed values from the device when available. This data may include more jitter but may be provided with less latency
+	VR_SummaryType_FromDevice			UMETA(DisplayName = "From Device"),
+};
+
 /*
  * SteamVR Input Extended Functions
  * Functions and properties defined here are safe for developer use
@@ -311,7 +322,7 @@ public:
 	* @param FingerCurls - Curl values for each finger pair this frame
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static void GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays);
+	static void GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays, ESkeletalSummaryDataType SummaryDataType = ESkeletalSummaryDataType::VR_SummaryType_FromAnimation);
 
 	/**
 	* Generate haptic feedback in the requested controller
