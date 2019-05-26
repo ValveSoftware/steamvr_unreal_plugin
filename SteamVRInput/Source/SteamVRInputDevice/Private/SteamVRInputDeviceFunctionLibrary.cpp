@@ -643,7 +643,7 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 			return;
 		}
 
-		EVRInputError GetSkeletalSummaryDataError = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, &ActiveSkeletalSummaryData);
+		EVRInputError GetSkeletalSummaryDataError = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, VRSummaryType_FromAnimation, &ActiveSkeletalSummaryData);
 		
 		if (GetSkeletalSummaryDataError != VRInputError_None)
 		{
