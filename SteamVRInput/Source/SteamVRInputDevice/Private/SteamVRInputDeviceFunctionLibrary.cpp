@@ -576,7 +576,7 @@ void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()
 	}
 }
 
-void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays)
+void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays, ESkeletalSummaryDataType SummaryDataType)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
 	if (SteamVRInputDevice != nullptr && VRSystem() &&  VRInput())
@@ -643,7 +643,8 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 			return;
 		}
 
-		EVRInputError GetSkeletalSummaryDataError = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, VRSummaryType_FromAnimation, &ActiveSkeletalSummaryData);
+		EVRSummaryType SteamVRSummaryType = (SummaryDataType == ESkeletalSummaryDataType::VR_SummaryType_FromDevice) ? VRSummaryType_FromDevice : VRSummaryType_FromAnimation;
+		EVRInputError GetSkeletalSummaryDataError = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, SteamVRSummaryType, &ActiveSkeletalSummaryData);
 		
 		if (GetSkeletalSummaryDataError != VRInputError_None)
 		{
