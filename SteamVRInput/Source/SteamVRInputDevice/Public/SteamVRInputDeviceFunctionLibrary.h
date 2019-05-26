@@ -235,6 +235,7 @@ struct STEAMVRINPUTDEVICE_API FSteamVRInputOriginInfo
 	}
 };
 
+/** Convenience type for SteamVR Hand designation (Left/Right) */
 UENUM(BlueprintType)	
 enum class ESteamVRHand : uint8
 {
@@ -473,13 +474,39 @@ public:
 	static void ShowSteamVR_ActionOrigin(FSteamVRAction SteamVRAction, FSteamVRActionSet SteamVRActionSet);
 
 	/**
-	* Search and show the current binding of a provided action anme and action set in the user's HMD
+	* Search and show the current binding of a provided action name and action set in the user's HMD
 	* @param SteamVRAction - The action that we will lookup the current binding for
 	* @param SteamVRActionSet - The action set that the action belongs to. Defaults to "main"
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static bool FindSteamVR_ActionOrigin(FName ActionName, FName ActionSet = FName("main"));
 
+	/**
+	* Returns the data for the hand transform at any point in time from current time, given a relative number of seconds
+	* @param Hand - The hand that we're going to retrieve the transform for
+	* @return Position - The position of the hand at the point in time, given a relative number of seconds, from the current time
+	* @return Orientation - The rotation of the hand at the point in time, given a relative number of seconds, from the current time
+	* @return bool - Whether or not the call was succesful
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static bool GetSteamVR_HandPoseRelativeToNow(FVector& Position, FRotator& Orientation, ESteamVRHand Hand = ESteamVRHand::VR_Left, float PredictedSecondsFromNow = 0.f);
+
+	/**
+	* Returns the the current value of the global PredictedSecondsFromNow use in any Get Pose Action Data calls (i.e. Getting controller transform)
+	* A value of -9999.f triggers a GetPoseActionDataForNextFrame, otherwise GetPoseActionRelativeToNow is called with this value
+	* @return float - The current Predicted Seconds From Now from the SteamVRInput device
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static float GetSteamVR_GlobalPredictedSecondsFromNow();
+
+	/**
+	* Sets the the current value of the global PredictedSecondsFromNow to use in any Get Pose Action Data calls (i.e. Getting controller transform)
+	* A value of -9999.f will trigger a GetPoseActionDataForNextFrame, otherwise GetPoseActionRelativeToNow will be called with this value
+	* @param NewValue - The value for PredictedSecondsFromNow that will be used by the SteamVRInput device for Get Action Pose Data calls 
+	* @return float - The current Predicted Seconds From Now from the SteamVRInput device
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static float SetSteamVR_GlobalPredictedSecondsFromNow(float NewValue);
 
 	/**
 	* Shows all current bindings for the current controller in the user's headset

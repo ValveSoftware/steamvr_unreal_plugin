@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #if STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
 #include "../ThirdParty/OpenVRSDK/headers/openvr.h"
+#include "GameFramework/WorldSettings.h"
 #include "HAL/FileManagerGeneric.h"
 using namespace vr;
 #endif // STEAMVRCONTROLLER_SUPPORTED_PLATFORMS
@@ -522,6 +523,87 @@ bool USteamVRInputDeviceFunctionLibrary::FindSteamVR_ActionOrigin(FName ActionNa
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("Unable to find Action [%s] for Action Set [%s]"), *ActionName.ToString(), *ActionSet.ToString()));
 	return false;
+}
+
+bool USteamVRInputDeviceFunctionLibrary::GetSteamVR_HandPoseRelativeToNow(FVector& Position, FRotator& Orientation, ESteamVRHand Hand /*= ESteamVRHand::VR_Left*/, float PredictedSecondsFromNow /*= 0.f*/)
+{
+	if (VRSystem() && VRInput())
+	{
+		FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+		if (SteamVRInputDevice != nullptr)
+		{
+			VRActionHandle_t HandActionHandle = (Hand == ESteamVRHand::VR_Left) ? SteamVRInputDevice->VRControllerHandleLeft : SteamVRInputDevice->VRControllerHandleRight;
+			if (HandActionHandle != k_ulInvalidActionHandle)
+			{
+				InputPoseActionData_t PoseData = {0};
+				EVRInputError InputError = VRInput()->GetPoseActionDataRelativeToNow(HandActionHandle, VRCompositor()->GetTrackingSpace(), PredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+
+				if (InputError == VRInputError_None)
+				{
+					// Get SteamVR Transform Matrix for this controller
+					HmdMatrix34_t Matrix = PoseData.pose.mDeviceToAbsoluteTracking;
+
+					// Transform SteamVR Pose to Unreal Pose
+					FMatrix Pose = FMatrix(
+						FPlane(Matrix.m[0][0], Matrix.m[1][0], Matrix.m[2][0], 0.0f),
+						FPlane(Matrix.m[0][1], Matrix.m[1][1], Matrix.m[2][1], 0.0f),
+						FPlane(Matrix.m[0][2], Matrix.m[1][2], Matrix.m[2][2], 0.0f),
+						FPlane(Matrix.m[0][3], Matrix.m[1][3], Matrix.m[2][3], 1.0f)
+					);
+
+
+					// Transform SteamVR Rotation Quaternion to a UE FRotator
+					FQuat OrientationQuat;
+					FQuat OrientationPose(Pose);
+					OrientationQuat.X = -OrientationPose.Z;
+					OrientationQuat.Y = OrientationPose.X;
+					OrientationQuat.Z = OrientationPose.Y;
+					OrientationQuat.W = -OrientationPose.W;
+
+					FVector PositionPose = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters);
+					Position = PositionPose;
+
+					//OutOrientation = BaseOrientation.Inverse() * OutOrientation;
+					OrientationQuat.Normalize();
+					Orientation = OrientationQuat.Rotator();
+					Orientation.Normalize();
+
+					return true;
+				}
+			}			
+		}
+	}
+
+	return false;
+}
+
+float USteamVRInputDeviceFunctionLibrary::GetSteamVR_GlobalPredictedSecondsFromNow()
+{
+	if (VRSystem() && VRInput())
+	{
+		FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+		if (SteamVRInputDevice != nullptr)
+		{
+			return SteamVRInputDevice->GlobalPredictedSecondsFromNow;
+		}
+	}
+
+	return -9999.f;
+}
+
+float USteamVRInputDeviceFunctionLibrary::SetSteamVR_GlobalPredictedSecondsFromNow(float NewValue)
+{
+	if (VRSystem() && VRInput())
+	{
+		FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+		if (SteamVRInputDevice != nullptr)
+		{
+			SteamVRInputDevice->GlobalPredictedSecondsFromNow = NewValue;
+			return SteamVRInputDevice->GlobalPredictedSecondsFromNow;
+		}
+	}
+
+	return -9999.f;
 }
 
 void USteamVRInputDeviceFunctionLibrary::ShowAllSteamVR_ActionOrigins()
