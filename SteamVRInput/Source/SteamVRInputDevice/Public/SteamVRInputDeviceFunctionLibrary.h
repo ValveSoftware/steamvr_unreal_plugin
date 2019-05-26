@@ -469,6 +469,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static bool FindSteamVR_ActionOrigin(FName ActionName, FName ActionSet = FName("main"));
 
+
+	/**
+	* Shows all current bindings for the current controller in the user's headset
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void ShowAllSteamVR_ActionOrigins();
+
 	/**
 	* Sets the zero pose for the seated tracker coordinate system to the current position and yaw of the HMD. 
 	* After this call, calls that pass TrackingUniverseSeated as the origin will be relative to this new zero pose.
