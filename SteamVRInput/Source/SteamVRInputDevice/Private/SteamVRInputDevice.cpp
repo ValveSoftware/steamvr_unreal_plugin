@@ -951,7 +951,7 @@ void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand
 			break;
 	}
 
-	if (VibrationAction != k_ulInvalidActionHandle)
+	if (VRSystem() && VRInput() && VibrationAction != k_ulInvalidActionHandle)
 	{
 		VRInput()->TriggerHapticVibrationAction(VibrationAction, 0.f, CurrentDeltaTime, Values.Frequency, Values.Amplitude, k_ulInvalidInputValueHandle);
 		//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("[HAPTIC] Hand: %i, Duration: %f, Frequency: %f, Amplitude: %f"), Hand, CurrentDeltaTime, Values.Frequency, Values.Amplitude);
