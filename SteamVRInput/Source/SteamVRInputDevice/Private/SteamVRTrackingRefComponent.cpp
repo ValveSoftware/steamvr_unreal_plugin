@@ -29,8 +29,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "SteamVRTrackingRefComponent.h"
 #include "../../OpenVRSDK/headers/openvr.h"
-#include "Camera/PlayerCameraManager.h"
-#include "Kismet/GameplayStatics.h"
 #include "SteamVRInput.h"
 
 using namespace vr;

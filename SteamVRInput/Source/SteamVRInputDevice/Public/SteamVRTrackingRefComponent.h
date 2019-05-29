@@ -29,7 +29,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Components/ActorComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "SteamVRTrackingRefComponent.generated.h"
 
 
