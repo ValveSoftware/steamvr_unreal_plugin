@@ -932,11 +932,6 @@ FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
 	return FName(TEXT("SteamVRInputDevice"));
 }
 
-void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
-{
-	// Empty on purpose
-}
-
 void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand, const FHapticFeedbackValues& Values)
 {
 	VRActionHandle_t VibrationAction = k_ulInvalidActionHandle;
