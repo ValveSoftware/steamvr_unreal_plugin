@@ -268,10 +268,10 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		RightHand.Thumb_2 = OutPose[4];
 		RightHand.Thumb_3 = OutPose[5];
 
-		RightHand.Index_0 =  OutPose[6];
-		RightHand.Index_1 =  OutPose[7];
-		RightHand.Index_2 =  OutPose[8];
-		RightHand.Index_3 =  OutPose[9];
+		RightHand.Index_0 = OutPose[6];
+		RightHand.Index_1 = OutPose[7];
+		RightHand.Index_2 = OutPose[8];
+		RightHand.Index_3 = OutPose[9];
 		RightHand.Index_4 = OutPose[10];
 
 		RightHand.Middle_0 = OutPose[11];
@@ -292,8 +292,8 @@ void USteamVRInputDeviceFunctionLibrary::GetSkeletalTransform(FSteamVRSkeletonTr
 		RightHand.Pinky_3 = OutPose[24];
 		RightHand.Pinky_4 = OutPose[25];
 
-		RightHand.Aux_Thumb =  OutPose[26];
-		RightHand.Aux_Index =  OutPose[27];
+		RightHand.Aux_Thumb = OutPose[26];
+		RightHand.Aux_Index = OutPose[27];
 		RightHand.Aux_Middle = OutPose[28];
 		RightHand.Aux_Ring = OutPose[29];
 		RightHand.Aux_Pinky = OutPose[30];
@@ -495,10 +495,10 @@ void USteamVRInputDeviceFunctionLibrary::ShowSteamVR_ActionOrigin(FSteamVRAction
 		// Show the action origin in user's hmd
 		EVRInputError Err = VRInput()->ShowActionOrigins(0, SteamVRAction.Handle);
 		FSteamVRInputOriginInfo OriginInfo;
-		
+
 		if (GetSteamVR_OriginTrackedDeviceInfo(SteamVRAction, OriginInfo))
 		{
-			VRActiveActionSet_t ActiveActionSets[] = {0};
+			VRActiveActionSet_t ActiveActionSets[] = { 0 };
 			ActiveActionSets[0].ulActionSet = SteamVRActionSet.Handle;
 			VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 1, SteamVRAction.ActiveOrigin);
 
@@ -535,7 +535,7 @@ bool USteamVRInputDeviceFunctionLibrary::GetSteamVR_HandPoseRelativeToNow(FVecto
 			VRActionHandle_t HandActionHandle = (Hand == ESteamVRHand::VR_Left) ? SteamVRInputDevice->VRControllerHandleLeft : SteamVRInputDevice->VRControllerHandleRight;
 			if (HandActionHandle != k_ulInvalidActionHandle)
 			{
-				InputPoseActionData_t PoseData = {0};
+				InputPoseActionData_t PoseData = { 0 };
 				EVRInputError InputError = VRInput()->GetPoseActionDataRelativeToNow(HandActionHandle, VRCompositor()->GetTrackingSpace(), PredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
 				if (InputError == VRInputError_None)
@@ -570,7 +570,7 @@ bool USteamVRInputDeviceFunctionLibrary::GetSteamVR_HandPoseRelativeToNow(FVecto
 
 					return true;
 				}
-			}			
+			}
 		}
 	}
 
@@ -630,6 +630,17 @@ bool USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
 	return false;
 }
 
+
+float USteamVRInputDeviceFunctionLibrary::GetUserIPD()
+{
+	if (VRSystem())
+	{
+		return VRSystem()->GetFloatTrackedDeviceProperty(k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty::Prop_UserIpdMeters_Float) * 1000; // Return IPD in mm
+	}
+
+	return 0.f;
+}
+
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
 {
 	FTransform RetTransform;
@@ -661,7 +672,7 @@ void USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL()
 void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSteamVRFingerCurls& FingerCurls, FSteamVRFingerSplays& FingerSplays, ESkeletalSummaryDataType SummaryDataType)
 {
 	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
-	if (SteamVRInputDevice != nullptr && VRSystem() &&  VRInput())
+	if (SteamVRInputDevice != nullptr && VRSystem() && VRInput())
 	{
 		// Get action state this frame
 		VRActiveActionSet_t ActiveActionSets[] = {
@@ -701,7 +712,7 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 
 		InputSkeletalActionData_t actionData;
 		EVRInputError GetSkeletalActionDataError = VRInput()->GetSkeletalActionData(ActiveSkeletalHand, &actionData, sizeof(InputSkeletalActionData_t));
-		
+
 		if (GetSkeletalActionDataError != VRInputError_None)
 		{
 			FingerCurls = {};
@@ -727,7 +738,7 @@ void USteamVRInputDeviceFunctionLibrary::GetFingerCurlsAndSplays(EHand Hand, FSt
 
 		EVRSummaryType SteamVRSummaryType = (SummaryDataType == ESkeletalSummaryDataType::VR_SummaryType_FromDevice) ? VRSummaryType_FromDevice : VRSummaryType_FromAnimation;
 		EVRInputError GetSkeletalSummaryDataError = VRInput()->GetSkeletalSummaryData(ActiveSkeletalHand, SteamVRSummaryType, &ActiveSkeletalSummaryData);
-		
+
 		if (GetSkeletalSummaryDataError != VRInputError_None)
 		{
 			FingerCurls = {};
