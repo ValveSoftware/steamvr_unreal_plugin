@@ -525,6 +525,13 @@ public:
 	static bool ResetSeatedPosition();
 
 	/**
+	* Returns the user's HMD's current IPD (interpupillary distance) setting in millimetres.
+	* @return float - The current IPD setting of the user's headset in millimetres
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static float GetUserIPD();
+
+	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
 	* @param SteamBoneTransform - The SteamVR Bone Transform value to get the UE coordinates for
 	*/
