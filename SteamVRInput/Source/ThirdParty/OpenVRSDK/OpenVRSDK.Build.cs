@@ -36,8 +36,8 @@ public class OpenVRSDK : ModuleRules
 
 		PublicLibraryPaths.Add(Path.Combine(LibraryPath, "win64"));
 		PublicAdditionalLibraries.Add("openvr_api.lib");
-		PublicDelayLoadDLLs.Add(Path.Combine(BinaryPath, "win64", "openvr_api.dll"));
-		RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinaryPath, "win64", "openvr_api.dll")));
+		//PublicDelayLoadDLLs.Add(Path.Combine(BinaryPath, "win64", "openvr_api.dll"));
+		//RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinaryPath, "win64", "openvr_api.dll")));
 
 		// Verify if necessary OpenVR paths exists
 		if (!Directory.Exists(HeadersPath) && !Directory.Exists(LibraryPath) && !Directory.Exists(BinaryPath))
