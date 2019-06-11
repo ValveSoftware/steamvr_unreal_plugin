@@ -176,6 +176,10 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 	// Cache UE4 retargetting references at first anim frame as FAnimPoseBase init does not appear to have a valid Pose to process at Initialize()
 	if (!UE4RetargettingRefs.bIsInitialized)
 	{
+		// Determine which hand we're working with
+		UE4RetargettingRefs.bIsRightHanded = (Hand == EHand::VR_RightHand && !Mirror) || (Hand == EHand::VR_LeftHand && Mirror);
+
+		// Calculate the average position of the UE4 knuckles bones and add it to the cache
 		for (int32 KnuckleIndex = 0; KnuckleIndex < 4; ++KnuckleIndex)
 		{
 			const FCompactPoseBoneIndex BoneIndex_UE4 = FCompactPoseBoneIndex(kUE4KnuckleBones[KnuckleIndex]);
@@ -183,6 +187,17 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 		}
 
 		UE4RetargettingRefs.KnuckleAverageMS_UE4 /= 4.f;
+
+		// Obtain the UE4 wrist Side & Forward directions from first animation frame and place in cache 
+		FCompactPoseBoneIndex WristBoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(EUE4HandBone_Wrist));
+		FTransform WristTransform_UE4 = Pose[WristBoneIndexCompact];
+		FVector ToKnuckleAverageMS_UE4 = UE4RetargettingRefs.KnuckleAverageMS_UE4 - WristTransform_UE4.GetTranslation();
+		ToKnuckleAverageMS_UE4.Normalize();
+
+		UE4RetargettingRefs.WristForwardLS_UE4 = WristTransform_UE4.GetRotation().UnrotateVector(ToKnuckleAverageMS_UE4);
+		UE4RetargettingRefs.WristSideDirectionLS_UE4 = FVector::CrossProduct(UE4RetargettingRefs.WristForwardLS_UE4, FVector::RightVector);
+
+		// Set initialized flag to true so that subsequent frames will skip the above calculations
 		UE4RetargettingRefs.bIsInitialized = true;
 	}
 
@@ -204,27 +219,18 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 		ToKnuckleAverageMS_SteamVR.Normalize();
 		FVector WristForwardLS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation().UnrotateVector(ToKnuckleAverageMS_SteamVR);
 
-		FCompactPoseBoneIndex WristBoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(EUE4HandBone_Wrist));
-		FTransform WristTransform_UE4 = Pose[WristBoneIndexCompact];
-		FVector ToKnuckleAverageMS_UE4 = UE4RetargettingRefs.KnuckleAverageMS_UE4 - WristTransform_UE4.GetTranslation();
-		ToKnuckleAverageMS_UE4.Normalize();
-		FVector WristForwardLS_UE4 = WristTransform_UE4.GetRotation().UnrotateVector(ToKnuckleAverageMS_UE4);
-
 		// Get the axis that most closely matches the direction the palm of the hand is facing
-		bool bIsRightHanded = ( Hand == EHand::VR_RightHand && !Mirror ) || ( Hand == EHand::VR_LeftHand && Mirror );
+		FVector WristSideDirectionLS_SteamVR = (UE4RetargettingRefs.bIsRightHanded) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
 
-		FVector WristSideDirectionLS_SteamVR = ( bIsRightHanded ) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
-
-		// Take the cross product with the forward vector for each hand to ensure that the side vector is perpendicular to the forward vector
+		// Take the cross product with the forward vector for the SteamVR hand to ensure that the side vector is perpendicular to the forward vector
 		WristSideDirectionLS_SteamVR = FVector::CrossProduct(WristForwardLS_SteamVR, WristSideDirectionLS_SteamVR);
-		UE4RetargettingRefs.WristSideDirectionLS_UE4 = FVector::CrossProduct(WristForwardLS_UE4, FVector(0.f, 1.f, 0.f));
 
 		// Find the model-space directions of the forward and side vectors based on the current pose
 		const FVector WristForwardMS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation() * WristForwardLS_SteamVR;
 		const FVector WristSideDirectionMS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation() * WristSideDirectionLS_SteamVR;
 
 		// Calculate the rotation that will align the UE4 hand's forward vector with the SteamVR hand's forward
-		FQuat AlignmentRot = FQuat::FindBetweenNormals(WristForwardLS_UE4, WristForwardMS_SteamVR);
+		FQuat AlignmentRot = FQuat::FindBetweenNormals(UE4RetargettingRefs.WristForwardLS_UE4, WristForwardMS_SteamVR);
 
 		// Rotate about the aligned forward direction to make the side directions align
 		FVector WristSideDirectionMS_UE4 = AlignmentRot * UE4RetargettingRefs.WristSideDirectionLS_UE4;
