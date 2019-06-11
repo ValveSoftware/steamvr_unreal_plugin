@@ -235,6 +235,29 @@ struct STEAMVRINPUTDEVICE_API FSteamVRInputOriginInfo
 	}
 };
 
+/** Retargetting information for the SteamVR skeleton to UE4 stock skeleton */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FUE4RetargettingRefs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	bool bIsInitialized;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FVector KnuckleAverageMS_UE4;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FVector WristSideDirectionLS_UE4;
+
+	FUE4RetargettingRefs()
+	{
+		bIsInitialized = false;
+		KnuckleAverageMS_UE4 = FVector::ZeroVector;
+		WristSideDirectionLS_UE4 = FVector(0.f, 1.f, 0.f);
+	}
+};
+
 /** Convenience type for SteamVR Hand designation (Left/Right) */
 UENUM(BlueprintType)	
 enum class ESteamVRHand : uint8
