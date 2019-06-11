@@ -61,8 +61,12 @@ struct STEAMVRINPUTDEVICE_API FAnimNode_SteamVRInputAnimPose : public FAnimNode_
 	bool Mirror = false;
 
 	/** The UE4 equivalent of the SteamVR Transform values per bone */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SteamVRInput)
 	FSteamVRSkeletonTransform SteamVRSkeletalTransform;
+
+	/** SteamVR Skeleton to UE4 retargetting cache */
+	UPROPERTY()
+	FUE4RetargettingRefs UE4RetargettingRefs;
 
 public:
 
@@ -79,11 +83,12 @@ public:
 	 * Retarget the given array of bone transforms for the SteamVR skeleton to the UE4 hand skeleton and apply it to the given FPoseContext. 
 	 * The bone transforms are in the bone's local space.  Assumes that PoseContest.Pose has already been set to its reference pose
 	*/
-	void PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const;
+	void PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount);
 
 	/** Retrieve the first active SteamVRInput device present in this game */
 	FSteamVRInputDevice* GetSteamVRInputDevice();
 
 	/** Recursively calculate the model-space transform of the given bone from the local-space transforms on the given pose */
-	FTransform CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex) const;
+	FTransform CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex);
+
 };
