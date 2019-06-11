@@ -143,13 +143,13 @@ FQuat CalcRotationAboutAxis(const FVector& FromDirection, const FVector& ToDirec
 }
 
 
-void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount) const
+void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, const FTransform* BoneTransformsLS, int32 BoneTransformCount)
 {
 	check(BoneTransformsLS != nullptr);
 	check(BoneTransformCount == SteamVRSkeleton::GetBoneCount());
 	check(Pose.GetNumBones() == UE4HandSkeleton::GetBoneCount());
 
-	// It is easier to do the retargeting in model space, so calculate the model space transforms for the SteamVR skeleton
+	// It is easier to do the retargetting in model space, so calculate the model space transforms for the SteamVR skeleton
 	// from the given local space transforms
 	FTransform BoneTransformsMS[STEAMVR_SKELETON_BONE_COUNT];
 	for ( int32 BoneIndex = 0; BoneIndex < SteamVRSkeleton::GetBoneCount(); ++BoneIndex)
@@ -173,25 +173,32 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 
 	FQuat TargetBoneRotationsMS[EUE4HandBone_Count];
 
+	// Cache UE4 retargetting references at first anim frame as FAnimPoseBase init does not appear to have a valid Pose to process at Initialize()
+	if (!UE4RetargettingRefs.bIsInitialized)
+	{
+		for (int32 KnuckleIndex = 0; KnuckleIndex < 4; ++KnuckleIndex)
+		{
+			const FCompactPoseBoneIndex BoneIndex_UE4 = FCompactPoseBoneIndex(kUE4KnuckleBones[KnuckleIndex]);
+			UE4RetargettingRefs.KnuckleAverageMS_UE4 += CalcModelSpaceTransform(Pose, BoneIndex_UE4).GetTranslation();
+		}
+
+		UE4RetargettingRefs.KnuckleAverageMS_UE4 /= 4.f;
+		UE4RetargettingRefs.bIsInitialized = true;
+	}
+
 	// Calculate the rotation to make the target wrist bone match the orientation of the source wrist bone
-	// TODO: a bunch of this can be calculated once at init time and cached.  Rune, can we calculate it during the animgraph compile?
 	{
 		// Calculate the average position of the knuckles bones for each hand, then rotate the wrist of the target skeleton
 		// so that its knuckle-average coincides with the knuckle-average of the source pose
 		FVector KnuckleAverageMS_SteamVR = FVector::ZeroVector;
-		FVector KnuckleAverageMS_UE4 = FVector::ZeroVector;
 
 		for (int32 KnuckleIndex = 0; KnuckleIndex < 4; ++KnuckleIndex)
 		{
 			const int32 BoneIndex_SteamVR = kSteamVRKnuckleBones[KnuckleIndex];
-			const FCompactPoseBoneIndex BoneIndex_UE4 = FCompactPoseBoneIndex(kUE4KnuckleBones[KnuckleIndex]);
-
 			KnuckleAverageMS_SteamVR	+= BoneTransformsMS[BoneIndex_SteamVR].GetTranslation();
-			KnuckleAverageMS_UE4		+= CalcModelSpaceTransform(Pose, BoneIndex_UE4).GetTranslation();
 		}
 
 		KnuckleAverageMS_SteamVR /= 4.f;
-		KnuckleAverageMS_UE4 /= 4.f;
 
 		FVector ToKnuckleAverageMS_SteamVR = KnuckleAverageMS_SteamVR - BoneTransformsMS[ESteamVRBone_Wrist].GetTranslation();
 		ToKnuckleAverageMS_SteamVR.Normalize();
@@ -199,7 +206,7 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 
 		FCompactPoseBoneIndex WristBoneIndexCompact = Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(EUE4HandBone_Wrist));
 		FTransform WristTransform_UE4 = Pose[WristBoneIndexCompact];
-		FVector ToKnuckleAverageMS_UE4 = KnuckleAverageMS_UE4 - WristTransform_UE4.GetTranslation();
+		FVector ToKnuckleAverageMS_UE4 = UE4RetargettingRefs.KnuckleAverageMS_UE4 - WristTransform_UE4.GetTranslation();
 		ToKnuckleAverageMS_UE4.Normalize();
 		FVector WristForwardLS_UE4 = WristTransform_UE4.GetRotation().UnrotateVector(ToKnuckleAverageMS_UE4);
 
@@ -207,11 +214,10 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 		bool bIsRightHanded = ( Hand == EHand::VR_RightHand && !Mirror ) || ( Hand == EHand::VR_LeftHand && Mirror );
 
 		FVector WristSideDirectionLS_SteamVR = ( bIsRightHanded ) ? FVector(0.f, -1.f, 0.f) : FVector(0.f, 1.f, 0.f);
-		FVector WristSideDirectionLS_UE4 = ( bIsRightHanded ) ? FVector(0.f, 1.f, 0.f) : FVector(0.f, 1.f, 0.f);
 
 		// Take the cross product with the forward vector for each hand to ensure that the side vector is perpendicular to the forward vector
 		WristSideDirectionLS_SteamVR = FVector::CrossProduct(WristForwardLS_SteamVR, WristSideDirectionLS_SteamVR);
-		WristSideDirectionLS_UE4 = FVector::CrossProduct(WristForwardLS_UE4, WristSideDirectionLS_UE4);
+		UE4RetargettingRefs.WristSideDirectionLS_UE4 = FVector::CrossProduct(WristForwardLS_UE4, FVector(0.f, 1.f, 0.f));
 
 		// Find the model-space directions of the forward and side vectors based on the current pose
 		const FVector WristForwardMS_SteamVR = BoneTransformsMS[ESteamVRBone_Wrist].GetRotation() * WristForwardLS_SteamVR;
@@ -221,7 +227,7 @@ void FAnimNode_SteamVRInputAnimPose::PoseUE4HandSkeleton(FCompactPose& Pose, con
 		FQuat AlignmentRot = FQuat::FindBetweenNormals(WristForwardLS_UE4, WristForwardMS_SteamVR);
 
 		// Rotate about the aligned forward direction to make the side directions align
-		FVector WristSideDirectionMS_UE4 = AlignmentRot * WristSideDirectionLS_UE4;
+		FVector WristSideDirectionMS_UE4 = AlignmentRot * UE4RetargettingRefs.WristSideDirectionLS_UE4;
 		FQuat TwistRotation = CalcRotationAboutAxis(WristSideDirectionMS_UE4, WristSideDirectionMS_SteamVR, WristForwardMS_SteamVR);
 
 		// Apply the rotation to the hand
@@ -313,7 +319,7 @@ FSteamVRInputDevice* FAnimNode_SteamVRInputAnimPose::GetSteamVRInputDevice()
 }
 
 
-FTransform FAnimNode_SteamVRInputAnimPose::CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex) const
+FTransform FAnimNode_SteamVRInputAnimPose::CalcModelSpaceTransform(const FCompactPose& Pose, FCompactPoseBoneIndex BoneIndex)
 {
 	FTransform BoneTransform = Pose[BoneIndex];
 
