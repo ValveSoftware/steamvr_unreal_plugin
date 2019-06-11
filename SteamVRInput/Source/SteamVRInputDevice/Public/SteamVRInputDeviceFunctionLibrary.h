@@ -245,16 +245,24 @@ struct STEAMVRINPUTDEVICE_API FUE4RetargettingRefs
 	bool bIsInitialized;
 
 	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	bool bIsRightHanded;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
 	FVector KnuckleAverageMS_UE4;
 
 	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
 	FVector WristSideDirectionLS_UE4;
 
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FVector WristForwardLS_UE4;
+
 	FUE4RetargettingRefs()
 	{
 		bIsInitialized = false;
+		bIsRightHanded = false;
 		KnuckleAverageMS_UE4 = FVector::ZeroVector;
-		WristSideDirectionLS_UE4 = FVector(0.f, 1.f, 0.f);
+		WristSideDirectionLS_UE4 = FVector::RightVector;
+		WristForwardLS_UE4 = FVector::ForwardVector;
 	}
 };
 
