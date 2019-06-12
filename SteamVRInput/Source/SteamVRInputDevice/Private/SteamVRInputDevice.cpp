@@ -366,17 +366,8 @@ void FSteamVRInputDevice::SendAnalogMessage(const ETrackedControllerRole Tracked
 void FSteamVRInputDevice::SendControllerEvents()
 {
 
-	if (VRSystem() && VRInput())
+	if (VRSystem() && VRInput() && SteamVRInputActionSets.Num() > 0)
 	{
-		// Set our active action set here
-		VRActiveActionSet_t ActiveActionSets[] = {
-			{
-				MainActionSet,
-				k_ulInvalidInputValueHandle,
-				k_ulInvalidActionSetHandle
-			}
-		};
-
 		EVRInputError ActionStateError = VRInput()->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
 		
 		if (ActionStateError != VRInputError_None)
@@ -385,97 +376,10 @@ void FSteamVRInputDevice::SendControllerEvents()
 			return;
 		}
 
-		// Go through Actions
-		for (auto& Action : ActionEvents)
+		// Go through all Actions in all active ActionSets
+		for (auto& SteamVRInputActionSet : SteamVRInputActionSets)
 		{
-			if (Action.Handle == k_ulInvalidActionHandle)
-			{
-				continue;
-			}
-
-			if (Action.Type == EActionType::Boolean && !Action.Path.Contains(TEXT(" axis")) && !Action.Path.Contains(TEXT("_axis")))
-			{
-				// Get digital data from SteamVR
-				InputDigitalActionData_t DigitalData;
-				ActionStateError = VRInput()->GetDigitalActionData(Action.Handle, &DigitalData, sizeof(DigitalData), k_ulInvalidInputValueHandle);
-				
-				if (ActionStateError != VRInputError_None)
-				{
-					//GetInputError(ActionStateError, TEXT("Error encountered retrieving digital data from SteamVR"));
-					//UE_LOG(LogSteamVRInputDevice, Error, TEXT("%s"), *Action.Path);
-					continue;
-				}
-				else if (ActionStateError == VRInputError_None &&
-					DigitalData.bActive &&
-					DigitalData.bState != Action.bState
-					)
-				{
-					// Update our action to the value reported by SteamVR
-					Action.bState = DigitalData.bState;
-
-					// Update the active origin
-					Action.ActiveOrigin = DigitalData.activeOrigin;
-
-					// Sent event back to Engine
-					// Find the temporary action key
-					FKey FoundKey;
-					if (FindTemporaryActionKey(Action.Name, FoundKey))
-					{
-						// Test what we're receiving from SteamVR
-						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %i"), *Action.Path, *FoundKey.GetFName().ToString(), DigitalData.bState);
-
-						if (Action.bState)
-						{
-							MessageHandler->OnControllerButtonPressed(FoundKey.GetFName(), 0, false);
-						}
-						else
-						{
-							MessageHandler->OnControllerButtonReleased(FoundKey.GetFName(), 0, false);
-						}
-					}
-				}
-			}
-			else if (Action.Type == EActionType::Vector1
-				|| Action.Type == EActionType::Vector2
-				|| Action.Type == EActionType::Vector3)
-			{
-				// Get analog data from SteamVR
-				InputAnalogActionData_t AnalogData;
-				ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
-				
-				if (ActionStateError != VRInputError_None)
-				{
-					//GetInputError(ActionStateError, TEXT("Error encountered retrieving analog data from SteamVR"));
-					continue;
-				}
-				else if (ActionStateError == VRInputError_None && AnalogData.bActive)
-				{
-					// Update the active origin
-					Action.ActiveOrigin = AnalogData.activeOrigin;
-
-					// Find the temporary action key (X)
-					FKey FoundKeyX;
-					if (FindTemporaryActionKey(Action.Name, FoundKeyX))
-					{
-						// Test what we're receiving from SteamVR
-						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
-
-						Action.Value.X = AnalogData.x; // ActionCount;
-						MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
-					}
-
-					// Find the temporary action key (Y)
-					FKey FoundKeyY;
-					if (FindTemporaryActionKey(Action.Name, FoundKeyY, true))
-					{
-						// Test what we're receiving from SteamVR
-						//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
-
-						Action.Value.Y = AnalogData.y;
-						MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
-					}
-				}
-			}
+			ProcessActionEvents(SteamVRInputActionSet);
 		}
 	}
 }
@@ -3229,6 +3133,20 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
 		GetInputError(InputError, FString(TEXT("Setting main action set")));
 
+		// Add to action set array
+		SteamVRInputActionSets.Add(FSteamVRInputActionSet(0, ACTION_SET, MainActionSet));
+
+		// Populate Active Action sets that will later be used in OpenVR calls
+		for (int32 i = 0; i < SteamVRInputActionSets.Num(); i++)
+		{
+			if (i > MAX_ACTION_SETS - 1) break;	// Skip if more than allocated maximum action sets
+
+			ActiveActionSets[i].nPriority = (int32_t)SteamVRInputActionSets[i].Priority;
+			ActiveActionSets[i].ulActionSet = SteamVRInputActionSets[i].Handle;
+			ActiveActionSets[i].ulRestrictedToDevice = SteamVRInputActionSets[i].RestrictedToDeviceHandle;
+			ActiveActionSets[i].ulSecondaryActionSet = SteamVRInputActionSets[i].SecondaryActionSetHandle;
+		}
+
 		// Fill in Action handles for each registered action
 		for (auto& Action : Actions)
 		{
@@ -3634,6 +3552,101 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_63, LOCTEXT("SteamVR_Input_Temporary_Action_63", "[STEAMVR INTERNAL] Temporary Action 63"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_64, LOCTEXT("SteamVR_Input_Temporary_Action_64", "[STEAMVR INTERNAL] Temporary Action 64"), FKeyDetails::GamepadKey));
 #pragma endregion
+}
+
+void FSteamVRInputDevice::ProcessActionEvents(FSteamVRInputActionSet SteamVRInputActionSet)
+{
+	for (auto& Action : ActionEvents)
+	{
+		if (Action.Handle == k_ulInvalidActionHandle)
+		{
+			continue;
+		}
+
+		if (Action.Type == EActionType::Boolean && !Action.Path.Contains(TEXT(" axis")) && !Action.Path.Contains(TEXT("_axis")))
+		{
+			// Get digital data from SteamVR
+			InputDigitalActionData_t DigitalData;
+			EVRInputError ActionStateError = VRInput()->GetDigitalActionData(Action.Handle, &DigitalData, sizeof(DigitalData), k_ulInvalidInputValueHandle);
+
+			if (ActionStateError != VRInputError_None)
+			{
+				//GetInputError(ActionStateError, TEXT("Error encountered retrieving digital data from SteamVR"));
+				//UE_LOG(LogSteamVRInputDevice, Error, TEXT("%s"), *Action.Path);
+				continue;
+			}
+			else if (ActionStateError == VRInputError_None &&
+				DigitalData.bActive &&
+				DigitalData.bState != Action.bState
+				)
+			{
+				// Update our action to the value reported by SteamVR
+				Action.bState = DigitalData.bState;
+
+				// Update the active origin
+				Action.ActiveOrigin = DigitalData.activeOrigin;
+
+				// Sent event back to Engine
+				// Find the temporary action key
+				FKey FoundKey;
+				if (FindTemporaryActionKey(Action.Name, FoundKey))
+				{
+					// Test what we're receiving from SteamVR
+					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s Value %i"), *Action.Path, *FoundKey.GetFName().ToString(), DigitalData.bState);
+
+					if (Action.bState)
+					{
+						MessageHandler->OnControllerButtonPressed(FoundKey.GetFName(), 0, false);
+					}
+					else
+					{
+						MessageHandler->OnControllerButtonReleased(FoundKey.GetFName(), 0, false);
+					}
+				}
+			}
+		}
+		else if (Action.Type == EActionType::Vector1
+			|| Action.Type == EActionType::Vector2
+			|| Action.Type == EActionType::Vector3)
+		{
+			// Get analog data from SteamVR
+			InputAnalogActionData_t AnalogData;
+			EVRInputError ActionStateError = VRInput()->GetAnalogActionData(Action.Handle, &AnalogData, sizeof(AnalogData), k_ulInvalidInputValueHandle);
+
+			if (ActionStateError != VRInputError_None)
+			{
+				//GetInputError(ActionStateError, TEXT("Error encountered retrieving analog data from SteamVR"));
+				continue;
+			}
+			else if (ActionStateError == VRInputError_None && AnalogData.bActive)
+			{
+				// Update the active origin
+				Action.ActiveOrigin = AnalogData.activeOrigin;
+
+				// Find the temporary action key (X)
+				FKey FoundKeyX;
+				if (FindTemporaryActionKey(Action.Name, FoundKeyX))
+				{
+					// Test what we're receiving from SteamVR
+					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyX %s X-Value [%f]"), *Action.Path, *FoundKeyX.GetFName().ToString(), AnalogData.x);
+
+					Action.Value.X = AnalogData.x; // ActionCount;
+					MessageHandler->OnControllerAnalog(FoundKeyX.GetFName(), 0, Action.Value.X);
+				}
+
+				// Find the temporary action key (Y)
+				FKey FoundKeyY;
+				if (FindTemporaryActionKey(Action.Name, FoundKeyY, true))
+				{
+					// Test what we're receiving from SteamVR
+					//UE_LOG(LogTemp, Warning, TEXT("Handle %s KeyY %s Y-Value {%f}"), *Action.Path, *FoundKeyY.GetFName().ToString(), AnalogData.y);
+
+					Action.Value.Y = AnalogData.y;
+					MessageHandler->OnControllerAnalog(FoundKeyY.GetFName(), 0, Action.Value.Y);
+				}
+			}
+		}
+	}
 }
 
 void FSteamVRInputDevice::GetInputError(EVRInputError InputError, FString InputAction)
