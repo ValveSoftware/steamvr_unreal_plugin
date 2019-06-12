@@ -173,6 +173,12 @@ public:
 	/** Current input values of the active player controllers  */
 	FInputDeviceState ControllerStates[SteamVRInputDeviceConstants::MaxControllers];
 
+	/** Holds the action sets that will be handled by the SteamVR Input System  */
+	TArray<FSteamVRInputActionSet> SteamVRInputActionSets;
+
+	/** Holds the action sets that will be fed in to OpenVR  */
+	VRActiveActionSet_t ActiveActionSets[MAX_ACTION_SETS];
+
 	/** Holds the actions that will be handled by the SteamVR Input System  */
 	TArray<FSteamVRInputAction> Actions;
 
@@ -312,6 +318,9 @@ private:
 
 	/** Setup the keys used by supported SteamVR Controllers  */
 	void InitControllerKeys();
+
+	/** Process all input action events for a give action set */
+	void ProcessActionEvents(FSteamVRInputActionSet SteamVRInputActionSet);
 
 	/**
 	* Create the action manifest used by the SteamVR Input System
