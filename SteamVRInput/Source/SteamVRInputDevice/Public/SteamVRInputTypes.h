@@ -48,6 +48,7 @@ using namespace vr;
 #define TOUCHPAD_DEADZONE				0.0f
 
 // Manifest constants
+#define MAX_ACTION_SETS					25
 #define CONTROLLER_BINDING_PATH			"SteamVRBindings"
 #define ACTION_MANIFEST					"steamvr_manifest.json"
 #define ACTION_MANIFEST_UE				"steamvr_actions.json"
@@ -275,6 +276,30 @@ struct FInputMapping
 	TArray<FString> Actions;	// Collection of SteamVR actions (e.g. Teleport, OpenConsole)
 
 	FInputMapping() {}
+};
+
+struct FSteamVRInputActionSet
+{
+	int32		Priority;					// The priority of this action set relative to other action sets.	
+	FName		Name;						// The name of the action set
+	FString		RestrictedToDevicePath;		// Device path that this action set is active for
+	FString		SecondaryActionSetPath;		// The path for the secondary action set
+
+	VRActionSetHandle_t Handle;						// This action set's handle
+	VRInputValueHandle_t RestrictedToDeviceHandle;	// Handle of a device path that this action set should be active for.  Use k_ulInvalidInputValueHandle to activate for all devices.
+	VRActionSetHandle_t SecondaryActionSetHandle;	// Secondary action set handle, if RestrictedToDeviceHandle is k_ulInvalidInputValueHandle, this is ignored
+
+	FSteamVRInputActionSet()
+	{}
+
+	FSteamVRInputActionSet(int32 InPriority, FName InName, VRActionSetHandle_t InHandle)
+		: Priority (InPriority)
+		, Name (InName)
+		, Handle (InHandle)
+	{
+		RestrictedToDeviceHandle = k_ulInvalidInputValueHandle;	// All devices
+		SecondaryActionSetHandle = k_ulInvalidActionSetHandle;	// Placeholder. Ignored due to k_ulInvalidValueHandle in RestrictedToDeviceHandle
+	}
 };
 
 struct FSteamVRInputAction
