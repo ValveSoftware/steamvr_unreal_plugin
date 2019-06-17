@@ -2557,7 +2557,9 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 
 					if (KeyMapping.Key.GetFName().ToString().Contains(KeyMappingInner.Key.GetFName().ToString())
 						&& KeyMappingInner.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
-						&& !KeyMappingInner.Key.GetFName().ToString().Contains("Temporary"))
+						&& !KeyMappingInner.Key.GetFName().ToString().Contains("Temporary")
+						&& !KeyMappingInner.Key.GetFName().ToString().Contains("None")
+						)
 					{
 						//UE_LOG(LogTemp, Warning, TEXT("SEARCH: MOTION CONTROLLER with STEAMVR Paired action found!"));
 						bFound = true;
@@ -3541,6 +3543,10 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_62, LOCTEXT("SteamVR_Input_Temporary_Action_62", "[STEAMVR INTERNAL] Temporary Action 62"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_63, LOCTEXT("SteamVR_Input_Temporary_Action_63", "[STEAMVR INTERNAL] Temporary Action 63"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(TemporaryActionKeys::SteamVR_Input_Temporary_Action_64, LOCTEXT("SteamVR_Input_Temporary_Action_64", "[STEAMVR INTERNAL] Temporary Action 64"), FKeyDetails::GamepadKey));
+#pragma endregion
+
+#pragma region GENERIC KEYS
+		EKeys::AddKey(FKeyDetails(GenericKeys::SteamVR_MotionController_None, LOCTEXT("SteamVR_MotionController_None", "SteamVR MotionController None"), FKeyDetails::GamepadKey));
 #pragma endregion
 }
 
