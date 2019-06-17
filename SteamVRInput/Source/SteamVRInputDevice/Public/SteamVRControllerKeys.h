@@ -99,6 +99,11 @@ namespace TemporaryActionKeys
 	FKey SteamVR_Input_Temporary_Action_64("SteamVR_Input_Temporary_Action_64");
 }
 
+namespace GenericKeys
+{
+	const FKey SteamVR_MotionController_None("SteamVR_MotionController_None");
+}
+
 namespace IndexControllerKeys
 {
 	// Button A
