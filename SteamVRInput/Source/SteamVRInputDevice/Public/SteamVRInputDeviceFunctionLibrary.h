@@ -169,11 +169,13 @@ struct STEAMVRINPUTDEVICE_API FSteamVRAction
 {
 	GENERATED_BODY()
 
+	// The SteamVR name of the action (e.g. Teleport, OpenConsole)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FName		Name;			// The SteamVR name of the action (e.g. Teleport, OpenConsole)
+	FName		Name;
 
+	// The path defined for the action (e.g. main/in/{ActionName})
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FString		Path;			// The path defined for the action (e.g. main/in/{ActionName})
+	FString		Path;
 
 	VRActionHandle_t Handle;				// The handle to the SteamVR Action 
 	VRInputValueHandle_t ActiveOrigin;		// The input value handle of the origin of the latest input event
@@ -196,8 +198,10 @@ struct STEAMVRINPUTDEVICE_API FSteamVRActionSet
 {
 	GENERATED_BODY()
 
+	// The path defined for this action set (e.g. /actions/main)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FString		Path;			// The path defined for this action set (e.g. /actions/main)
+	FString		Path;			
+	
 	VRActionSetHandle_t Handle;	// The handle to the SteamVR Action Set
 
 	FSteamVRActionSet(const FString ActionSetPath, const VRActionHandle_t ActionSetHandle)
@@ -215,14 +219,17 @@ struct STEAMVRINPUTDEVICE_API FSteamVRInputOriginInfo
 {
 	GENERATED_BODY()
 
+	// The tracked device index for the device or k_unTrackedDeviceInvalid (0xFFFFFFFF)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	int32	TrackedDeviceIndex;			// The tracked device index for the device or k_unTrackedDeviceInvalid (0xFFFFFFFF)
+	int32	TrackedDeviceIndex;
 	
+	//  The name of the component of the tracked device's render model that represents this input source, or an empty string if there is no associated render model component.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FString	RenderModelComponentName;	//  The name of the component of the tracked device's render model that represents this input source, or an empty string if there is no associated render model component.
+	FString	RenderModelComponentName;
 
+	//  The tracked device's model info
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SteamVR Input")
-	FString	TrackedDeviceModel;			//  The tracked device's model info
+	FString	TrackedDeviceModel;
 
 	FSteamVRInputOriginInfo(const int32 InDeviceIndex, const FString InRenderModelComponentName)
 		: TrackedDeviceIndex(InDeviceIndex)
