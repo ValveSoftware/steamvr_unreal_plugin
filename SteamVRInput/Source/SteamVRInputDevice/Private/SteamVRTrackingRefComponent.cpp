@@ -36,9 +36,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogSteamVRTrackingRefComponent, Log, All);
 
 USteamVRTrackingReferences::USteamVRTrackingReferences()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
-
 
 bool USteamVRTrackingReferences::ShowTrackingReferences(UStaticMesh* TrackingReferenceMesh)
 {
@@ -62,7 +61,7 @@ bool USteamVRTrackingReferences::ShowTrackingReferences(UStaticMesh* TrackingRef
 		for (unsigned int id = 0; id < k_unMaxTrackedDeviceCount; ++id)
 		{
 			ETrackedDeviceClass trackedDeviceClass = VRSystem()->GetTrackedDeviceClass(id);
-
+			
 			if (trackedDeviceClass == ETrackedDeviceClass::TrackedDeviceClass_TrackingReference)
 			{
 				// Extraneous call, used for Debugging
@@ -146,4 +145,78 @@ void USteamVRTrackingReferences::HideTrackingReferences()
 void USteamVRTrackingReferences::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Check if this component needs to continually poll for active devices
+	if (ActiveDevicePollFrequency <= 0.f)
+	{
+		this->SetComponentTickEnabled(false);
+	}
+}
+
+void USteamVRTrackingReferences::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// Check if we need to do an active device check
+	CurrentDeltaTime += DeltaTime;
+	if (CurrentDeltaTime >= ActiveDevicePollFrequency)
+	{
+		CurrentDeltaTime = 0.f;
+	}
+	else
+	{
+		return;
+	}
+
+	// Check for any newly activated tracked devices
+	if (VRSystem() && VRInput())
+	{
+		// Find all SteamVR Tracking References
+		for (unsigned int id = 0; id < k_unMaxTrackedDeviceCount; ++id)
+		{
+			ETrackedDeviceClass TrackedDeviceClass = VRSystem()->GetTrackedDeviceClass(id);
+
+			if (TrackedDeviceClass != TrackedDeviceClass_Invalid && 
+				(TrackedDeviceClass == TrackedDeviceClass_Controller || 
+				 TrackedDeviceClass == TrackedDeviceClass_GenericTracker || 
+				 TrackedDeviceClass == TrackedDeviceClass_TrackingReference)
+				)
+			{
+				// Check if this device has already been tagged as activated
+				if (ActiveTrackingDevices.Find(id) != INDEX_NONE)
+				{
+					continue;
+				}
+
+				// Get Device Class
+				FName DeviceClass;
+				switch (TrackedDeviceClass)
+				{
+				case TrackedDeviceClass_Controller:
+					DeviceClass = FName(TEXT("Controller"));
+					break;
+				case TrackedDeviceClass_GenericTracker:
+					DeviceClass = FName(TEXT("GenericTracker"));
+					break;
+				case TrackedDeviceClass_TrackingReference:
+					DeviceClass = FName(TEXT("TrackingReference"));
+					break;
+				default:
+					DeviceClass = FName(TEXT("Unknown"));
+					break;
+				}
+
+				// Get device model info
+				char buf[k_unMaxPropertyStringSize];
+				uint32 StringBytes = VRSystem()->GetStringTrackedDeviceProperty(id, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
+				FString DeviceModel = *FString(UTF8_TO_TCHAR(buf));
+
+				// Broadcast activated event
+				OnTrackedDeviceActivated.Broadcast(id, DeviceClass, DeviceModel);
+
+				// Add this device to the tracked active devices
+				ActiveTrackingDevices.Add(id);
+			}
+		}
+	}
 }
