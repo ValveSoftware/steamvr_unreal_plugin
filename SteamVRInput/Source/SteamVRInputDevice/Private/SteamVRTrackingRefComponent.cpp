@@ -146,6 +146,9 @@ void USteamVRTrackingReferences::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Reserve memory for tracking device cache upfront to save on performance - we're using 4 as it is the most common setup
+	ActiveTrackingDevices.Reserve(4);
+
 	// Check if this component needs to continually poll for active devices
 	if (ActiveDevicePollFrequency <= 0.f)
 	{
@@ -182,41 +185,109 @@ void USteamVRTrackingReferences::TickComponent(float DeltaTime, ELevelTick TickT
 				 TrackedDeviceClass == TrackedDeviceClass_TrackingReference)
 				)
 			{
-				// Check if this device has already been tagged as activated
-				if (ActiveTrackingDevices.Find(id) != INDEX_NONE)
+				// Check if this device has already been detected
+				if (FindTrackedDevice(id))
 				{
 					continue;
 				}
-
-				// Get Device Class
-				FName DeviceClass;
-				switch (TrackedDeviceClass)
+				else
 				{
-				case TrackedDeviceClass_Controller:
-					DeviceClass = FName(TEXT("Controller"));
-					break;
-				case TrackedDeviceClass_GenericTracker:
-					DeviceClass = FName(TEXT("GenericTracker"));
-					break;
-				case TrackedDeviceClass_TrackingReference:
-					DeviceClass = FName(TEXT("TrackingReference"));
-					break;
-				default:
-					DeviceClass = FName(TEXT("Unknown"));
-					break;
+					// If not, add this device to the tracked active devices
+					ActiveTrackingDevices.Add(FActiveTrackedDevice(id, false));
 				}
+			
+				// Get Device Class
+				FName DeviceClass = GetDeviceClass(id);
 
 				// Get device model info
 				char buf[k_unMaxPropertyStringSize];
 				uint32 StringBytes = VRSystem()->GetStringTrackedDeviceProperty(id, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
 				FString DeviceModel = *FString(UTF8_TO_TCHAR(buf));
 
-				// Broadcast activated event
-				OnTrackedDeviceActivated.Broadcast(id, DeviceClass, DeviceModel);
+				UE_LOG(LogSteamVRTrackingRefComponent, Warning, TEXT("Found device [%i] %s"), id, *DeviceModel);
+			}
+		}
 
-				// Add this device to the tracked active devices
-				ActiveTrackingDevices.Add(id);
+		// Check if we need to broadcast any activation and deactivation events
+		for (int32 i = 0; i < ActiveTrackingDevices.Num(); i++)
+		{
+			// If a device is flagged as inactive but SteamVR reports it connected, trigger a connected event
+			if (!ActiveTrackingDevices[i].bActivated && VRSystem()->IsTrackedDeviceConnected(ActiveTrackingDevices[i].id))
+			{
+				// Get Device Class
+				FName DeviceClass = GetDeviceClass(ActiveTrackingDevices[i].id);
+
+				// Get device model info
+				char buf[k_unMaxPropertyStringSize];
+				uint32 StringBytes = VRSystem()->GetStringTrackedDeviceProperty(ActiveTrackingDevices[i].id, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
+				FString DeviceModel = *FString(UTF8_TO_TCHAR(buf));
+
+				// Broadcast activated event
+				OnTrackedDeviceActivated.Broadcast(ActiveTrackingDevices[i].id, DeviceClass, DeviceModel);
+
+				// Flag this device as activated
+				ActiveTrackingDevices[i].bActivated = true;
+
+				UE_LOG(LogSteamVRTrackingRefComponent, Warning, TEXT("Device [%i] %s is connected."), ActiveTrackingDevices[i].id, *DeviceModel);
+			}
+
+			// If however a device is flagged as inactive but SteamVR reports it as disconnected, trigger a disconnected event
+			else if (ActiveTrackingDevices[i].bActivated && !VRSystem()->IsTrackedDeviceConnected(ActiveTrackingDevices[i].id))
+			{
+				// Get Device Class
+				FName DeviceClass = GetDeviceClass(ActiveTrackingDevices[i].id);
+
+				// Get device model info
+				char buf[k_unMaxPropertyStringSize];
+				uint32 StringBytes = VRSystem()->GetStringTrackedDeviceProperty(ActiveTrackingDevices[i].id, ETrackedDeviceProperty::Prop_ModelNumber_String, buf, sizeof(buf));
+				FString DeviceModel = *FString(UTF8_TO_TCHAR(buf));
+
+				// Broadcast deactivated event
+				OnTrackedDeviceDeactivated.Broadcast(ActiveTrackingDevices[i].id, DeviceClass, DeviceModel);
+
+				// Flag this device as deactivated
+				ActiveTrackingDevices[i].bActivated = false;
+
+				UE_LOG(LogSteamVRTrackingRefComponent, Warning, TEXT("Device [%i] %s has been disconnected."), ActiveTrackingDevices[i].id, *DeviceModel);
 			}
 		}
 	}
+}
+
+FName USteamVRTrackingReferences::GetDeviceClass(unsigned int id)
+{
+	// Get device class
+	ETrackedDeviceClass TrackedDeviceClass = VRSystem()->GetTrackedDeviceClass(id);
+
+	// Get Device Class
+	FName DeviceClass;
+	switch (TrackedDeviceClass)
+	{
+	case TrackedDeviceClass_Controller:
+		DeviceClass = FName(TEXT("Controller"));
+		break;
+	case TrackedDeviceClass_GenericTracker:
+		DeviceClass = FName(TEXT("GenericTracker"));
+		break;
+	case TrackedDeviceClass_TrackingReference:
+		DeviceClass = FName(TEXT("TrackingReference"));
+		break;
+	default:
+		DeviceClass = FName(TEXT("Unknown"));
+		break;
+	}
+
+	return DeviceClass;
+}
+
+bool USteamVRTrackingReferences::FindTrackedDevice(unsigned int id)
+{
+	for (FActiveTrackedDevice Device : ActiveTrackingDevices)
+	{
+		if (Device.id == id)
+		{
+			return true;
+		}
+	}
+	return false;
 }
