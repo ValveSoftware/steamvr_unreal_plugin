@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FComponentTrackingActivatedSignature, int32, DeviceID, FName, DeviceClass, FString, DeviceModel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FComponentTrackingDeactivatedSignature, int32, DeviceID, FName, DeviceClass, FString, DeviceModel);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMVRINPUTDEVICE_API USteamVRTrackingReferences : public UActorComponent
@@ -45,10 +46,13 @@ class STEAMVRINPUTDEVICE_API USteamVRTrackingReferences : public UActorComponent
 public:	
 	USteamVRTrackingReferences();
 
-	// Blueprint event - When a new active device is recognized
+	/** Blueprint event - When a new active device is recognized */
 	UPROPERTY(BlueprintAssignable, Category = "VR")
 	FComponentTrackingActivatedSignature OnTrackedDeviceActivated;
 
+	/** When an active device gets deactivated */
+	UPROPERTY(BlueprintAssignable, Category = "VR")
+	FComponentTrackingDeactivatedSignature OnTrackedDeviceDeactivated;
 
 	// TODO: Set default mesh to SteamVR provided render model. Must be backwards compatible to UE4.15
 
@@ -73,10 +77,28 @@ public:
 	TArray<UStaticMeshComponent*> TrackingReferences;
 
 private:
-	float CurrentDeltaTime = 0.f;					
-	TArray<unsigned int> ActiveTrackingDevices;
+	/** Represents a tracked device with a flag on whether its activated or not */
+	struct FActiveTrackedDevice
+	{
+		unsigned int		id;		// The SteamVR id of this device
+		bool		bActivated;		// Whether or not this device has been activated
+
+		FActiveTrackedDevice(unsigned int inId, bool inActivated)
+			: id(inId)
+			, bActivated(inActivated)
+		{}
+
+	};
+
+	/** Cache for current delta time */
+	float CurrentDeltaTime = 0.f;
+
+	/** Cache to hold tracked devices registered in SteamVR */
+	TArray<FActiveTrackedDevice> ActiveTrackingDevices;
 
 protected:
 	virtual void BeginPlay() override;	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	FName GetDeviceClass(unsigned int id);
+	bool FindTrackedDevice(unsigned int id);
 };
