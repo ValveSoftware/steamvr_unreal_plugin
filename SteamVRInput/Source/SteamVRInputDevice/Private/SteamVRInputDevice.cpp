@@ -2073,7 +2073,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	
 	ControllerTypes.Emplace(FControllerType(TEXT("indexhmd"), TEXT("Valve Index Headset"), TEXT("SteamVR_Valve_Index_Headset")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive"), TEXT("Vive Headset"), TEXT("SteamVR_Vive")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_pro"), TEXT("Vive Pro Headser"), TEXT("SteamVR_Vive_Pro")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_pro"), TEXT("Vive Pro Headset"), TEXT("SteamVR_Vive_Pro")));
 	ControllerTypes.Emplace(FControllerType(TEXT("rift"), TEXT("Rift Headset"), TEXT("SteamVR_Rift")));
 
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_camera"), TEXT("Vive Trackers"), TEXT("SteamVR_Vive_Tracker")));
