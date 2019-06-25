@@ -102,6 +102,7 @@ namespace TemporaryActionKeys
 namespace GenericKeys
 {
 	const FKey SteamVR_MotionController_None("SteamVR_MotionController_None");
+	const FKey SteamVR_HMD_Proximity("SteamVR_HMD_Proximity");
 }
 
 namespace IndexControllerKeys
