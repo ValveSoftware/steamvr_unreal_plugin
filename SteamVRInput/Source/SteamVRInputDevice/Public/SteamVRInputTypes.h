@@ -77,6 +77,7 @@ using namespace vr;
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
 
 // Input paths
+#define ACTION_PATH_HEAD_PROXIMITY		"/user/head/proximity"
 #define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"
 #define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"
 #define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"					// Special 1
@@ -444,6 +445,7 @@ struct FSteamVRInputState
 	bool bIsPinchGrab;
 	bool bIsPress;
 	bool bIsAppMenu;
+	bool bIsProximity;
 
 	FSteamVRInputState() {}
 };
