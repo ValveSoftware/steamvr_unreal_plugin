@@ -3257,94 +3257,94 @@ void FSteamVRInputDevice::InitControllerKeys()
 #pragma region INDEX CONTROLLER
 
 		// Buttons
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Left", "SteamVR Valve Index Controller (L) A Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Right", "SteamVR Valve Index Controller (R) A Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Left", "SteamVR Valve Index Controller (L) B Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Right", "SteamVR Valve Index Controller (R) B Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Left", "SteamVR Valve Index (L) A Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Touch_Right", "SteamVR Valve Index (R) A Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Left", "SteamVR Valve Index (L) B Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Touch_Right", "SteamVR Valve Index (R) B Touch"), FKeyDetails::GamepadKey));
 	
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Left", "SteamVR Valve Index Controller (L) A Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Right", "SteamVR Valve Index Controller (R) A Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Left", "SteamVR Valve Index Controller (L) B Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Right", "SteamVR Valve Index Controller (R) B Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Left", "SteamVR Valve Index (L) A Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_A_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_A_Press_Right", "SteamVR Valve Index (R) A Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Left", "SteamVR Valve Index (L) B Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_B_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_B_Press_Right", "SteamVR Valve Index (R) B Press"), FKeyDetails::GamepadKey));
 
 		// Trigger
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Touch_Left", "SteamVR Valve Index Controller (L) Trigger Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Touch_Right", "SteamVR Valve Index Controller (R) Trigger Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Touch_Left", "SteamVR Valve Index (L) Trigger Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Touch_Right", "SteamVR Valve Index (R) Trigger Touch"), FKeyDetails::GamepadKey));
 		
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Click_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Click_Left", "SteamVR Valve Index Controller (L) Trigger Click"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Click_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Click_Right", "SteamVR Valve Index Controller (R) Trigger Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Click_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Click_Left", "SteamVR Valve Index (L) Trigger Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Click_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Click_Right", "SteamVR Valve Index (R) Trigger Click"), FKeyDetails::GamepadKey));
 		
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Press_Left", "SteamVR Valve Index Controller (L) Trigger Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Press_Right", "SteamVR Valve Index Controller (R) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Press_Left", "SteamVR Valve Index (L) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Press_Right", "SteamVR Valve Index (R) Trigger Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Pull_Left", "SteamVR Valve Index Controller (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Pull_Right", "SteamVR Valve Index Controller (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Pull_Left", "SteamVR Valve Index (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trigger_Pull_Right", "SteamVR Valve Index (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Grip
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Press_Left", "SteamVR Valve Index Controller (L) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Touch_Left", "SteamVR Valve Index Controller (L) Grip Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Press_Left", "SteamVR Valve Index (L) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Touch_Left", "SteamVR Valve Index (L) Grip Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_CapSense_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_CapSense_Left", "SteamVR Valve Index Controller (L) Grip CapSense"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Left, LOCTEXT("SteamVR_Valve_Index_Controller_GripForce_Axis_Left", "SteamVR Valve Index Controller (L) Grip Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_CapSense_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_CapSense_Left", "SteamVR Valve Index (L) Grip CapSense"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Left, LOCTEXT("SteamVR_Valve_Index_Controller_GripForce_Axis_Left", "SteamVR Valve Index (L) Grip Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Press_Right", "SteamVR Valve Index Controller (R) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Touch_Right", "SteamVR Valve Index Controller (R) Grip Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Press_Right", "SteamVR Valve Index (R) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Touch_Right", "SteamVR Valve Index (R) Grip Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_CapSense_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_CapSense_Right", "SteamVR Valve Index Controller (R) Grip CapSense"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Right, LOCTEXT("SteamVR_Valve_Index_Controller_GripForce_Axis_Right", "SteamVR Valve Index Controller (R) Grip Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_CapSense_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_CapSense_Right", "SteamVR Valve Index (R) Grip CapSense"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Right, LOCTEXT("SteamVR_Valve_Index_Controller_GripForce_Axis_Right", "SteamVR Valve Index (R) Grip Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Thumbstick
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Touch_Left", "SteamVR Valve Index Controller (L) Thumbstick Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Touch_Right", "SteamVR Valve Index Controller (R) Thumbstick Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Touch_Left", "SteamVR Valve Index (L) Thumbstick Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Touch_Right", "SteamVR Valve Index (R) Thumbstick Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Press_Left", "SteamVR Valve Index Controller (L) Thumbstick Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Press_Right", "SteamVR Valve Index Controller (R) Thumbstick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Press_Left", "SteamVR Valve Index (L) Thumbstick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Press_Right", "SteamVR Valve Index (R) Thumbstick Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Up_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Up_Left", "SteamVR Valve Index Controller (L) Thumbstick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Down_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Down_Left", "SteamVR Valve Index Controller (L) Thumbstick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_L_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_L_Left", "SteamVR Valve Index Controller (L) Thumbstick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_R_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_R_Left", "SteamVR Valve Index Controller (L) Thumbstick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Up_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Up_Left", "SteamVR Valve Index (L) Thumbstick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Down_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Down_Left", "SteamVR Valve Index (L) Thumbstick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_L_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_L_Left", "SteamVR Valve Index (L) Thumbstick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_R_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_R_Left", "SteamVR Valve Index (L) Thumbstick Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Up_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Up_Right", "SteamVR Valve Index Controller (R) Thumbstick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Down_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Down_Right", "SteamVR Valve Index Controller (R) Thumbstick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_L_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_L_Right", "SteamVR Valve Index Controller (R) Thumbstick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_R_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_R_Right", "SteamVR Valve Index Controller (R) Thumbstick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Up_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Up_Right", "SteamVR Valve Index (R) Thumbstick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Down_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Down_Right", "SteamVR Valve Index (R) Thumbstick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_L_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_L_Right", "SteamVR Valve Index (R) Thumbstick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_R_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_R_Right", "SteamVR Valve Index (R) Thumbstick Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_X_Left", "SteamVR Valve Index Controller (L) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_X_Right", "SteamVR Valve Index Controller (R) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Y_Left", "SteamVR Valve Index Controller (L) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Y_Right", "SteamVR Valve Index Controller (R) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_X_Left", "SteamVR Valve Index (L) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_X_Right", "SteamVR Valve Index (R) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Y_Left", "SteamVR Valve Index (L) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Thumbstick_Y_Right", "SteamVR Valve Index (R) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Trackpad
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Touch_Left", "SteamVR Valve Index Controller (L) Trackpad Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Touch_Right", "SteamVR Valve Index Controller (R) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Touch_Left", "SteamVR Valve Index (L) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Touch_Right", "SteamVR Valve Index (R) Trackpad Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Left", "SteamVR Valve Index Controller (L) Trackpad Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Right", "SteamVR Valve Index Controller (R) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Left", "SteamVR Valve Index (L) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Press_Right", "SteamVR Valve Index (R) Trackpad Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left", "SteamVR Valve Index Controller (L) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right", "SteamVR Valve Index Controller (R) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Left", "SteamVR Valve Index (L) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right, LOCTEXT("SteamVR_Valve_Index_Controller_TrackpadForce_Axis_Right", "SteamVR Valve Index (R) Trackpad Force"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Up_Left", "SteamVR Valve Index Controller (L) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Down_Left", "SteamVR Valve Index Controller (L) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_L_Left", "SteamVR Valve Index Controller (L) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_R_Left", "SteamVR Valve Index Controller (L) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Up_Left", "SteamVR Valve Index (L) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Down_Left", "SteamVR Valve Index (L) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_L_Left", "SteamVR Valve Index (L) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_R_Left", "SteamVR Valve Index (L) Trackpad Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Up_Right", "SteamVR Valve Index Controller (R) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Down_Right", "SteamVR Valve Index Controller (R) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_L_Right", "SteamVR Valve Index Controller (R) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_R_Right", "SteamVR Valve Index Controller (R) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Up_Right", "SteamVR Valve Index (R) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Down_Right", "SteamVR Valve Index (R) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_L_Right", "SteamVR Valve Index (R) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_R_Right", "SteamVR Valve Index (R) Trackpad Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_X_Left", "SteamVR Valve Index Controller (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_X_Right", "SteamVR Valve Index Controller (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Y_Left", "SteamVR Valve Index Controller (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Y_Right", "SteamVR Valve Index Controller (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_X_Left", "SteamVR Valve Index (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_X_Right", "SteamVR Valve Index (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Y_Left", "SteamVR Valve Index (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Trackpad_Y_Right", "SteamVR Valve Index (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Special
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Grab_Left", "SteamVR Index Controller (L) Grip Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Pinch_Grab_Left", "SteamVR Index Controller (L) Pinch Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Grab_Right", "SteamVR Index Controller (R) Grip Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Pinch_Grab_Right", "SteamVR Index Controller (R) Pinch Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Grab_Left", "SteamVR Valve Index (L) Grip Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left, LOCTEXT("SteamVR_Valve_Index_Controller_Pinch_Grab_Left", "SteamVR Valve Index (L) Pinch Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Grip_Grab_Right", "SteamVR Valve Index (R) Grip Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Right, LOCTEXT("SteamVR_Valve_Index_Controller_Pinch_Grab_Right", "SteamVR Valve Index (R) Pinch Grab"), FKeyDetails::GamepadKey));
 #pragma endregion
 
 #pragma region OCULUS TOUCH
@@ -3406,101 +3406,101 @@ void FSteamVRInputDevice::InitControllerKeys()
 
 #pragma region VIVE WANDS
 		// Trigger
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Click_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Click_Left", "SteamVR HTC Vive Controller (L) Trigger Click"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Click_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Click_Right", "SteamVR HTC Vive Controller (R) Trigger Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Click_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Click_Left", "SteamVR HTC Vive (L) Trigger Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Click_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Click_Right", "SteamVR HTC Vive (R) Trigger Click"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Press_Left", "SteamVR HTC Vive Controller (L) Trigger Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Press_Right", "SteamVR HTC Vive Controller (R) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Press_Left", "SteamVR HTC Vive (L) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Press_Right", "SteamVR HTC Vive (R) Trigger Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Pull_Left", "SteamVR HTC Vive Controller (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Pull_Right", "SteamVR HTC Vive Controller (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Vive_Controller_Trigger_Pull_Left", "SteamVR HTC Vive (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Vive_Controller_Trigger_Pull_Right", "SteamVR HTC Vive (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Grip
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Grip_Press_Left", "SteamVR HTC Vive Controller (L) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Grip_Press_Right", "SteamVR HTC Vive Controller (R) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Grip_Press_Left", "SteamVR HTC Vive (L) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Grip_Press_Right", "SteamVR HTC Vive (R) Grip Press"), FKeyDetails::GamepadKey));
 
 		// Trackpad
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Touch_Left", "SteamVR HTC Vive Controller (L) Trackpad Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Touch_Right", "SteamVR HTC Vive Controller (R) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Touch_Left", "SteamVR HTC Vive (L) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Touch_Right", "SteamVR HTC Vive (R) Trackpad Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Press_Left", "SteamVR HTC Vive Controller (L) Trackpad Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Press_Right", "SteamVR HTC Vive Controller (R) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Press_Left", "SteamVR HTC Vive (L) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Press_Right", "SteamVR HTC Vive (R) Trackpad Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Up_Left", "SteamVR HTC Vive Controller (L) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Up_Right", "SteamVR HTC Vive Controller (R) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Down_Left", "SteamVR HTC Vive Controller (L) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Down_Right", "SteamVR HTC Vive Controller (R) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_L_Left", "SteamVR HTC Vive Controller (L) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_L_Right", "SteamVR HTC Vive Controller (R) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_R_Left", "SteamVR HTC Vive Controller (L) Trackpad Right"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_R_Right", "SteamVR HTC Vive Controller (R) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Up_Left", "SteamVR HTC Vive (L) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Up_Right", "SteamVR HTC Vive (R) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Down_Left", "SteamVR HTC Vive (L) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Down_Right", "SteamVR HTC Vive (R) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_L_Left", "SteamVR HTC Vive (L) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_L_Right", "SteamVR HTC Vive (R) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_R_Left", "SteamVR HTC Vive (L) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_R_Right", "SteamVR HTC Vive (R) Trackpad Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Left", "SteamVR HTC Vive Controller (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Right", "SteamVR HTC Vive Controller (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Left", "SteamVR HTC Vive Controller (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Right", "SteamVR HTC Vive Controller (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Left", "SteamVR HTC Vive (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_X_Right", "SteamVR HTC Vive (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Left", "SteamVR HTC Vive (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Vive_Controller_Trackpad_Y_Right", "SteamVR HTC Vive (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Special
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Application_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Application_Press_Left", "SteamVR HTC Vive Controller (L) Application Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Application_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Application_Press_Right", "SteamVR HTC Vive Controller (R) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Application_Press_Left, LOCTEXT("SteamVR_Vive_Controller_Application_Press_Left", "SteamVR HTC Vive (L) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(ViveControllerKeys::SteamVR_Vive_Controller_Application_Press_Right, LOCTEXT("SteamVR_Vive_Controller_Application_Press_Right", "SteamVR HTC Vive (R) Application Press"), FKeyDetails::GamepadKey));
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
 		// Trigger
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Press_Left", "SteamVR Windows MR Controller (L) Trigger Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Press_Right", "SteamVR Windows MR Controller (R) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Press_Left", "SteamVR Windows MR (L) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Press_Right", "SteamVR Windows MR (R) Trigger Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Pull_Left", "SteamVR Windows MR Controller (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Pull_Right", "SteamVR Windows MR Controller (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Pull_Left", "SteamVR Windows MR (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trigger_Pull_Right", "SteamVR Windows MR (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Grip
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Left", "SteamVR Windows MR Controller (L) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Right", "SteamVR Windows MR Controller (R) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Left", "SteamVR Windows MR (L) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Grip_Press_Right", "SteamVR Windows MR (R) Grip Press"), FKeyDetails::GamepadKey));
 
 		// Joystick
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Press_Left", "SteamVR Windows MR Controller (L) Joystick Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Press_Right", "SteamVR Windows MR Controller (R) Joystick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Press_Left", "SteamVR Windows MR (L) Joystick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Press_Right", "SteamVR Windows MR (R) Joystick Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Up_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Up_Left", "SteamVR Windows MR Controller (L) Joystick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Down_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Down_Left", "SteamVR Windows MR Controller (L) Joystick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_L_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_L_Left", "SteamVR Windows MR Controller (L) Joystick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_R_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_R_Left", "SteamVR Windows MR Controller (L) Joystick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Up_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Up_Left", "SteamVR Windows MR (L) Joystick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Down_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Down_Left", "SteamVR Windows MR (L) Joystick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_L_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_L_Left", "SteamVR Windows MR (L) Joystick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_R_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_R_Left", "SteamVR Windows MR (L) Joystick Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Up_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Up_Right", "SteamVR Windows MR Controller (R) Joystick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Down_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Down_Right", "SteamVR Windows MR Controller (R) Joystick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_L_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_L_Right", "SteamVR Windows MR Controller (R) Joystick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_R_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_R_Right", "SteamVR Windows MR Controller (R) Joystick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Up_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Up_Right", "SteamVR Windows MR (R) Joystick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Down_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Down_Right", "SteamVR Windows MR (R) Joystick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_L_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_L_Right", "SteamVR Windows MR (R) Joystick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_R_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_R_Right", "SteamVR Windows MR (R) Joystick Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_X_Left", "SteamVR Windows MR Controller (L) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_X_Right", "SteamVR Windows MR Controller (R) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Y_Left", "SteamVR Windows MR Controller (L) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Y_Right", "SteamVR Windows MR Controller (R) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_X_Left", "SteamVR Windows MR (L) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_X_Right", "SteamVR Windows MR (R) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Y_Left", "SteamVR Windows MR (L) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Joystick_Y_Right", "SteamVR Windows MR (R) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Trackpad
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Touch_Left", "SteamVR Windows MR Controller (L) Trackpad Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Touch_Right", "SteamVR Windows MR Controller (R) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Touch_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Touch_Left", "SteamVR Windows MR (L) Trackpad Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Touch_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Touch_Right", "SteamVR Windows MR (R) Trackpad Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Press_Left", "SteamVR Windows MR Controller (L) Trackpad Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Press_Right", "SteamVR Windows MR Controller (R) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Press_Left", "SteamVR Windows MR (L) Trackpad Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Press_Right", "SteamVR Windows MR (R) Trackpad Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Up_Left", "SteamVR Windows MR Controller (L) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Down_Left", "SteamVR Windows MR Controller (L) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_L_Left", "SteamVR Windows MR Controller (L) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_R_Left", "SteamVR Windows MR Controller (L) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Up_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Up_Left", "SteamVR Windows MR (L) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Down_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Down_Left", "SteamVR Windows MR (L) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_L_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_L_Left", "SteamVR Windows MR (L) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_R_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_R_Left", "SteamVR Windows MR (L) Trackpad Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Up_Right", "SteamVR Windows MR Controller (R) Trackpad Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Down_Right", "SteamVR Windows MR Controller (R) Trackpad Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_L_Right", "SteamVR Windows MR Controller (R) Trackpad Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_R_Right", "SteamVR Windows MR Controller (R) Trackpad Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Up_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Up_Right", "SteamVR Windows MR (R) Trackpad Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Down_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Down_Right", "SteamVR Windows MR (R) Trackpad Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_L_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_L_Right", "SteamVR Windows MR (R) Trackpad Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_R_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_R_Right", "SteamVR Windows MR (R) Trackpad Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_X_Left", "SteamVR Windows MR Controller (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Y_Right", "SteamVR Windows MR Controller (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_X_Left", "SteamVR Windows MR Controller (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Y_Right", "SteamVR Windows MR Controller (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_X_Left", "SteamVR Windows MR (L) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Y_Right", "SteamVR Windows MR (R) Trackpad X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_X_Left", "SteamVR Windows MR (L) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Trackpad_Y_Right", "SteamVR Windows MR (R) Trackpad Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Special
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Left", "SteamVR Windows MR Controller (L) Application Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Right", "SteamVR Windows MR Controller (R) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Left, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Left", "SteamVR Windows MR (L) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(WindowsMRKeys::SteamVR_Windows_MR_Controller_Application_Press_Right, LOCTEXT("SteamVR_Windows_MR_Controller_Application_Press_Right", "SteamVR Windows MR (R) Application Press"), FKeyDetails::GamepadKey));
 
 #pragma endregion
 
