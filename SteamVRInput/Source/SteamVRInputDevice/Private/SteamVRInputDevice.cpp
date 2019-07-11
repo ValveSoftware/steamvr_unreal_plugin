@@ -197,11 +197,11 @@ void FSteamVRInputDevice::FindAxisMappings(const UInputSettings* InputSettings, 
 {
 	if (InAxisName.IsValid())
 	{
-		for (int32 AxisIndex = InputSettings->AxisMappings.Num() - 1; AxisIndex >= 0; --AxisIndex)
+		for (int32 AxisIndex = InputSettings->GetAxisMappings().Num() - 1; AxisIndex >= 0; --AxisIndex)
 		{
-			if (InputSettings->AxisMappings[AxisIndex].AxisName == InAxisName)
+			if (InputSettings->GetAxisMappings()[AxisIndex].AxisName == InAxisName)
 			{
-				OutMappings.Add(InputSettings->AxisMappings[AxisIndex]);
+				OutMappings.Add(InputSettings->GetAxisMappings()[AxisIndex]);
 			}
 		}
 	}
@@ -220,11 +220,11 @@ void FSteamVRInputDevice::FindActionMappings(const UInputSettings* InputSettings
 {
 	if (InActionName.IsValid())
 	{
-		for (int32 ActionIndex = InputSettings->ActionMappings.Num() - 1; ActionIndex >= 0; --ActionIndex)
+		for (int32 ActionIndex = InputSettings->GetActionMappings().Num() - 1; ActionIndex >= 0; --ActionIndex)
 		{
-			if (InputSettings->ActionMappings[ActionIndex].ActionName == InActionName)
+			if (InputSettings->GetActionMappings()[ActionIndex].ActionName == InActionName)
 			{
-				OutMappings.Add(InputSettings->ActionMappings[ActionIndex]);
+				OutMappings.Add(InputSettings->GetActionMappings()[ActionIndex]);
 			}
 		}
 	}
@@ -819,6 +819,11 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
 {
 	return FName(TEXT("SteamVRInputDevice"));
+}
+
+bool FSteamVRInputDevice::GetHandJointPosition(const FName MotionSource, int jointIndex, FVector& OutPosition) const
+{
+	return false;
 }
 
 void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
@@ -3959,7 +3964,7 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 	if (InputSettings->IsValidLowLevelFast())
 	{
 		// Clear action mappings
-		for (const FInputActionKeyMapping& KeyMapping : InputSettings->ActionMappings)
+		for (const FInputActionKeyMapping& KeyMapping : InputSettings->GetActionMappings())
 		{
 			if (KeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR_Input_Temporary_Action")))
 			{
@@ -3970,7 +3975,7 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 		}
 
 		// Clear axis mappings
-		for (const FInputAxisKeyMapping& AxisKeyMapping : InputSettings->AxisMappings)
+		for (const FInputAxisKeyMapping& AxisKeyMapping : InputSettings->GetAxisMappings())
 		{
 			if (AxisKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR_Input_Temporary_Action")))
 			{

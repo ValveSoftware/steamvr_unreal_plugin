@@ -139,8 +139,8 @@ void FSteamVREditorModule::AddSampleInputs()
 {
 	// Get Existing Input Settings
 	auto DefaultInputSettings = GetDefault<UInputSettings>();
-	TArray<FInputAxisKeyMapping> ExistingAxisKeys = DefaultInputSettings->AxisMappings;
-	TArray<FInputActionKeyMapping> ExistingActionKeys = DefaultInputSettings->ActionMappings;
+	TArray<FInputAxisKeyMapping> ExistingAxisKeys = DefaultInputSettings->GetAxisMappings();
+	TArray<FInputActionKeyMapping> ExistingActionKeys = DefaultInputSettings->GetActionMappings();
 
 	// Create new Input Settings
 	UInputSettings* InputSettings = GetMutableDefault<UInputSettings>();

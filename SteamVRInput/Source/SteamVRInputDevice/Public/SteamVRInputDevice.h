@@ -65,6 +65,7 @@ public:
 	virtual void EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const;
 	virtual float GetCustomParameterValue(const FName MotionSource, FName ParameterName, bool& bValueFound) const { bValueFound = false;  return 0.f; }
 	virtual FName GetMotionControllerDeviceTypeName() const override;
+	virtual bool GetHandJointPosition(const FName MotionSource, int jointIndex, FVector& OutPosition) const;
 	// End of IMotionController Interface
 
 	// IHapticDevice Interface
