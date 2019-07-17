@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define ACTION_PATH_VIBRATE_LEFT		"/actions/main/out/vibrateleft"
 #define ACTION_PATH_VIBRATE_RIGHT		"/actions/main/out/vibrateright"
+#define MAX_BINDINGINFO_COUNT	5
 
 /** UE4 Bone definition of the SteamVR Skeleton */
 USTRUCT(BlueprintType)
@@ -270,6 +271,41 @@ struct STEAMVRINPUTDEVICE_API FUE4RetargettingRefs
 		KnuckleAverageMS_UE4 = FVector::ZeroVector;
 		WristSideDirectionLS_UE4 = FVector::RightVector;
 		WristForwardLS_UE4 = FVector::ForwardVector;
+	}
+};
+
+/** Retrieve information about the input bindings for an action on active controller (i.e device path, input path, mode, slot)  */
+USTRUCT(BlueprintType)
+struct STEAMVRINPUTDEVICE_API FSteamVRInputBindingInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FName	DevicePathName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FName	InputPathName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FName	ModeName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "SteamVR Input")
+	FName	SlotName;
+
+	FSteamVRInputBindingInfo()
+	{
+		DevicePathName = NAME_None;
+		InputPathName = NAME_None;
+		ModeName = NAME_None;
+		SlotName = NAME_None;
+	}
+
+	FSteamVRInputBindingInfo(FName InDevicePathName, FName InInputPathName, FName InModeName, FName InSlotName) 
+		: DevicePathName(InDevicePathName)
+		, InputPathName(InInputPathName)
+		, ModeName(InModeName)
+		, SlotName(InSlotName)
+	{
 	}
 };
 
@@ -551,6 +587,13 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void ShowAllSteamVR_ActionOrigins();
+
+	/**
+	* Retrieves useful information about the SteamVR input bindings for an action.
+	* @return FSteamVRInputBindingInfo - Binding info for an action
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static TArray<FSteamVRInputBindingInfo> GetSteamVRInputBindingInfo(FSteamVRAction SteamVRActionHandle);
 
 	/**
 	* Sets the zero pose for the seated tracker coordinate system to the current position and yaw of the HMD. 
