@@ -612,6 +612,64 @@ void USteamVRInputDeviceFunctionLibrary::ShowAllSteamVR_ActionOrigins()
 	VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 0, 0);
 }
 
+TArray<FSteamVRInputBindingInfo> USteamVRInputDeviceFunctionLibrary::GetSteamVRInputBindingInfo(FSteamVRAction SteamVRActionHandle)
+{
+	// Setup variables to be used by the OpenVR call
+	TArray<FSteamVRInputBindingInfo> SteamVRBindingInfo;
+	InputBindingInfo_t* InputBindingInfo = new InputBindingInfo_t[MAX_BINDINGINFO_COUNT];
+	uint32_t BindingInfoCount = 0;
+	EVRInputError BindingInfoError = VRInputError_NoData;
+
+	// Execute OpenVR call GetActionBindingInfo if action handle is valid and VRInput is present
+	if (VRInput() && !SteamVRActionHandle.Path.IsEmpty())
+	{
+		// Get binding info for provided action handle in the currently active controller type
+		BindingInfoError = VRInput()->GetActionBindingInfo(SteamVRActionHandle.Handle, InputBindingInfo, sizeof(InputBindingInfo_t), MAX_BINDINGINFO_COUNT, &BindingInfoCount);
+
+		// Check if call is successful
+		if (BindingInfoError != VRInputError_None)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error retrieving binding info for active controller: %i"), (int)BindingInfoError);
+		}
+		else
+		{
+			// Check if there are binding info related to the action
+			if (BindingInfoCount > 0)
+			{
+				// If there are, go through each binding info found
+				for (int32 i = 0; i < (int32)BindingInfoCount; i++)
+				{
+					// Convert binding info text from a char array to a UE4 FString
+					FString DevicePathName = FString(UTF8_TO_TCHAR(InputBindingInfo[i].rchDevicePathName));
+					FString InputPathName = FString(UTF8_TO_TCHAR(InputBindingInfo[i].rchInputPathName));
+					FString ModeName = FString(UTF8_TO_TCHAR(InputBindingInfo[i].rchModeName));
+					FString SlotName = FString(UTF8_TO_TCHAR(InputBindingInfo[i].rchSlotName));
+
+					// Create a BP compatible binding info struct and add this to the output array
+					SteamVRBindingInfo.Add(FSteamVRInputBindingInfo(
+						FName(*DevicePathName),
+						FName(*InputPathName),
+						FName(*ModeName),
+						FName(*SlotName)
+					));
+
+					//UE_LOG(LogTemp, Error, TEXT("Found Binding Info: %s %s %s %s"), *DevicePathName, *InputPathName, *ModeName, *SlotName);
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No binding info found for action: %s"), *SteamVRActionHandle.Path);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error calling GetSteamVRInputBindingInfo from Blueprint. OpenVRInput is not present or SteamVR Action Handle provided as input is invalid or empty!"));
+	}
+
+	return SteamVRBindingInfo;
+}
+
 bool USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
 {
 	if (VRSystem() && VRInput())
