@@ -274,7 +274,7 @@ struct STEAMVRINPUTDEVICE_API FUE4RetargettingRefs
 	}
 };
 
-/** Retrieve information about the input bindings for an action on active controller (i.e device path, input path, mode, slot)  */
+/** Information about the input bindings for an action on currently active controller (i.e device path, input path, mode, slot)  */
 USTRUCT(BlueprintType)
 struct STEAMVRINPUTDEVICE_API FSteamVRInputBindingInfo
 {
@@ -590,10 +590,20 @@ public:
 
 	/**
 	* Retrieves useful information about the SteamVR input bindings for an action.
-	* @return FSteamVRInputBindingInfo - Binding info for an action
+	* @param SteamVRActionHandle - The action handle of the action that binding info will be retrieved for the currently active controller. Use Find SteamVRAction node to get a handle
+	* @return SteamVRInputBindingInfo - Array of binding info for an action with the currently active controller
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
-	static TArray<FSteamVRInputBindingInfo> GetSteamVRInputBindingInfo(FSteamVRAction SteamVRActionHandle);
+	static TArray<FSteamVRInputBindingInfo> GetSteamVR_InputBindingInfo(FSteamVRAction SteamVRActionHandle);
+
+	/**
+	* Retrieves useful information about the SteamVR input bindings with a given action name and action set.
+	* @param ActionName - The name of the action that binding info will be retrieved for the currently active controller
+	* @param ActionSet - The name of the action set that the action belongs in
+	* @return SteamVRInputBindingInfo - Array of binding info for an action with the currently active controller
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static TArray<FSteamVRInputBindingInfo> FindSteamVR_InputBindingInfo(FName ActionName, FName ActionSet = FName("main"));
 
 	/**
 	* Sets the zero pose for the seated tracker coordinate system to the current position and yaw of the HMD. 

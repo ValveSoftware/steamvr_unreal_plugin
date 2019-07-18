@@ -612,7 +612,7 @@ void USteamVRInputDeviceFunctionLibrary::ShowAllSteamVR_ActionOrigins()
 	VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 0, 0);
 }
 
-TArray<FSteamVRInputBindingInfo> USteamVRInputDeviceFunctionLibrary::GetSteamVRInputBindingInfo(FSteamVRAction SteamVRActionHandle)
+TArray<FSteamVRInputBindingInfo> USteamVRInputDeviceFunctionLibrary::GetSteamVR_InputBindingInfo(FSteamVRAction SteamVRActionHandle)
 {
 	// Setup variables to be used by the OpenVR call
 	TArray<FSteamVRInputBindingInfo> SteamVRBindingInfo;
@@ -668,6 +668,41 @@ TArray<FSteamVRInputBindingInfo> USteamVRInputDeviceFunctionLibrary::GetSteamVRI
 	}
 
 	return SteamVRBindingInfo;
+}
+
+TArray<FSteamVRInputBindingInfo> USteamVRInputDeviceFunctionLibrary::FindSteamVR_InputBindingInfo(FName ActionName, FName ActionSet /*= FName("main")*/)
+{
+	// Check for a valid OpenVR session and action name/set
+	if (VRInput() && ActionName != NAME_None && ActionSet != NAME_None)
+	{
+		// Get the action handle for given action name and action set
+		bool bFindResult = false;
+		FSteamVRAction FoundAction;
+		FSteamVRActionSet FoundActionSet;
+		FindSteamVR_Action(ActionName, bFindResult, FoundAction, FoundActionSet, ActionSet);
+
+		// Check if we found the action
+		if (bFindResult)
+		{
+			// If found, get the binding info and return the result
+			return GetSteamVR_InputBindingInfo(FoundAction);
+		}
+		else
+		{
+			// Otherwise, provide an error message
+			UE_LOG(LogTemp, Error, TEXT("Error when calling FindSteamVRInputBindingInfo, there was no Action found with the name %s in action set %s"), *ActionName.ToString(), *ActionSet.ToString());
+		}
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error calling FindSteamVRInputBindingInfo from Blueprint. OpenVRInput is not present or SteamVR action name/set provided is empty!"));
+	}
+
+	// Return an empty array of binding info
+	TArray<FSteamVRInputBindingInfo> EmptyInfo;
+	return EmptyInfo;
+
 }
 
 bool USteamVRInputDeviceFunctionLibrary::ResetSeatedPosition()
