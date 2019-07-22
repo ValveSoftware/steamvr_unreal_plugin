@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IInputDevice.h"
 #include "CoreMinimal.h"
 #include "Runtime/Core/Public/Misc/ConfigCacheIni.h"
-#include "IMotionController.h"
+#include "XRMotionControllerBase.h"
 #include "IHapticDevice.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
 #include "Runtime/Core/Public/Misc/Paths.h"
@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVRInputTypes.h"
 #include "SteamVRInputPublic.h"
 
-class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public IMotionController, public IHapticDevice
+class STEAMVRINPUTDEVICE_API FSteamVRInputDevice : public IInputDevice, public FXRMotionControllerBase, public IHapticDevice
 {
 public:
 	FSteamVRInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -59,11 +59,12 @@ public:
 	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
 	// End of IInput Device Interface
 
+	// FXRMotionControllerBase
+	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const;
+	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const;
+	// End of FXRMotionControllerBase
+	
 	// IMotionController Interface
-	virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const FName MotionSource, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const;
-	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const FName MotionSource) const;
-	virtual void EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const;
-	virtual float GetCustomParameterValue(const FName MotionSource, FName ParameterName, bool& bValueFound) const { bValueFound = false;  return 0.f; }
 	virtual FName GetMotionControllerDeviceTypeName() const override;
 	virtual bool GetHandJointPosition(const FName MotionSource, int jointIndex, FVector& OutPosition) const;
 	// End of IMotionController Interface
