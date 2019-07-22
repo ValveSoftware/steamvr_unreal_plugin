@@ -394,7 +394,7 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 	return false;
 }
 
-bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const FName MotionSource, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
 {
 	if (VRInput() && VRCompositor())
 	{
@@ -404,8 +404,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		VRActionHandle_t LeftActionHandle = bUseSkeletonPose ? VRSkeletalHandleLeft : VRControllerHandleLeft;
 		VRActionHandle_t RightActionHandle = bUseSkeletonPose ? VRSkeletalHandleRight : VRControllerHandleRight;
 
-		if (MotionSource == TEXT("Left"))
+		switch (DeviceHand)
 		{
+		case EControllerHand::Left:
 			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				if (GlobalPredictedSecondsFromNow <= -9999.f)
@@ -416,15 +417,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				{
 					InputError = VRInput()->GetPoseActionDataRelativeToNow(LeftActionHandle, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 				}
-				
+
 				if (InputError != VRInputError_None)
 				{
 					return false;
 				}
 			}
-		}
-		else if (MotionSource == TEXT("Right"))
-		{
+			break;
+		case EControllerHand::Right:
+
 			if (RightActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				if (GlobalPredictedSecondsFromNow <= -9999.f)
@@ -441,9 +442,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 					return false;
 				}
 			}
-		}
-		else if (MotionSource == TEXT("Special_1"))
-		{
+			break;
+		case EControllerHand::Special_1:
+
 			if (VRSpecial1 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -457,14 +458,14 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial1, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-		}
-		else if (MotionSource == TEXT("Special_2"))
-		{
+			break;
+		case EControllerHand::Special_2:
+
 			if (VRSpecial2 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -483,9 +484,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				return false;
 			}
-		}
-		else if (MotionSource == TEXT("Special_3"))
-		{
+			break;
+		case EControllerHand::Special_3:
+
 			if (VRSpecial3 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -499,14 +500,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial3, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-		}
-		else if (MotionSource == TEXT("Special_4"))
-		{
+
+			break;
+		case EControllerHand::Special_4:
+
 			if (VRSpecial4 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -520,15 +522,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial4, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_5"))
-		{
+			break;
+		case EControllerHand::Special_5:
+
 			if (VRSpecial5 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -542,14 +544,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial5, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-		}
-		else if (MotionSource == TEXT("Special_6"))
-		{
+
+			break;
+		case EControllerHand::Special_6:
+
 			if (VRSpecial6 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -563,15 +566,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial6, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_7"))
-		{
+			break;
+		case EControllerHand::Special_7:
+
 			if (VRSpecial7 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -585,14 +588,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial7, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-		}
-		else if (MotionSource == TEXT("Special_8"))
-		{
+
+			break;
+		case EControllerHand::Special_8:
+
 			if (VRSpecial8 == k_ulInvalidActionHandle)
 			{
 				return false;
@@ -606,11 +610,15 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial8, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
+
+			break;
+		default:
+			return false;
 		}
 
 		if (InputError == VRInputError_None)
@@ -649,7 +657,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 	return true;
 }
 
-ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const FName MotionSource) const
+ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
 
@@ -658,22 +666,25 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
 
-		if (MotionSource == TEXT("Left"))
+		switch (DeviceHand)
 		{
+		case EControllerHand::Left:
+
 			if (VRControllerHandleLeft == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			InputError = VRInput()->GetPoseActionDataForNextFrame(VRControllerHandleLeft, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
-			
+
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-		}
-		else if (MotionSource == TEXT("Right"))
-		{
+
+			break;
+		case EControllerHand::Right:
+
 			if (VRControllerHandleRight == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -686,9 +697,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_1"))
-		{
+			break;
+		case EControllerHand::Special_1:
+
 			if (VRSpecial1 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -700,9 +711,10 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			{
 				return ETrackingStatus::NotTracked;
 			}
-		}
-		else if (MotionSource == TEXT("Special_2"))
-		{
+
+			break;
+		case EControllerHand::Special_2:
+
 			if (VRSpecial2 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -715,9 +727,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_3"))
-		{
+			break;
+		case EControllerHand::Special_3:
+
 			if (VRSpecial3 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -730,13 +742,13 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_4"))
-		{
+			break;
+		case EControllerHand::Special_4:
+
 			if (VRSpecial4 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
-			} 
+			}
 
 			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial4, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
@@ -745,9 +757,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_5"))
-		{
+			break;
+		case EControllerHand::Special_5:
+
 			if (VRSpecial5 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -760,13 +772,13 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_6"))
-		{
+			break;
+		case EControllerHand::Special_6:
+
 			if (VRSpecial6 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
-			} 
+			}
 
 			InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial6, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 
@@ -775,9 +787,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_7"))
-		{
+			break;
+		case EControllerHand::Special_7:
+
 			if (VRSpecial7 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -790,9 +802,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
-		}
-		else if (MotionSource == TEXT("Special_8"))
-		{
+			break;
+		case EControllerHand::Special_8:
+
 			if (VRSpecial8 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -805,6 +817,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 				return ETrackingStatus::NotTracked;
 			}
 
+			break;
+		default:
+			break;
 		}
 
 		if (InputError == VRInputError_None && PoseData.pose.bDeviceIsConnected)
@@ -821,10 +836,26 @@ FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
 	return FName(TEXT("SteamVRInputDevice"));
 }
 
-void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
-{
-	// Empty on purpose
-}
+//void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
+//{
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Left")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Right")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("AnyHand")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Pad")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("ExternalCamera")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Gun")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_1")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_2")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_3")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_4")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_5")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_6")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_7")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_8")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_9")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_10")));
+//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_11")));
+//}
 
 void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand, const FHapticFeedbackValues& Values)
 {
