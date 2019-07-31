@@ -230,6 +230,47 @@ namespace ViveControllerKeys
 	const FKey SteamVR_Vive_Controller_Trackpad_R_Right("SteamVR_Vive_Controller_Trackpad_R_Right");
 }
 
+namespace CosmosControllerKeys
+{
+	// Application
+	const FKey SteamVR_HTC_Cosmos_Controller_Application_Press_Left("SteamVR_HTC_Cosmos_Controller_Application_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Application_Press_Right("SteamVR_HTC_Cosmos_Controller_Application_Press_Right");
+
+	// Grip
+	const FKey SteamVR_HTC_Cosmos_Controller_Grip_Press_Left("SteamVR_HTC_Cosmos_Controller_Grip_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Grip_Press_Right("SteamVR_HTC_Cosmos_Controller_Grip_Press_Right");
+
+	// Trigger
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Click_Left("SteamVR_HTC_Cosmos_Controller_Trigger_Click_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Press_Left("SteamVR_HTC_Cosmos_Controller_Trigger_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Left("SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Left");
+
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Click_Right("SteamVR_HTC_Cosmos_Controller_Trigger_Click_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Press_Right("SteamVR_HTC_Cosmos_Controller_Trigger_Press_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Right("SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Right");
+
+	// Thumbstick
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Left");
+
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Right");
+
+	// Thumbstick Directions
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Left("SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Left");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Right");
+	const FKey SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Right("SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Right");
+}
+
 namespace OculusTouchKeys
 {
 	// Button A
