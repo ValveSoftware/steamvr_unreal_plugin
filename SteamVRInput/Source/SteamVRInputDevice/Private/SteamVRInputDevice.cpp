@@ -2089,7 +2089,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	ControllerTypes.Empty();
 	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("SteamVR_Index_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("SteamVR_Vive_Controller")));
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_cosmos"), TEXT("Cosmos Controllers"), TEXT("SteamVR_Cosmos_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_cosmos_controller"), TEXT("HTC Cosmos Controllers"), TEXT("SteamVR_HTC_Cosmos_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch"), TEXT("SteamVR_Oculus_Touch")));
 	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller"), TEXT("SteamVR_Windows_MR")));
 	
