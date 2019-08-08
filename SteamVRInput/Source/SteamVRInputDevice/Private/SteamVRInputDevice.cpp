@@ -1527,20 +1527,20 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 					InputState.bIsDpadRight = true;
 				}
 
-				// Handle Special Actions for Knuckles Keys
-				if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
-					CurrentInputKeyName.Contains(TEXT("Pinch"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
-					)
+				// Handle Special Grip & Grab actions for supported controllers
+				if ((CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) 
+					|| CurrentInputKeyName.Contains(TEXT("HTC_Cosmos"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
+					&& CurrentInputKeyName.Contains(TEXT("Pinch"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 				{
 					InputState.bIsPinchGrab = true;
 					InputState.bIsGripGrab = false;
 					InputState.bIsGrip = false;
 					InputState.bIsAxis = false;
 				}
-				else if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
-					CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::IgnoreCase, ESearchDir::FromEnd) &&
-					CurrentInputKeyName.Contains(TEXT("Grab"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
-					)
+				else if ((CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) 
+					|| CurrentInputKeyName.Contains(TEXT("HTC_Cosmos"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
+					&& CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
+					&& CurrentInputKeyName.Contains(TEXT("Grab"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 				{
 					InputState.bIsGripGrab = true;
 					InputState.bIsPinchGrab = false;
@@ -1848,19 +1848,19 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 						}
 	
 						// Handle Special Actions for Knuckles Keys
-						if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
-							CurrentInputKeyName.Contains(TEXT("Pinch"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
-							)
+						if ((CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart)
+							|| CurrentInputKeyName.Contains(TEXT("HTC_Cosmos"), ESearchCase::IgnoreCase, ESearchDir::FromStart)) 
+							&& CurrentInputKeyName.Contains(TEXT("Pinch"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 						{
 							InputState.bIsPinchGrab = true;
 							InputState.bIsGripGrab = false;
 							InputState.bIsGrip = false;
 							InputState.bIsAxis = false;
 						}
-						else if (CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart) &&
-							CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::IgnoreCase, ESearchDir::FromEnd) &&
-							CurrentInputKeyName.Contains(TEXT("Grab"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
-							)
+						else if ((CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart)
+							|| CurrentInputKeyName.Contains(TEXT("HTC_Cosmos"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
+							&& CurrentInputKeyName.Contains(TEXT("Grip"), ESearchCase::IgnoreCase, ESearchDir::FromEnd) 
+							&& CurrentInputKeyName.Contains(TEXT("Grab"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 						{
 							InputState.bIsGripGrab = true;
 							InputState.bIsPinchGrab = false;
@@ -3532,6 +3532,12 @@ void FSteamVRInputDevice::InitControllerKeys()
 		// Special
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Left", "SteamVR HTC Cosmos (L) Application Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Right", "SteamVR HTC Cosmos (R) Application Press"), FKeyDetails::GamepadKey));
+
+		// Special
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Left", "SteamVR HTC Cosmos (L) Grip Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Left, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Left", "SteamVR HTC Cosmos (L) Pinch Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Right", "SteamVR HTC Cosmos (R) Grip Grab"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Right", "SteamVR HTC Cosmos (R) Pinch Grab"), FKeyDetails::GamepadKey));
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
