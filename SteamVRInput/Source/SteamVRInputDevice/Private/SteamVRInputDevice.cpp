@@ -2045,7 +2045,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	ControllerTypes.Empty();
 	ControllerTypes.Emplace(FControllerType(TEXT("knuckles"), TEXT("Index Controllers"), TEXT("SteamVR_Index_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_controller"), TEXT("Vive Controllers"), TEXT("SteamVR_Vive_Controller")));
-	ControllerTypes.Emplace(FControllerType(TEXT("cosmos_controller"), TEXT("Cosmos Controllers"), TEXT("SteamVR_Cosmos_Controller")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_cosmos"), TEXT("Cosmos Controllers"), TEXT("SteamVR_Cosmos_Controller")));
 	ControllerTypes.Emplace(FControllerType(TEXT("oculus_touch"), TEXT("Oculus Touch"), TEXT("SteamVR_Oculus_Touch")));
 	ControllerTypes.Emplace(FControllerType(TEXT("holographic_controller"), TEXT("Holographic Controller"), TEXT("SteamVR_Windows_MR")));
 	
@@ -2546,9 +2546,9 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 			{
 				CurrentControllerType = FString(TEXT("Vive_Controller"));
 			}
-			else if (CurrentKey.Contains(TEXT("Cosmos_Controller")))
+			else if (CurrentKey.Contains(TEXT("HTC_Cosmos")))
 			{
-				CurrentControllerType = FString(TEXT("Cosmos_Controller"));
+				CurrentControllerType = FString(TEXT("HTC_Cosmos"));
 			}
 			else if (CurrentKey.Contains(TEXT("Oculus_Touch")))
 			{
@@ -2691,9 +2691,9 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Vive_Controller"));
 			}
-			else if (CurrentKey.Contains(TEXT("Cosmos_Controller")))
+			else if (CurrentKey.Contains(TEXT("HTC_Cosmos")))
 			{
-				CurrentControllerType = FString(TEXT("Cosmos_Controller"));
+				CurrentControllerType = FString(TEXT("HTC_Cosmos"));
 			}
 			else if (CurrentKey.Contains(TEXT("Oculus_Touch")))
 			{
@@ -2848,9 +2848,9 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 			{
 				CurrentControllerType = FString(TEXT("Vive_Controller"));
 			}
-			else if (CurrentKey.Contains(TEXT("Cosmos_Controller")))
+			else if (CurrentKey.Contains(TEXT("HTC_Cosmos")))
 			{
-				CurrentControllerType = FString(TEXT("Cosmos_Controller"));
+				CurrentControllerType = FString(TEXT("HTC_Cosmos"));
 			}
 			else if (CurrentKey.Contains(TEXT("Oculus_Touch")))
 			{
@@ -3459,44 +3459,71 @@ void FSteamVRInputDevice::InitControllerKeys()
 #pragma endregion
 
 #pragma region HTC COSMOS
-		// Trigger
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Click_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Click_Left", "SteamVR HTC Cosmos Controller (L) Trigger Click"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Click_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Click_Right", "SteamVR HTC Cosmos Controller (R) Trigger Click"), FKeyDetails::GamepadKey));
+		// Buttons
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_A_Touch, LOCTEXT("SteamVR_HTC_Cosmos_A_Touch", "SteamVR HTC Cosmos A Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_X_Touch, LOCTEXT("SteamVR_HTC_Cosmos_X_Touch", "SteamVR HTC Cosmos X Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_B_Touch, LOCTEXT("SteamVR_HTC_Cosmos_B_Touch", "SteamVR HTC Cosmos B Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Y_Touch, LOCTEXT("SteamVR_HTC_Cosmos_Y_Touch", "SteamVR HTC Cosmos Y Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Press_Left", "SteamVR HTC Cosmos Controller (L) Trigger Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Press_Right", "SteamVR HTC Cosmos Controller (R) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_A_Press, LOCTEXT("SteamVR_HTC_Cosmos_A_Press", "SteamVR HTC Cosmos A Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_X_Press, LOCTEXT("SteamVR_HTC_Cosmos_X_Press", "SteamVR HTC Cosmos X Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_B_Press, LOCTEXT("SteamVR_HTC_Cosmos_B_Press", "SteamVR HTC Cosmos B Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Y_Press, LOCTEXT("SteamVR_HTC_Cosmos_Y_Press", "SteamVR HTC Cosmos Y Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Left", "SteamVR HTC Cosmos Controller (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Trigger_Pull_Right", "SteamVR HTC Cosmos Controller (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		// Bumper (L1/R1)
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Click_Left, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Click_Left", "SteamVR HTC Cosmos (L) Bumper Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Click_Right, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Click_Right", "SteamVR HTC Cosmos (R) Bumper Click"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Press_Left", "SteamVR HTC Cosmos (L) Bumper Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Press_Right", "SteamVR HTC Cosmos (R) Bumper Press"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Touch_Left", "SteamVR HTC Cosmos (L) Bumper Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Touch_Right, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Touch_Right", "SteamVR HTC Cosmos (R) Bumper Touch"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Pull_Left, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Pull_Left", "SteamVR HTC Cosmos (L) Bumper Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Bumper_Pull_Right, LOCTEXT("SteamVR_HTC_Cosmos_Bumper_Pull_Right", "SteamVR HTC Cosmos (R) Bumper Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+
+		// Trigger (L2/R2)
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Click_Left, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Click_Left", "SteamVR HTC Cosmos (L) Trigger Click"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Click_Right, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Click_Right", "SteamVR HTC Cosmos (R) Trigger Click"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Press_Left", "SteamVR HTC Cosmos (L) Trigger Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Press_Right", "SteamVR HTC Cosmos (R) Trigger Press"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Touch_Press_Left", "SteamVR HTC Cosmos (L) Trigger Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Touch_Right, LOCTEXT("SteamVR_HTC_Cosmos_Touch_Press_Right", "SteamVR HTC Cosmos (R) Trigger Touch"), FKeyDetails::GamepadKey));
+
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Left, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Pull_Left", "SteamVR HTC Cosmos (L) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Right, LOCTEXT("SteamVR_HTC_Cosmos_Trigger_Pull_Right", "SteamVR HTC Cosmos (R) Trigger Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Grip
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Grip_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Grip_Press_Left", "SteamVR HTC Cosmos Controller (L) Grip Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Grip_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Grip_Press_Right", "SteamVR HTC Cosmos Controller (R) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Press_Left", "SteamVR HTC Cosmos (L) Grip Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Press_Right", "SteamVR HTC Cosmos (R) Grip Press"), FKeyDetails::GamepadKey));
 
-		// Thumbstick
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Touch"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Touch_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Touch"), FKeyDetails::GamepadKey));
+		// Joystick
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Touch_Left", "SteamVR HTC Cosmos (L) Joystick Touch"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Touch_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Touch_Right", "SteamVR HTC Cosmos (R) Joystick Touch"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Press_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Press_Left", "SteamVR HTC Cosmos (L) Joystick Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Press_Right", "SteamVR HTC Cosmos (R) Joystick Press"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Up_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Up"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Down_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Down"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_L_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Left"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Right"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_R_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Up_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Up_Left", "SteamVR HTC Cosmos (L) Joystick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Up_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Up_Right", "SteamVR HTC Cosmos (R) Joystick Up"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Down_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Down_Left", "SteamVR HTC Cosmos (L) Joystick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Down_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Down_Right", "SteamVR HTC Cosmos (R) Joystick Down"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_L_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_L_Left", "SteamVR HTC Cosmos (L) Joystick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_L_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_L_Right", "SteamVR HTC Cosmos (R) Joystick Left"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_R_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_R_Left", "SteamVR HTC Cosmos (L) Joystick Right"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_R_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_R_Right", "SteamVR HTC Cosmos (R) Joystick Right"), FKeyDetails::GamepadKey));
 
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_X_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Left", "SteamVR HTC Cosmos Controller (L) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Thumbstick_Y_Right", "SteamVR HTC Cosmos Controller (R) Thumbstick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_X_Left", "SteamVR HTC Cosmos (L) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_X_Right", "SteamVR HTC Cosmos (R) Joystick X"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Y_Left", "SteamVR HTC Cosmos (L) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Right, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Y_Right", "SteamVR HTC Cosmos (R) Joystick Y"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Special
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Application_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Application_Press_Left", "SteamVR HTC Cosmos Controller (L) Application Press"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Controller_Application_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Controller_Application_Press_Right", "SteamVR HTC Cosmos Controller (R) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Left", "SteamVR HTC Cosmos (L) Application Press"), FKeyDetails::GamepadKey));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Right", "SteamVR HTC Cosmos (R) Application Press"), FKeyDetails::GamepadKey));
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
