@@ -90,6 +90,8 @@ using namespace vr;
 #define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistolgrip"			// Special 8
 #define ACTION_PATH_TRIGGER_LEFT		"/user/hand/left/input/trigger"
 #define ACTION_PATH_TRIGGER_RIGHT		"/user/hand/right/input/trigger"
+#define ACTION_PATH_BUMPER_LEFT			"/user/hand/left/input/bumper"
+#define ACTION_PATH_BUMPER_RIGHT		"/user/hand/right/input/bumper"
 #define ACTION_PATH_THUMBSTICK_LEFT		"/user/hand/left/input/thumbstick"
 #define ACTION_PATH_THUMBSTICK_RIGHT	"/user/hand/right/input/thumbstick"
 #define ACTION_PATH_TRACKPAD_LEFT		"/user/hand/left/input/trackpad"
@@ -98,6 +100,8 @@ using namespace vr;
 #define ACTION_PATH_JOYSTICK_RIGHT		"/user/hand/right/input/joystick"
 #define ACTION_PATH_GRIP_LEFT			"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_RIGHT			"/user/hand/right/input/grip"
+#define ACTION_PATH_PADDLE_LEFT			"/user/hand/left/input/paddle_heavy"
+#define ACTION_PATH_PADDLE_RIGHT		"/user/hand/right/input/paddle_heavy"
 #define ACTION_PATH_BTN_A_LEFT			"/user/hand/left/input/a"
 #define ACTION_PATH_BTN_A_RIGHT			"/user/hand/right/input/a"
 #define ACTION_PATH_BTN_B_LEFT			"/user/hand/left/input/b"
@@ -428,6 +432,7 @@ struct FSteamVRInputState
 	bool bIsAxis2;
 	bool bIsAxis3;
 	bool bIsTrigger;
+	bool bIsBumper;
 	bool bIsThumbstick;
 	bool bIsJoystick;
 	bool bIsTrackpad;
