@@ -237,35 +237,44 @@ namespace CosmosControllerKeys
 	const FKey SteamVR_HTC_Cosmos_Application_Press_Right("SteamVR_HTC_Cosmos_Application_Press_Right");
 
 	// Button A
-	const FKey SteamVR_HTC_Cosmos_A_Press("SteamVR_HTC_Cosmos_A_Press");
-	const FKey SteamVR_HTC_Cosmos_A_Touch("SteamVR_HTC_Cosmos_A_Touch");
+	const FKey SteamVR_HTC_Cosmos_A_Press_Left("SteamVR_HTC_Cosmos_A_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_A_Touch_Left("SteamVR_HTC_Cosmos_A_Touch_Left");
+
+	const FKey SteamVR_HTC_Cosmos_A_Press_Right("SteamVR_HTC_Cosmos_A_Press_Right");
+	const FKey SteamVR_HTC_Cosmos_A_Touch_Right("SteamVR_HTC_Cosmos_A_Touch_Right");
 
 	// Button B
-	const FKey SteamVR_HTC_Cosmos_B_Press("SteamVR_HTC_Cosmos_B_Press");
-	const FKey SteamVR_HTC_Cosmos_B_Touch("SteamVR_HTC_Cosmos_B_Touch");
+	const FKey SteamVR_HTC_Cosmos_B_Press_Left("SteamVR_HTC_Cosmos_B_Press_Left");
+	const FKey SteamVR_HTC_Cosmos_B_Touch_Left("SteamVR_HTC_Cosmos_B_Touch_Left");
 
-	// Button X
-	const FKey SteamVR_HTC_Cosmos_X_Press("SteamVR_HTC_Cosmos_X_Press");
-	const FKey SteamVR_HTC_Cosmos_X_Touch("SteamVR_HTC_Cosmos_X_Touch");
+	const FKey SteamVR_HTC_Cosmos_B_Press_Right("SteamVR_HTC_Cosmos_B_Press_Right");
+	const FKey SteamVR_HTC_Cosmos_B_Touch_Right("SteamVR_HTC_Cosmos_B_Touch_Right");
 
-	// Button Y
-	const FKey SteamVR_HTC_Cosmos_Y_Press("SteamVR_HTC_Cosmos_Y_Press");
-	const FKey SteamVR_HTC_Cosmos_Y_Touch("SteamVR_HTC_Cosmos_Y_Touch");
+	// Button X - @HTC to finalize
+	//const FKey SteamVR_HTC_Cosmos_X_Press("SteamVR_HTC_Cosmos_X_Press");
+	//const FKey SteamVR_HTC_Cosmos_X_Touch("SteamVR_HTC_Cosmos_X_Touch");
+
+	// Button Y - @HTC to finalize
+	//const FKey SteamVR_HTC_Cosmos_Y_Press("SteamVR_HTC_Cosmos_Y_Press");
+	//const FKey SteamVR_HTC_Cosmos_Y_Touch("SteamVR_HTC_Cosmos_Y_Touch");
 
 	// Grip
-	const FKey SteamVR_HTC_Cosmos_Grip_Press_Left("SteamVR_HTC_Cosmos_Grip_Press_Left");
-	const FKey SteamVR_HTC_Cosmos_Grip_Press_Right("SteamVR_HTC_Cosmos_Grip_Press_Right");
+	const FKey SteamVR_HTC_Cosmos_Grip_Click_Left("SteamVR_HTC_Cosmos_Grip_Click_Left");
+	const FKey SteamVR_HTC_Cosmos_Grip_Click_Right("SteamVR_HTC_Cosmos_Grip_Click_Right");
+
+	// @HTC to finalize
+	//const FKey SteamVR_HTC_Cosmos_Grip_Press_Left("SteamVR_HTC_Cosmos_Grip_Press_Left");
+	//const FKey SteamVR_HTC_Cosmos_Grip_Press_Right("SteamVR_HTC_Cosmos_Grip_Press_Right");
+
+	//const FKey SteamVR_HTC_Cosmos_Grip_Pull_Left("SteamVR_HTC_Cosmos_Grip_Pull_Left");
+	//const FKey SteamVR_HTC_Cosmos_Grip_Pull_Right("SteamVR_HTC_Cosmos_Grip_Pull_Right");
+
+	//const FKey SteamVR_HTC_Cosmos_Grip_Touch_Left("SteamVR_HTC_Cosmos_Grip_Touch_Left");
+	//const FKey SteamVR_HTC_Cosmos_Grip_Touch_Right("SteamVR_HTC_Cosmos_Grip_Touch_Right");
 
 	// Bumper (L1/R1)
 	const FKey SteamVR_HTC_Cosmos_Bumper_Click_Left("SteamVR_HTC_Cosmos_Bumper_Click_Left");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Press_Left("SteamVR_HTC_Cosmos_Bumper_Press_Left");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Touch_Left("SteamVR_HTC_Cosmos_Bumper_Touch_Left");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Pull_Left("SteamVR_HTC_Cosmos_Bumper_Pull_Left");
-
 	const FKey SteamVR_HTC_Cosmos_Bumper_Click_Right("SteamVR_HTC_Cosmos_Bumper_Click_Right");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Press_Right("SteamVR_HTC_Cosmos_Bumper_Press_Right");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Touch_Right("SteamVR_HTC_Cosmos_Bumper_Touch_Right");
-	const FKey SteamVR_HTC_Cosmos_Bumper_Pull_Right("SteamVR_HTC_Cosmos_Bumper_Pull_Right");
 
 	// Trigger (L2/R2)
 	const FKey SteamVR_HTC_Cosmos_Trigger_Click_Left("SteamVR_HTC_Cosmos_Trigger_Click_Left");
