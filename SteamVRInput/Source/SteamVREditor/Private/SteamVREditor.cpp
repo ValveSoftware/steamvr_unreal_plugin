@@ -157,7 +157,7 @@ void FSteamVREditorModule::AddSampleInputs()
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), FGamepadKeyNames::MotionController_Right_Thumbstick);
@@ -165,14 +165,14 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Grab
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Press_Left);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), FGamepadKeyNames::MotionController_Left_Trigger);
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), FGamepadKeyNames::MotionController_Right_Trigger);
@@ -187,7 +187,7 @@ void FSteamVREditorModule::AddSampleInputs()
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Right);
+		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), FGamepadKeyNames::MotionController_Right_Trigger);
