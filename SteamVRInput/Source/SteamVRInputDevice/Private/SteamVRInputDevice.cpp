@@ -355,7 +355,7 @@ void FSteamVRInputDevice::SendControllerEvents()
 	if (VRSystem() && VRInput() && SteamVRInputActionSets.Num() > 0)
 	{
 		EVRInputError ActionStateError = VRInput()->UpdateActionState(ActiveActionSets, sizeof(VRActiveActionSet_t), 1);
-		
+
 		if (ActionStateError != VRInputError_None)
 		{
 			//GetInputError(ActionStateError, TEXT("Error encountered when trying to update the action state"));
@@ -4054,7 +4054,7 @@ bool FSteamVRInputDevice::FindTemporaryActionKey(FName ActionName, FKey& FoundKe
 {
 	for (FSteamVRTemporaryAction& TemporaryAction : SteamVRTemporaryActions)
 	{
-		if (TemporaryAction.ActionName.ToString().Equals(ActionName.ToString()))
+		if (TemporaryAction.ActionName == ActionName)
 		{
 			if (bIsY)
 			{
