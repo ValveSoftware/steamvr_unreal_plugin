@@ -147,17 +147,19 @@ void FSteamVREditorModule::AddSampleInputs()
 
 	if (InputSettings->IsValidLowLevel())
 	{
+		// @HTC: Commented out sample keys until final driver changes/release
+
 		// Teleport
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Left);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Left);
+		// AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportLeft")), FGamepadKeyNames::MotionController_Left_Thumbstick);
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Right);
+		//AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("TeleportRight")), FGamepadKeyNames::MotionController_Right_Thumbstick);
@@ -165,14 +167,14 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Grab
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Left);
+		//AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabLeft")), FGamepadKeyNames::MotionController_Left_Trigger);
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Grip_Grab_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Right);
+		//AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Click_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Grip_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Grip_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("GrabRight")), FGamepadKeyNames::MotionController_Right_Trigger);
@@ -180,14 +182,14 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Fire Arrow
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Left);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Left);
+		//AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Left);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowLeft")), FGamepadKeyNames::MotionController_Left_Trigger);
 
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Pinch_Grab_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Press_Right);
-		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Right);
+		//AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Press_Right);
 		AddUniqueActionMapping(ExistingActionKeys, InputSettings, FName(TEXT("FireArrowRight")), FGamepadKeyNames::MotionController_Right_Trigger);
@@ -198,28 +200,28 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Move Right
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Right);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_Y")), FGamepadKeyNames::MotionController_Right_Thumbstick_Y);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Right);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveRight_X")), FGamepadKeyNames::MotionController_Right_Thumbstick_X);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Left);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_Y")), FGamepadKeyNames::MotionController_Left_Thumbstick_Y);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Thumbstick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Left);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Joystick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("MoveLeft_X")), FGamepadKeyNames::MotionController_Left_Thumbstick_X);
@@ -227,28 +229,28 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Teleport Direction
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Right);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Right);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_Y")), FGamepadKeyNames::MotionController_Right_Thumbstick_Y);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Right);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Right);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionRight_X")), FGamepadKeyNames::MotionController_Right_Thumbstick_X);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_Y_Left);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Left);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_Y_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_Y")), FGamepadKeyNames::MotionController_Left_Thumbstick_Y);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), IndexControllerKeys::SteamVR_Valve_Index_Controller_Trackpad_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), ViveControllerKeys::SteamVR_Vive_Controller_Trackpad_X_Left);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Left);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), OculusTouchKeys::SteamVR_Oculus_Touch_Joystick_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trackpad_X_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("TeleportDirectionLeft_X")), FGamepadKeyNames::MotionController_Left_Thumbstick_X);
@@ -256,14 +258,14 @@ void FSteamVREditorModule::AddSampleInputs()
 		// Squeeze
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Left);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Left);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Pull_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Left);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeLeft")), FGamepadKeyNames::MotionController_Left_TriggerAxis);
 
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), IndexControllerKeys::SteamVR_Valve_Index_Controller_GripForce_Axis_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), ViveControllerKeys::SteamVR_Vive_Controller_Trigger_Pull_Right);
-		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Right);
+		//AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), CosmosControllerKeys::SteamVR_HTC_Cosmos_Trigger_Pull_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), OculusTouchKeys::SteamVR_Oculus_Touch_Trigger_Pull_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), WindowsMRKeys::SteamVR_Windows_MR_Controller_Trigger_Pull_Right);
 		AddUniqueAxisMapping(ExistingAxisKeys, InputSettings, FName(TEXT("SqueezeRight")), FGamepadKeyNames::MotionController_Right_TriggerAxis);
