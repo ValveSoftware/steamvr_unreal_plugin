@@ -12,7 +12,7 @@
   "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/401605a650e64a8fa3c0f45838a6357d",
   "SupportURL": "https://github.com/ValveSoftware/steamvr_unreal_plugin/issues",
   "CanContainContent": true,
-  "IsBetaVersion": true,
+  "IsBetaVersion": false,
   "Installed": true,
   "Modules": [
     {
