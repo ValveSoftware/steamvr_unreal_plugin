@@ -3,6 +3,7 @@
 | Branch | Notes | Download |
 | ------------- | ------------- | ------------- |
 | [develop](https://github.com/ValveSoftware/steamvr_unreal_plugin) | Active development branch using UE 4.15, may be unstable | N.A. |
+| [4.23](https://github.com/ValveSoftware/steamvr_unreal_plugin/tree/4.23) | For projects using UE 4.23 | [Zip](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.23.zip) <br> [Tarball](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.23.tar.gz) |
 | [4.22](https://github.com/ValveSoftware/steamvr_unreal_plugin/tree/4.22) | For projects using UE 4.22 | [Zip](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.22.zip) <br> [Tarball](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.22.tar.gz) |
 | [4.21](https://github.com/ValveSoftware/steamvr_unreal_plugin/tree/4.21) | For projects using UE 4.21 | [Zip](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.21.zip) <br> [Tarball](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.21.tar.gz) |
 | [4.20](https://github.com/ValveSoftware/steamvr_unreal_plugin/tree/4.20) | For projects using UE 4.20 | [Zip](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.20.zip) <br> [Tarball](https://github.com/ValveSoftware/steamvr_unreal_plugin/archive/v1.5_4.20.tar.gz) |
