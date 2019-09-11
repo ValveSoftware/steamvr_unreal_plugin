@@ -3579,6 +3579,9 @@ void FSteamVRInputDevice::InitControllerKeys()
 
 #pragma region HTC COSMOS
 
+	/* 
+	@HTC: COMMENTED OUT, PENDING FINALIZED DRIVER RELEASE/CHANGES
+
 		// Buttons
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_A_Touch, LOCTEXT("SteamVR_HTC_Cosmos_A_Touch", "SteamVR HTC Cosmos A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_X_Touch, LOCTEXT("SteamVR_HTC_Cosmos_X_Touch", "SteamVR HTC Cosmos X Touch"), FKeyDetails::GamepadKey));
@@ -3650,6 +3653,8 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Left, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Left", "SteamVR HTC Cosmos (L) Pinch Grab"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Right", "SteamVR HTC Cosmos (R) Grip Grab"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Right", "SteamVR HTC Cosmos (R) Pinch Grab"), FKeyDetails::GamepadKey));
+
+	*/
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
