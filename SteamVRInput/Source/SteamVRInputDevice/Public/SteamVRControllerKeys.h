@@ -260,11 +260,11 @@ namespace CosmosControllerKeys
 	//const FKey SteamVR_HTC_Cosmos_Grip_Press_Left("SteamVR_HTC_Cosmos_Grip_Press_Left");
 	//const FKey SteamVR_HTC_Cosmos_Grip_Press_Right("SteamVR_HTC_Cosmos_Grip_Press_Right");
 
-	//const FKey SteamVR_HTC_Cosmos_Grip_Pull_Left("SteamVR_HTC_Cosmos_Grip_Pull_Left");
-	//const FKey SteamVR_HTC_Cosmos_Grip_Pull_Right("SteamVR_HTC_Cosmos_Grip_Pull_Right");
-
 	//const FKey SteamVR_HTC_Cosmos_Grip_Touch_Left("SteamVR_HTC_Cosmos_Grip_Touch_Left");
 	//const FKey SteamVR_HTC_Cosmos_Grip_Touch_Right("SteamVR_HTC_Cosmos_Grip_Touch_Right");
+
+	const FKey SteamVR_HTC_Cosmos_Grip_Pull_Left("SteamVR_HTC_Cosmos_Grip_Pull_Left");
+	const FKey SteamVR_HTC_Cosmos_Grip_Pull_Right("SteamVR_HTC_Cosmos_Grip_Pull_Right");
 
 	// Bumper (L1/R1)
 	const FKey SteamVR_HTC_Cosmos_Bumper_Click_Left("SteamVR_HTC_Cosmos_Bumper_Click_Left");
