@@ -1674,14 +1674,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 				}
 				else if (InputState.bIsGrip)
 				{
-					if (CurrentInputKeyName.Contains(TEXT("HTC_Cosmos")))
-					{
-						CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_PADDLE_LEFT)) : FString(TEXT(ACTION_PATH_PADDLE_RIGHT));
-					}
-					else
-					{
-						CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
-					}
+					CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
 				}
 				else if (InputState.bIsFaceButton1)
 				{
@@ -2011,13 +2004,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 						}
 						else if (InputState.bIsGrip)
 						{
-							if (CurrentInputKeyName.Contains(TEXT("HTC_Cosmos")))
+							CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
+
+							// For controllers without force sensor support, use trigger value mode
+							if (!CurrentInputKeyName.Contains(TEXT("Index_Controller"), ESearchCase::IgnoreCase, ESearchDir::FromStart)
+								&& CurrentInputKeyName.Contains(TEXT("Pull"), ESearchCase::IgnoreCase, ESearchDir::FromEnd)
+								)
 							{
-								CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_PADDLE_LEFT)) : FString(TEXT(ACTION_PATH_PADDLE_RIGHT));
-							}
-							else
-							{
-								CachePath = InputState.bIsLeft ? FString(TEXT(ACTION_PATH_GRIP_LEFT)) : FString(TEXT(ACTION_PATH_GRIP_RIGHT));
+								CacheMode = FName(TEXT("trigger"));
 							}
 						}
 						else if (InputState.bIsFaceButton1)
@@ -2078,7 +2072,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 						{
 							if (InputState.bIsGrip)
 							{
-								CacheType = FString(TEXT("force"));
+								if (CacheMode == FName("trigger"))
+								{
+									CacheType = FString(TEXT("pull"));
+								}
+								else
+								{
+									CacheType = FString(TEXT("force"));
+								}
 							}
 							else
 							{
@@ -2096,7 +2097,14 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 						{
 							if (InputState.bIsGrip)
 							{
-								CacheType = FString(TEXT("force"));
+								if (CacheMode == FName("trigger"))
+								{
+									CacheType = FString(TEXT("pull"));
+								}
+								else
+								{
+									CacheType = FString(TEXT("force"));
+								}
 							}
 							else if (!InputState.bIsThumbstick && !InputState.bIsTrackpad)
 							{
@@ -3579,9 +3587,6 @@ void FSteamVRInputDevice::InitControllerKeys()
 
 #pragma region HTC COSMOS
 
-	/* 
-	@HTC: COMMENTED OUT, PENDING FINALIZED DRIVER RELEASE/CHANGES
-
 		// Buttons
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_A_Touch, LOCTEXT("SteamVR_HTC_Cosmos_A_Touch", "SteamVR HTC Cosmos A Touch"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_X_Touch, LOCTEXT("SteamVR_HTC_Cosmos_X_Touch", "SteamVR HTC Cosmos X Touch"), FKeyDetails::GamepadKey));
@@ -3620,8 +3625,8 @@ void FSteamVRInputDevice::InitControllerKeys()
 		//EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Touch_Left", "SteamVR HTC Cosmos (L) Grip Touch"), FKeyDetails::GamepadKey));
 		//EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Touch_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Touch_Right", "SteamVR HTC Cosmos (R) Grip Touch"), FKeyDetails::GamepadKey));
 
-		//EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Pull_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Pull_Left", "SteamVR HTC Cosmos (L) Grip Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
-		//EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Pull_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Pull_Right", "SteamVR HTC Cosmos (R) Grip Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Pull_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Pull_Left", "SteamVR HTC Cosmos (L) Grip Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
+		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Pull_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Pull_Right", "SteamVR HTC Cosmos (R) Grip Pull"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 
 		// Joystick
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Joystick_Touch_Left, LOCTEXT("SteamVR_HTC_Cosmos_Joystick_Touch_Left", "SteamVR HTC Cosmos (L) Joystick Touch"), FKeyDetails::GamepadKey));
@@ -3654,7 +3659,6 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Right", "SteamVR HTC Cosmos (R) Grip Grab"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Right", "SteamVR HTC Cosmos (R) Pinch Grab"), FKeyDetails::GamepadKey));
 
-	*/
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
