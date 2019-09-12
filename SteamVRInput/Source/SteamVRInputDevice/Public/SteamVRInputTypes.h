@@ -100,8 +100,6 @@ using namespace vr;
 #define ACTION_PATH_JOYSTICK_RIGHT		"/user/hand/right/input/joystick"
 #define ACTION_PATH_GRIP_LEFT			"/user/hand/left/input/grip"
 #define ACTION_PATH_GRIP_RIGHT			"/user/hand/right/input/grip"
-#define ACTION_PATH_PADDLE_LEFT			"/user/hand/left/input/paddle_heavy"
-#define ACTION_PATH_PADDLE_RIGHT		"/user/hand/right/input/paddle_heavy"
 #define ACTION_PATH_BTN_A_LEFT			"/user/hand/left/input/a"
 #define ACTION_PATH_BTN_A_RIGHT			"/user/hand/right/input/a"
 #define ACTION_PATH_BTN_B_LEFT			"/user/hand/left/input/b"
