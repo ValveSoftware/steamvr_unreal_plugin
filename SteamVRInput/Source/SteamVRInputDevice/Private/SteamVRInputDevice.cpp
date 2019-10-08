@@ -2468,6 +2468,15 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 #pragma endregion
 
 #pragma region DEFAULT CONTROLLER BINDINGS
+
+#if WITH_EDITOR
+	// If we're running in the editor, build the controller bindings if they don't exist yet
+	if (GenerateBindings)
+	{
+		GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings, DeleteIfExists);
+	}
+#endif
+
 	// Start search for controller bindings files
 	TArray<FString> ControllerBindingFiles;
 	FileManager.FindFiles(ControllerBindingFiles, *ControllerBindingsPath, TEXT("*.json"));
@@ -2517,14 +2526,6 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			}
 		}
 	}
-
-	// If we're running in the editor, build the controller bindings if they don't exist yet
-#if WITH_EDITOR
-	if (GenerateBindings)
-	{
-		GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings, DeleteIfExists);
-	}
-#endif
 
 	// Add the default bindings object to the action manifest
 	if (ControllerBindings.Num() == 0)
