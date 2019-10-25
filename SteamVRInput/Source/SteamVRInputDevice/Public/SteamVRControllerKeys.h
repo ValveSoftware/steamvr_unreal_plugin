@@ -302,11 +302,6 @@ namespace CosmosControllerKeys
 	const FKey SteamVR_HTC_Cosmos_Joystick_L_Right("SteamVR_HTC_Cosmos_Joystick_L_Right");
 	const FKey SteamVR_HTC_Cosmos_Joystick_R_Right("SteamVR_HTC_Cosmos_Joystick_R_Right");
 
-	// Special
-	const FKey SteamVR_HTC_Cosmos_Grip_Grab_Left("SteamVR_HTC_Cosmos_Grip_Grab_Left");
-	const FKey SteamVR_HTC_Cosmos_Pinch_Grab_Left("SteamVR_HTC_Cosmos_Pinch_Grab_Left");
-	const FKey SteamVR_HTC_Cosmos_Grip_Grab_Right("SteamVR_HTC_Cosmos_Grip_Grab_Right");
-	const FKey SteamVR_HTC_Cosmos_Pinch_Grab_Right("SteamVR_HTC_Cosmos_Pinch_Grab_Right");
 }
 
 namespace OculusTouchKeys
