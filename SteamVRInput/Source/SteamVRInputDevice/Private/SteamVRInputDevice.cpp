@@ -3654,12 +3654,6 @@ void FSteamVRInputDevice::InitControllerKeys()
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Left, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Left", "SteamVR HTC Cosmos (L) Application Press"), FKeyDetails::GamepadKey));
 		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Application_Press_Right, LOCTEXT("SteamVR_HTC_Cosmos_Application_Press_Right", "SteamVR HTC Cosmos (R) Application Press"), FKeyDetails::GamepadKey));
 
-		// Special
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Left, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Left", "SteamVR HTC Cosmos (L) Grip Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Left, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Left", "SteamVR HTC Cosmos (L) Pinch Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Grip_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Grip_Grab_Right", "SteamVR HTC Cosmos (R) Grip Grab"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(CosmosControllerKeys::SteamVR_HTC_Cosmos_Pinch_Grab_Right, LOCTEXT("SteamVR_HTC_Cosmos_Pinch_Grab_Right", "SteamVR HTC Cosmos (R) Pinch Grab"), FKeyDetails::GamepadKey));
-
 #pragma endregion
 
 #pragma region WINDOWS MR CONTROLLER
