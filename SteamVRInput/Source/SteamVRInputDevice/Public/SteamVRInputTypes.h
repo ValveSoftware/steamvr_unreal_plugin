@@ -459,6 +459,13 @@ struct FSteamVRTemporaryAction
 	FName ActionName;
 	bool bIsY;
 
+	FSteamVRTemporaryAction()
+	{
+		ActionName = NAME_None;
+		UE4Key = EKeys::Invalid;
+		bIsY = false;
+	}
+
 	FSteamVRTemporaryAction(const FKey& inUE4Key, const FName& inActionName)
 		: UE4Key(inUE4Key)
 		, ActionName(inActionName)
