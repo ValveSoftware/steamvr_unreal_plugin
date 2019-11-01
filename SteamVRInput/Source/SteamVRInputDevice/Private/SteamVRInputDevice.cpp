@@ -644,7 +644,7 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 			OrientationQuat.W = -Orientation.W;
 
 			// Return controller transform
-			FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * GWorld->GetWorldSettings()->WorldToMeters - CachedBasePosition);
+			FVector Position = ((FVector(-Pose.M[3][2], Pose.M[3][0], Pose.M[3][1])) * WorldToMetersScale - CachedBasePosition);
 			OutPosition = CachedBaseOrientation.Inverse().RotateVector(Position);
 
 			OrientationQuat = CachedBaseOrientation.Inverse() * OrientationQuat;
