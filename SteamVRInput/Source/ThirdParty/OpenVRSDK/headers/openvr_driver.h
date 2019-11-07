@@ -15,8 +15,8 @@
 namespace vr
 {
 	static const uint32_t k_nSteamVRVersionMajor = 1;
-	static const uint32_t k_nSteamVRVersionMinor = 7;
-	static const uint32_t k_nSteamVRVersionBuild = 15;
+	static const uint32_t k_nSteamVRVersionMinor = 8;
+	static const uint32_t k_nSteamVRVersionBuild = 19;
 } // namespace vr
 
 // vrtypes.h
@@ -440,7 +440,10 @@ enum ETrackedDeviceProperty
 	Prop_DisplayColorMultLeft_Vector3			= 2082,
 	Prop_DisplayColorMultRight_Vector3			= 2083,
 
-	Prop_DashboardLayoutPathName_String			= 2090,
+	Prop_DashboardLayoutPathName_String 		= 2090,
+	Prop_DashboardScale_Float 					= 2091,
+	Prop_IpdUIRangeMinMeters_Float 				= 2100,
+	Prop_IpdUIRangeMaxMeters_Float 				= 2101,
 
 	// Driver requested mura correction properties
 	Prop_DriverRequestedMuraCorrectionMode_Int32		= 2200,
@@ -452,6 +455,10 @@ enum ETrackedDeviceProperty
 	Prop_DriverRequestedMuraFeather_OuterRight_Int32	= 2206,
 	Prop_DriverRequestedMuraFeather_OuterTop_Int32		= 2207,
 	Prop_DriverRequestedMuraFeather_OuterBottom_Int32	= 2208,
+
+	Prop_Audio_DefaultPlaybackDeviceId_String		= 2300,
+	Prop_Audio_DefaultRecordingDeviceId_String		= 2301,
+	Prop_Audio_DefaultPlaybackDeviceVolume_Float	= 2302,
 
 	// Properties that are unique to TrackedDeviceClass_Controller
 	Prop_AttachedDeviceId_String				= 3000,
@@ -696,17 +703,19 @@ enum EVREventType
 
 	VREvent_InputFocusCaptured			= 400, // data is process DEPRECATED
 	VREvent_InputFocusReleased			= 401, // data is process DEPRECATED
-	VREvent_SceneFocusLost				= 402, // data is process
-	VREvent_SceneFocusGained			= 403, // data is process
+	// VREvent_SceneFocusLost			= 402, // data is process
+	// VREvent_SceneFocusGained			= 403, // data is process
 	VREvent_SceneApplicationChanged		= 404, // data is process - The App actually drawing the scene changed (usually to or from the compositor)
 	VREvent_SceneFocusChanged			= 405, // data is process - New app got access to draw the scene
 	VREvent_InputFocusChanged			= 406, // data is process
-	VREvent_SceneApplicationSecondaryRenderingStarted = 407, // data is process
+	// VREvent_SceneApplicationSecondaryRenderingStarted = 407,
 	VREvent_SceneApplicationUsingWrongGraphicsAdapter = 408, // data is process
 	VREvent_ActionBindingReloaded		 = 409, // data is process - The App that action binds reloaded for
 
 	VREvent_HideRenderModels			= 410, // Sent to the scene application to request hiding render models temporarily
 	VREvent_ShowRenderModels			= 411, // Sent to the scene application to request restoring render model visibility
+
+	VREvent_SceneApplicationStateChanged = 412, // No data; but query VRApplications()->GetSceneApplicationState();
 
 	VREvent_ConsoleOpened               = 420,
 	VREvent_ConsoleClosed               = 421,
@@ -752,7 +761,7 @@ enum EVREventType
 
 	VREvent_Quit							= 700, // data is process
 	VREvent_ProcessQuit						= 701, // data is process
-	VREvent_QuitAborted_UserPrompt			= 702, // data is process
+	//VREvent_QuitAborted_UserPrompt			= 702, // data is process
 	VREvent_QuitAcknowledged				= 703, // data is process
 	VREvent_DriverRequestedQuit				= 704, // The driver has requested that SteamVR shut down
 	VREvent_RestartRequested				= 705, // A driver or other component wants the user to restart SteamVR
@@ -777,7 +786,7 @@ enum EVREventType
 	VREvent_EnableHomeAppSettingsHaveChanged		= 856,
 	VREvent_SteamVRSectionSettingChanged			= 857,
 	VREvent_LighthouseSectionSettingChanged			= 858,
-	VREvent_NullSectionSettingChanged				= 859,
+	VREvent_nullptrSectionSettingChanged				= 859,
 	VREvent_UserInterfaceSectionSettingChanged		= 860,
 	VREvent_NotificationsSectionSettingChanged		= 861,
 	VREvent_KeyboardSectionSettingChanged			= 862,
@@ -801,12 +810,12 @@ enum EVREventType
 	VREvent_KeyboardCharInput				= 1201,
 	VREvent_KeyboardDone					= 1202, // Sent when DONE button clicked on keyboard
 
-	VREvent_ApplicationTransitionStarted		= 1300,
-	VREvent_ApplicationTransitionAborted		= 1301,
-	VREvent_ApplicationTransitionNewAppStarted	= 1302,
+	//VREvent_ApplicationTransitionStarted		= 1300,
+	//VREvent_ApplicationTransitionAborted		= 1301,
+	//VREvent_ApplicationTransitionNewAppStarted	= 1302,
 	VREvent_ApplicationListUpdated				= 1303,
 	VREvent_ApplicationMimeTypeLoad				= 1304,
-	VREvent_ApplicationTransitionNewAppLaunchComplete = 1305,
+	// VREvent_ApplicationTransitionNewAppLaunchComplete = 1305,
 	VREvent_ProcessConnected					= 1306,
 	VREvent_ProcessDisconnected					= 1307,
 
@@ -820,6 +829,7 @@ enum EVREventType
 	VREvent_Compositor_ApplicationNotResponding	= 1415,
 	VREvent_Compositor_ApplicationResumed		= 1416,
 	VREvent_Compositor_OutOfVideoMemory			= 1417,
+	VREvent_Compositor_DisplayModeNotSupported	= 1418, // k_pch_SteamVR_PreferredRefreshRate
 
 	VREvent_TrackedCamera_StartVideoStream  = 1500,
 	VREvent_TrackedCamera_StopVideoStream   = 1501,
@@ -871,6 +881,7 @@ enum EDeviceActivityLevel
 	k_EDeviceActivityLevel_UserInteraction = 1,				// Activity (movement or prox sensor) is happening now	
 	k_EDeviceActivityLevel_UserInteraction_Timeout = 2,		// No activity for the last 0.5 seconds
 	k_EDeviceActivityLevel_Standby = 3,						// Idle for at least 5 seconds (configurable in Settings -> Power Management)
+	k_EDeviceActivityLevel_Idle_Timeout = 4,
 };
 
 
@@ -1259,7 +1270,7 @@ enum EVRSpatialAnchorError
 * This mesh draws on all the pixels that will be hidden after distortion. 
 *
 * If the HMD does not provide a visible area mesh pVertexData will be
-* NULL and unTriangleCount will be 0. */
+* nullptr and unTriangleCount will be 0. */
 struct HiddenAreaMesh_t
 {
 	const HmdVector2_t *pVertexData;
@@ -1537,6 +1548,7 @@ enum EVRInitError
 	VRInitError_Init_AlreadyRunning					= 143,
 	VRInitError_Init_FailedForVrMonitor				= 144,
 	VRInitError_Init_PropertyManagerInitFailed		= 145,
+	VRInitError_Init_WebServerFailed				= 146,
 
 	VRInitError_Driver_Failed						= 200,
 	VRInitError_Driver_Unknown						= 201,
@@ -1572,18 +1584,18 @@ enum EVRInitError
 	VRInitError_Compositor_OverlayInitFailed									= 403,
 	VRInitError_Compositor_ScreenshotsInitFailed								= 404,
 	VRInitError_Compositor_UnableToCreateDevice									= 405,
-	VRInitError_Compositor_SharedStateIsNull									= 406,
-	VRInitError_Compositor_NotificationManagerIsNull							= 407,
-	VRInitError_Compositor_ResourceManagerClientIsNull							= 408,
+	VRInitError_Compositor_SharedStateIsnullptr									= 406,
+	VRInitError_Compositor_NotificationManagerIsnullptr							= 407,
+	VRInitError_Compositor_ResourceManagerClientIsnullptr							= 408,
 	VRInitError_Compositor_MessageOverlaySharedStateInitFailure					= 409,
-	VRInitError_Compositor_PropertiesInterfaceIsNull							= 410,
+	VRInitError_Compositor_PropertiesInterfaceIsnullptr							= 410,
 	VRInitError_Compositor_CreateFullscreenWindowFailed							= 411,
-	VRInitError_Compositor_SettingsInterfaceIsNull								= 412,
+	VRInitError_Compositor_SettingsInterfaceIsnullptr								= 412,
 	VRInitError_Compositor_FailedToShowWindow									= 413,
-	VRInitError_Compositor_DistortInterfaceIsNull								= 414,
+	VRInitError_Compositor_DistortInterfaceIsnullptr								= 414,
 	VRInitError_Compositor_DisplayFrequencyFailure								= 415,
 	VRInitError_Compositor_RendererInitializationFailed							= 416,
-	VRInitError_Compositor_DXGIFactoryInterfaceIsNull							= 417,
+	VRInitError_Compositor_DXGIFactoryInterfaceIsnullptr							= 417,
 	VRInitError_Compositor_DXGIFactoryCreateFailed								= 418,
 	VRInitError_Compositor_DXGIFactoryQueryFailed								= 419,
 	VRInitError_Compositor_InvalidAdapterDesktop								= 420,
@@ -1653,6 +1665,7 @@ enum EVRInitError
 	VRInitError_Compositor_CreateLastFrameRenderTexture							= 484,
 	VRInitError_Compositor_CreateMirrorOverlay									= 485,
 	VRInitError_Compositor_FailedToCreateVirtualDisplayBackbuffer				= 486,
+	VRInitError_Compositor_DisplayModeNotSupported								= 487,
 
 	VRInitError_VendorSpecific_UnableToConnectToOculusRuntime		= 1000,
 	VRInitError_VendorSpecific_WindowsNotInDevMode					= 1001,
@@ -2184,16 +2197,19 @@ namespace vr
 	static const char * const k_pch_SteamVR_BackgroundDomeRadius_Float = "backgroundDomeRadius";
 	static const char * const k_pch_SteamVR_GridColor_String = "gridColor";
 	static const char * const k_pch_SteamVR_PlayAreaColor_String = "playAreaColor";
+	static const char * const k_pch_SteamVR_TrackingLossColor_String = "trackingLossColor";
 	static const char * const k_pch_SteamVR_ShowStage_Bool = "showStage";
 	static const char * const k_pch_SteamVR_ActivateMultipleDrivers_Bool = "activateMultipleDrivers";
 	static const char * const k_pch_SteamVR_UsingSpeakers_Bool = "usingSpeakers";
 	static const char * const k_pch_SteamVR_SpeakersForwardYawOffsetDegrees_Float = "speakersForwardYawOffsetDegrees";
 	static const char * const k_pch_SteamVR_BaseStationPowerManagement_Int32 = "basestationPowerManagement";
+	static const char * const k_pch_SteamVR_ShowBaseStationPowerManagementTip_Int32 = "ShowBaseStationPowerManagementTip";
 	static const char * const k_pch_SteamVR_NeverKillProcesses_Bool = "neverKillProcesses";
 	static const char * const k_pch_SteamVR_SupersampleScale_Float = "supersampleScale";
 	static const char * const k_pch_SteamVR_MaxRecommendedResolution_Int32 = "maxRecommendedResolution";
 	static const char * const k_pch_SteamVR_MotionSmoothing_Bool = "motionSmoothing";
 	static const char * const k_pch_SteamVR_MotionSmoothingOverride_Int32 = "motionSmoothingOverride";
+	static const char * const k_pch_SteamVR_DisableAsyncReprojection_Bool = "disableAsync";
 	static const char * const k_pch_SteamVR_ForceFadeOnBadTracking_Bool = "forceFadeOnBadTracking";
 	static const char * const k_pch_SteamVR_DefaultMirrorView_Int32 = "mirrorView";
 	static const char * const k_pch_SteamVR_ShowLegacyMirrorView_Bool = "showLegacyMirrorView";
@@ -2254,21 +2270,20 @@ namespace vr
 	static const char * const k_pch_Lighthouse_PowerManagedBaseStations2_String = "PowerManagedBaseStations2";
 	static const char * const k_pch_Lighthouse_InactivityTimeoutForBaseStations_Int32 = "InactivityTimeoutForBaseStations";
 	static const char * const k_pch_Lighthouse_EnableImuFallback_Bool = "enableImuFallback";
-	static const char * const k_pch_Lighthouse_NewPairing_Bool = "newPairing";
 
 	//-----------------------------------------------------------------------------
-	// null keys
-	static const char * const k_pch_Null_Section = "driver_null";
-	static const char * const k_pch_Null_SerialNumber_String = "serialNumber";
-	static const char * const k_pch_Null_ModelNumber_String = "modelNumber";
-	static const char * const k_pch_Null_WindowX_Int32 = "windowX";
-	static const char * const k_pch_Null_WindowY_Int32 = "windowY";
-	static const char * const k_pch_Null_WindowWidth_Int32 = "windowWidth";
-	static const char * const k_pch_Null_WindowHeight_Int32 = "windowHeight";
-	static const char * const k_pch_Null_RenderWidth_Int32 = "renderWidth";
-	static const char * const k_pch_Null_RenderHeight_Int32 = "renderHeight";
-	static const char * const k_pch_Null_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
-	static const char * const k_pch_Null_DisplayFrequency_Float = "displayFrequency";
+	// nullptr keys
+	static const char * const k_pch_nullptr_Section = "driver_nullptr";
+	static const char * const k_pch_nullptr_SerialNumber_String = "serialNumber";
+	static const char * const k_pch_nullptr_ModelNumber_String = "modelNumber";
+	static const char * const k_pch_nullptr_WindowX_Int32 = "windowX";
+	static const char * const k_pch_nullptr_WindowY_Int32 = "windowY";
+	static const char * const k_pch_nullptr_WindowWidth_Int32 = "windowWidth";
+	static const char * const k_pch_nullptr_WindowHeight_Int32 = "windowHeight";
+	static const char * const k_pch_nullptr_RenderWidth_Int32 = "renderWidth";
+	static const char * const k_pch_nullptr_RenderHeight_Int32 = "renderHeight";
+	static const char * const k_pch_nullptr_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
+	static const char * const k_pch_nullptr_DisplayFrequency_Float = "displayFrequency";
 
 	//-----------------------------------------------------------------------------
 	// user interface keys
@@ -2316,6 +2331,7 @@ namespace vr
 	static const char * const k_pch_CollisionBounds_ColorGammaG_Int32 = "CollisionBoundsColorGammaG";
 	static const char * const k_pch_CollisionBounds_ColorGammaB_Int32 = "CollisionBoundsColorGammaB";
 	static const char * const k_pch_CollisionBounds_ColorGammaA_Int32 = "CollisionBoundsColorGammaA";
+	static const char * const k_pch_CollisionBounds_EnableDriverImport = "enableDriverBoundsImport";
 
 	//-----------------------------------------------------------------------------
 	// camera keys
@@ -2334,11 +2350,19 @@ namespace vr
 	//-----------------------------------------------------------------------------
 	// audio keys
 	static const char * const k_pch_audio_Section = "audio";
-	static const char * const k_pch_audio_OnPlaybackDevice_String = "onPlaybackDevice";
-	static const char * const k_pch_audio_OnRecordDevice_String = "onRecordDevice";
-	static const char * const k_pch_audio_OnPlaybackMirrorDevice_String = "onPlaybackMirrorDevice";
-	static const char * const k_pch_audio_OffPlaybackDevice_String = "offPlaybackDevice";
-	static const char * const k_pch_audio_OffRecordDevice_String = "offRecordDevice";
+	static const char * const k_pch_audio_SetOsDefaultPlaybackDevice_Bool = "setOsDefaultPlaybackDevice";
+	static const char * const k_pch_audio_EnablePlaybackDeviceOverride_Bool = "enablePlaybackDeviceOverride";
+	static const char * const k_pch_audio_PlaybackDeviceOverride_String = "playbackDeviceOverride";
+	static const char * const k_pch_audio_PlaybackDeviceOverrideName_String = "playbackDeviceOverrideName";
+	static const char * const k_pch_audio_SetOsDefaultRecordingDevice_Bool = "setOsDefaultRecordingDevice";
+	static const char * const k_pch_audio_EnableRecordingDeviceOverride_Bool = "enableRecordingDeviceOverride";
+	static const char * const k_pch_audio_RecordingDeviceOverride_String = "recordingDeviceOverride";
+	static const char * const k_pch_audio_RecordingDeviceOverrideName_String = "recordingDeviceOverrideName";
+	static const char * const k_pch_audio_EnablePlaybackMirror_Bool = "enablePlaybackMirror";
+	static const char * const k_pch_audio_PlaybackMirrorDevice_String = "playbackMirrorDevice";
+	static const char * const k_pch_audio_PlaybackMirrorDeviceName_String = "playbackMirrorDeviceName";
+	static const char * const k_pch_audio_OldPlaybackMirrorDevice_String = "onPlaybackMirrorDevice";
+	static const char * const k_pch_audio_LastHmdPlaybackDeviceId_String = "lastHmdPlaybackDeviceId";
 	static const char * const k_pch_audio_VIVEHDMIGain = "viveHDMIGain";
 
 	//-----------------------------------------------------------------------------
@@ -2356,11 +2380,8 @@ namespace vr
 	static const char * const k_pch_Dashboard_Section = "dashboard";
 	static const char * const k_pch_Dashboard_EnableDashboard_Bool = "enableDashboard";
 	static const char * const k_pch_Dashboard_ArcadeMode_Bool = "arcadeMode";
-	static const char * const k_pch_Dashboard_UseWebDashboard = "useWebDashboard";
+	static const char * const k_pch_Dashboard_UseWebKeyboard = "useWebKeyboard";
 	static const char * const k_pch_Dashboard_UseWebSettings = "useWebSettings";
-	static const char * const k_pch_Dashboard_UseWebIPD = "useWebIPD";
-	static const char * const k_pch_Dashboard_UseWebPowerMenu = "useWebPowerMenu";
-	static const char * const k_pch_Dashboard_UseWebNotifications = "useWebNotifications";
 
 	//-----------------------------------------------------------------------------
 	// model skin keys
@@ -2374,8 +2395,6 @@ namespace vr
 	//-----------------------------------------------------------------------------
 	// web interface keys
 	static const char* const k_pch_WebInterface_Section = "WebInterface";
-	static const char* const k_pch_WebInterface_WebEnable_Bool = "WebEnable";
-	static const char* const k_pch_WebInterface_WebPort_String = "WebPort";
 
 	//-----------------------------------------------------------------------------
 	// vrwebhelper keys
@@ -2524,13 +2543,13 @@ public:
 	/** Handles a request from the system to put this device into standby mode. What that means is defined per-device. */
 	virtual void EnterStandby() = 0;
 
-	/** Requests a component interface of the driver for device-specific functionality. The driver should return NULL
+	/** Requests a component interface of the driver for device-specific functionality. The driver should return nullptr
 	* if the requested interface or version is not supported. */
 	virtual void *GetComponent( const char *pchComponentNameAndVersion ) = 0;
 
 	/** A VR Client has made this debug request of the driver. The set of valid requests is entirely
 	* up to the driver and the client to figure out, as is the format of the response. Responses that
-	* exceed the length of the supplied buffer should be truncated and null terminated */
+	* exceed the length of the supplied buffer should be truncated and nullptr terminated */
 	virtual void DebugRequest( const char *pchRequest, char *pchResponseBuffer, uint32_t unResponseBufferSize ) = 0;
 
 	// ------------------------------------
@@ -2715,7 +2734,7 @@ struct DriverPose_t;
 class IVRDriverContext
 {
 public:
-	/** Returns the requested interface. If the interface was not available it will return NULL and fill
+	/** Returns the requested interface. If the interface was not available it will return nullptr and fill
 	* out the error. */
 	virtual void *GetGenericInterface( const char *pchInterfaceVersion, EVRInitError *peError = nullptr ) = 0;
 
@@ -2731,7 +2750,7 @@ public:
 	/** initializes the driver. This will be called before any other methods are called.
 	* If Init returns anything other than VRInitError_None the driver DLL will be unloaded.
 	*
-	* pDriverHost will never be NULL, and will always be a pointer to a IServerDriverHost interface
+	* pDriverHost will never be nullptr, and will always be a pointer to a IServerDriverHost interface
 	*
 	* pchUserDriverConfigDir - The absolute path of the directory where the driver should store user
 	*	config files.
@@ -2799,7 +2818,7 @@ public:
 	/** Returns the versions of interfaces used by this driver */
 	virtual const char * const *GetInterfaceVersions() = 0;
 
-	/** Requests a component interface of the driver for specific functionality. The driver should return NULL
+	/** Requests a component interface of the driver for specific functionality. The driver should return nullptr
 	* if the requested interface or version is not supported. */
 	virtual void *GetComponent( const char *pchComponentNameAndVersion ) = 0;
 };
@@ -2885,13 +2904,13 @@ public:
 
 	/** Returns a single typed property. If the device index is not valid or the property is not a string type this function will
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+	* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 	uint32_t GetProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() void *pvBuffer, uint32_t unBufferSize, PropertyTypeTag_t *punTag, ETrackedPropertyError *pError = 0L );
 
 
 	/** Returns a string property. If the device index is not valid or the property is not a string type this function will
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+	* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 	uint32_t GetStringProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, ETrackedPropertyError *pError = 0L );
 
 	/** Returns a string property as a std::string. If the device index is not valid or the property is not a string type this function will
@@ -2981,7 +3000,7 @@ inline ETrackedPropertyError CVRPropertyHelpers::SetProperty( PropertyContainerH
 
 /** Returns a string property. If the device index is not valid or the property is not a string type this function will
 * return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 inline uint32_t CVRPropertyHelpers::GetStringProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, ETrackedPropertyError *pError )
 {
 	PropertyTypeTag_t unTag;
@@ -3575,7 +3594,7 @@ class IVRDriverManager
 public:
 	virtual uint32_t GetDriverCount() const = 0;
 
-	/** Returns the length of the number of bytes necessary to hold this string including the trailing null. */
+	/** Returns the length of the number of bytes necessary to hold this string including the trailing nullptr. */
 	virtual uint32_t GetDriverName( vr::DriverId_t nDriver, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize ) = 0;
 
 	virtual DriverHandle_t GetDriverHandle( const char *pchDriverName ) = 0;
