@@ -64,7 +64,7 @@ void USteamVRInputDeviceFunctionLibrary::PlaySteamVR_HapticFeedback(ESteamVRHand
 			ActiveSkeletalHand = SteamVRInputDevice->VRSkeletalHandleLeft;
 			VRInput()->TriggerHapticVibrationAction(SteamVRInputDevice->VRVibrationLeft, StartSecondsFromNow, DurationSeconds, Frequency, Amplitude, k_ulInvalidInputValueHandle);
 		}
-		else if (Hand == ESteamVRHand::VR_Right && SteamVRInputDevice->VRVibrationLeft != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerRightPresent && SteamVRInputDevice->VRSkeletalHandleRight != k_ulInvalidActionHandle)
+		else if (Hand == ESteamVRHand::VR_Right && SteamVRInputDevice->VRVibrationRight != k_ulInvalidActionHandle && SteamVRInputDevice->bIsSkeletalControllerRightPresent && SteamVRInputDevice->VRSkeletalHandleRight != k_ulInvalidActionHandle)
 		{
 			if (SteamVRInputDevice->VRVibrationRight == k_ulInvalidActionHandle)
 			{
@@ -374,7 +374,7 @@ void USteamVRInputDeviceFunctionLibrary::FindSteamVR_Action(FName ActionName, bo
 	TArray<FSteamVRActionSet> SteamVRActionSets;
 	GetSteamVR_ActionSetArray(SteamVRActionSets);
 
-	// Find Action
+	// Find Action Set
 	for (FSteamVRActionSet SteamVRDefinedActionSet : SteamVRActionSets)
 	{
 		if (SteamVRDefinedActionSet.Path.Equals(InActionSet, ESearchCase::IgnoreCase))
@@ -502,7 +502,7 @@ void USteamVRInputDeviceFunctionLibrary::ShowSteamVR_ActionOrigin(FSteamVRAction
 			ActiveActionSets[0].ulActionSet = SteamVRActionSet.Handle;
 			VRInput()->ShowBindingsForActionSet(ActiveActionSets, sizeof(ActiveActionSets[0]), 1, SteamVRAction.ActiveOrigin);
 
-			UE_LOG(LogTemp, Warning, TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName);
+			//UE_LOG(LogTemp, Warning, TEXT("Action [%s] triggered from Device [%i][%s] at Component [%s]"), *SteamVRAction.Name.ToString(), OriginInfo.TrackedDeviceIndex, *OriginInfo.TrackedDeviceModel, *OriginInfo.RenderModelComponentName);
 		}
 	}
 }
@@ -732,6 +732,53 @@ float USteamVRInputDeviceFunctionLibrary::GetUserIPD()
 	}
 
 	return 0.f;
+}
+
+void USteamVRInputDeviceFunctionLibrary::ShowBindingsUI(EHand Hand, FName ActionSet /*= FName("main")*/, bool bShowInVR /*= true*/)
+{
+	FSteamVRInputDevice* SteamVRInputDevice = GetSteamVRInputDevice();
+	if (SteamVRInputDevice && VRSystem() && VRInput())
+	{
+		// Get current SteamVR Action Sets
+		FString InActionSet = TEXT("/actions/") + ActionSet.ToString();
+		TArray<FSteamVRActionSet> SteamVRActionSets;
+		GetSteamVR_ActionSetArray(SteamVRActionSets);
+
+		// Find Action Set
+		FSteamVRActionSet FoundActionSet;
+		bool bActionSetFound = false;
+		for (FSteamVRActionSet SteamVRDefinedActionSet : SteamVRActionSets)
+		{
+			if (SteamVRDefinedActionSet.Path.Equals(InActionSet, ESearchCase::IgnoreCase))
+			{
+				FoundActionSet = SteamVRDefinedActionSet;
+				bActionSetFound = true;
+				break;
+			}
+		}
+
+		// Set selected hand
+		VRActionHandle_t SelectedHand;
+		switch (Hand)
+		{
+			case EHand::VR_RightHand:
+				SelectedHand = SteamVRInputDevice->VRControllerHandleRight;
+				break;
+		
+			default:
+				SelectedHand = SteamVRInputDevice->VRControllerHandleLeft;
+				break;
+		}
+
+		if (bActionSetFound)
+		{
+			VRInput()->OpenBindingUI(nullptr, FoundActionSet.Handle, SelectedHand, !bShowInVR);	
+		}
+		else
+		{
+			VRInput()->OpenBindingUI(nullptr, k_ulInvalidActionSetHandle, SelectedHand, !bShowInVR);
+		}
+	}
 }
 
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
