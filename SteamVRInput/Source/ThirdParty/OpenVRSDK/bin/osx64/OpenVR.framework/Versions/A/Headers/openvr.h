@@ -847,7 +847,7 @@ struct VREvent_t
 * This mesh draws on all the pixels that will be hidden after distortion. 
 *
 * If the HMD does not provide a visible area mesh pVertexData will be
-* NULL and unTriangleCount will be 0. */
+* nullptr and unTriangleCount will be 0. */
 struct HiddenAreaMesh_t
 {
 	const HmdVector2_t *pVertexData;
@@ -1419,7 +1419,7 @@ public:
 
 	/** Returns a string property. If the device index is not valid or the property is not a string type this function will 
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+	* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 	virtual uint32_t GetStringTrackedDeviceProperty( vr::TrackedDeviceIndex_t unDeviceIndex, ETrackedDeviceProperty prop, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, ETrackedPropertyError *pError = 0L ) = 0;
 
 	/** returns a string that corresponds with the specified property error. The string will be the name 
@@ -1448,7 +1448,7 @@ public:
 	// ------------------------------------
 
 	/** Returns the hidden area mesh for the current HMD. The pixels covered by this mesh will never be seen by the user after the lens distortion is
-	* applied based on visibility to the panels. If this HMD does not have a hidden area mesh, the vertex data and count will be NULL and 0 respectively.
+	* applied based on visibility to the panels. If this HMD does not have a hidden area mesh, the vertex data and count will be nullptr and 0 respectively.
 	* This mesh is meant to be rendered into the stencil buffer (or into the depth buffer setting nearz) before rendering each eye's view. 
 	* This will improve performance by letting the GPU early-reject pixels the user will never see before running the pixel shader.
 	* NOTE: Render this mesh with backface culling disabled since the winding order of the vertices can be different per-HMD or per-eye.
@@ -1498,7 +1498,7 @@ public:
 
 	/** Sends a request to the driver for the specified device and returns the response. The maximum response size is 32k,
 	* but this method can be called with a smaller buffer. If the response exceeds the size of the buffer, it is truncated. 
-	* The size of the response including its terminating null is returned. */
+	* The size of the response including its terminating nullptr is returned. */
 	virtual uint32_t DriverDebugRequest( vr::TrackedDeviceIndex_t unDeviceIndex, const char *pchRequest, char *pchResponseBuffer, uint32_t unResponseBufferSize ) = 0;
 
 	// ------------------------------------
@@ -1732,7 +1732,7 @@ namespace vr
 		/** Starts a subprocess within the calling application. This
 		* suppresses all application transition UI and automatically identifies the new executable 
 		* as part of the same application. On success the calling process should exit immediately. 
-		* If working directory is NULL or "" the directory portion of the binary path will be 
+		* If working directory is nullptr or "" the directory portion of the binary path will be 
 		* the working directory. */
 		virtual EVRApplicationError LaunchInternalProcess( const char *pchBinaryPath, const char *pchArguments, const char *pchWorkingDirectory ) = 0;
 
@@ -1846,18 +1846,18 @@ namespace vr
 	static const char * const k_pch_Lighthouse_DBHistory_Bool = "dbhistory";
 
 	//-----------------------------------------------------------------------------
-	// null keys
-	static const char * const k_pch_Null_Section = "driver_null";
-	static const char * const k_pch_Null_SerialNumber_String = "serialNumber";
-	static const char * const k_pch_Null_ModelNumber_String = "modelNumber";
-	static const char * const k_pch_Null_WindowX_Int32 = "windowX";
-	static const char * const k_pch_Null_WindowY_Int32 = "windowY";
-	static const char * const k_pch_Null_WindowWidth_Int32 = "windowWidth";
-	static const char * const k_pch_Null_WindowHeight_Int32 = "windowHeight";
-	static const char * const k_pch_Null_RenderWidth_Int32 = "renderWidth";
-	static const char * const k_pch_Null_RenderHeight_Int32 = "renderHeight";
-	static const char * const k_pch_Null_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
-	static const char * const k_pch_Null_DisplayFrequency_Float = "displayFrequency";
+	// nullptr keys
+	static const char * const k_pch_nullptr_Section = "driver_nullptr";
+	static const char * const k_pch_nullptr_SerialNumber_String = "serialNumber";
+	static const char * const k_pch_nullptr_ModelNumber_String = "modelNumber";
+	static const char * const k_pch_nullptr_WindowX_Int32 = "windowX";
+	static const char * const k_pch_nullptr_WindowY_Int32 = "windowY";
+	static const char * const k_pch_nullptr_WindowWidth_Int32 = "windowWidth";
+	static const char * const k_pch_nullptr_WindowHeight_Int32 = "windowHeight";
+	static const char * const k_pch_nullptr_RenderWidth_Int32 = "renderWidth";
+	static const char * const k_pch_nullptr_RenderHeight_Int32 = "renderHeight";
+	static const char * const k_pch_nullptr_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
+	static const char * const k_pch_nullptr_DisplayFrequency_Float = "displayFrequency";
 
 	//-----------------------------------------------------------------------------
 	// user interface keys
@@ -2070,11 +2070,11 @@ public:
 	* Height of every corner is 0Y (on the floor). **/
 	virtual bool GetWorkingPlayAreaRect( HmdQuad_t *rect ) = 0;
 
-	/** Returns the number of Quads if the buffer points to null. Otherwise it returns Quads 
+	/** Returns the number of Quads if the buffer points to nullptr. Otherwise it returns Quads 
 	* into the buffer up to the max specified from the working copy. */
 	virtual bool GetWorkingCollisionBoundsInfo( VR_OUT_ARRAY_COUNT(punQuadsCount) HmdQuad_t *pQuadsBuffer, uint32_t* punQuadsCount ) = 0;
 
-	/** Returns the number of Quads if the buffer points to null. Otherwise it returns Quads 
+	/** Returns the number of Quads if the buffer points to nullptr. Otherwise it returns Quads 
 	* into the buffer up to the max specified. */
 	virtual bool GetLiveCollisionBoundsInfo( VR_OUT_ARRAY_COUNT(punQuadsCount) HmdQuad_t *pQuadsBuffer, uint32_t* punQuadsCount ) = 0;
 
@@ -2249,10 +2249,10 @@ public:
 
 	/** Interface for accessing last set of poses returned by WaitGetPoses one at a time.
 	* Returns VRCompositorError_IndexOutOfRange if unDeviceIndex not less than k_unMaxTrackedDeviceCount otherwise VRCompositorError_None.
-	* It is okay to pass NULL for either pose if you only want one of the values. */
+	* It is okay to pass nullptr for either pose if you only want one of the values. */
 	virtual EVRCompositorError GetLastPoseForTrackedDeviceIndex( TrackedDeviceIndex_t unDeviceIndex, TrackedDevicePose_t *pOutputPose, TrackedDevicePose_t *pOutputGamePose ) = 0;
 
-	/** Updated scene texture to display. If pBounds is NULL the entire texture will be used.  If called from an OpenGL app, consider adding a glFlush after
+	/** Updated scene texture to display. If pBounds is nullptr the entire texture will be used.  If called from an OpenGL app, consider adding a glFlush after
 	* Submitting both frames to signal the driver to start processing, otherwise it may wait until the command buffer fills up, causing the app to miss frames.
 	*
 	* OpenGL dirty state:
@@ -2378,12 +2378,12 @@ public:
 
 	/** [Vulkan Only]
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null.  The string will be a space separated list of-required instance extensions to enable in VkCreateInstance */
+	* nullptr.  The string will be a space separated list of-required instance extensions to enable in VkCreateInstance */
 	virtual uint32_t GetVulkanInstanceExtensionsRequired( VR_OUT_STRING() char *pchValue, uint32_t unBufferSize ) = 0;
 
 	/** [Vulkan only]
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null.  The string will be a space separated list of required device extensions to enable in VkCreateDevice */
+	* nullptr.  The string will be a space separated list of required device extensions to enable in VkCreateDevice */
 	virtual uint32_t GetVulkanDeviceExtensionsRequired( VkPhysicalDevice_T *pPhysicalDevice, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize ) = 0;
 
 	/** [ Vulkan/D3D12 Only ]
@@ -2496,7 +2496,7 @@ public:
 	/** Create a notification and enqueue it to be shown to the user.
 	* An overlay handle is required to create a notification, as otherwise it would be impossible for a user to act on it.
 	* To create a two-line notification, use a line break ('\n') to split the text into two lines.
-	* The pImage argument may be NULL, in which case the specified overlay's icon will be used instead. */
+	* The pImage argument may be nullptr, in which case the specified overlay's icon will be used instead. */
 	virtual EVRNotificationError CreateNotification( VROverlayHandle_t ulOverlayHandle, uint64_t ulUserValue, EVRNotificationType type, const char *pchText, EVRNotificationStyle style, const NotificationBitmap_t *pImage, /* out */ VRNotificationId *pNotificationId ) = 0;
 
 	/** Destroy a notification, hiding it first if it currently shown to the user. */
@@ -2514,10 +2514,10 @@ static const char * const IVRNotifications_Version = "IVRNotifications_002";
 namespace vr
 {
 
-	/** The maximum length of an overlay key in bytes, counting the terminating null character. */
+	/** The maximum length of an overlay key in bytes, counting the terminating nullptr character. */
 	static const uint32_t k_unVROverlayMaxKeyLength = 128;
 
-	/** The maximum length of an overlay name in bytes, counting the terminating null character. */
+	/** The maximum length of an overlay name in bytes, counting the terminating nullptr character. */
 	static const uint32_t k_unVROverlayMaxNameLength = 128;
 
 	/** The maximum number of overlays that can exist in the system at one time. */
@@ -2703,11 +2703,11 @@ namespace vr
 		virtual vr::VROverlayHandle_t GetHighQualityOverlay() = 0;
 
 		/** Fills the provided buffer with the string key of the overlay. Returns the size of buffer required to store the key, including
-		* the terminating null character. k_unVROverlayMaxKeyLength will be enough bytes to fit the string. */
+		* the terminating nullptr character. k_unVROverlayMaxKeyLength will be enough bytes to fit the string. */
 		virtual uint32_t GetOverlayKey( VROverlayHandle_t ulOverlayHandle, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, EVROverlayError *pError = 0L ) = 0;
 
 		/** Fills the provided buffer with the friendly name of the overlay. Returns the size of buffer required to store the key, including
-		* the terminating null character. k_unVROverlayMaxNameLength will be enough bytes to fit the string. */
+		* the terminating nullptr character. k_unVROverlayMaxNameLength will be enough bytes to fit the string. */
 		virtual uint32_t GetOverlayName( VROverlayHandle_t ulOverlayHandle, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, EVROverlayError *pError = 0L ) = 0;
 
 		/** set the name to use for this overlay */
@@ -2800,7 +2800,7 @@ namespace vr
 		/** Gets render model to draw behind this overlay */
 		virtual uint32_t GetOverlayRenderModel( vr::VROverlayHandle_t ulOverlayHandle, char *pchValue, uint32_t unBufferSize, HmdColor_t *pColor, vr::EVROverlayError *pError ) = 0;
 
-		/** Sets render model to draw behind this overlay and the vertex color to use, pass null for pColor to match the overlays vertex color. 
+		/** Sets render model to draw behind this overlay and the vertex color to use, pass nullptr for pColor to match the overlays vertex color. 
 			The model is scaled by the same amount as the overlay, with a default of 1m. */
 		virtual vr::EVROverlayError SetOverlayRenderModel( vr::VROverlayHandle_t ulOverlayHandle, const char *pchRenderModel, const HmdColor_t *pColor ) = 0;
 
@@ -3132,14 +3132,14 @@ public:
 	virtual EVRRenderModelError LoadRenderModel_Async( const char *pchRenderModelName, RenderModel_t **ppRenderModel ) = 0;
 
 	/** Frees a previously returned render model
-	*   It is safe to call this on a null ptr. */
+	*   It is safe to call this on a nullptr ptr. */
 	virtual void FreeRenderModel( RenderModel_t *pRenderModel ) = 0;
 
 	/** Loads and returns a texture for use in the application. */
 	virtual EVRRenderModelError LoadTexture_Async( TextureID_t textureId, RenderModel_TextureMap_t **ppTexture ) = 0;
 
 	/** Frees a previously returned texture
-	*   It is safe to call this on a null ptr. */
+	*   It is safe to call this on a nullptr ptr. */
 	virtual void FreeTexture( RenderModel_TextureMap_t *pTexture ) = 0;
 
 	/** Creates a D3D11 texture and loads data into it. */
@@ -3272,7 +3272,7 @@ public:
 	virtual vr::EVRTrackedCameraError ReleaseVideoStreamingService( vr::TrackedCameraHandle_t hTrackedCamera ) = 0;
 
 	/** Copies the image frame into a caller's provided buffer. The image data is currently provided as RGBA data, 4 bytes per pixel.
-	* A caller can provide null for the framebuffer or frameheader if not desired. Requesting the frame header first, followed by the frame buffer allows
+	* A caller can provide nullptr for the framebuffer or frameheader if not desired. Requesting the frame header first, followed by the frame buffer allows
 	* the caller to determine if the frame as advanced per the frame header sequence. 
 	* If there is no frame available yet, due to initial camera spinup or re-activation, the error will be VRTrackedCameraError_NoFrameAvailable.
 	* Ideally a caller should be polling at ~16ms intervals */
@@ -3441,7 +3441,7 @@ class IVRDriverManager
 public:
 	virtual uint32_t GetDriverCount() const = 0;
 
-	/** Returns the length of the number of bytes necessary to hold this string including the trailing null. */
+	/** Returns the length of the number of bytes necessary to hold this string including the trailing nullptr. */
 	virtual uint32_t GetDriverName( vr::DriverId_t nDriver, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize ) = 0;
 };
 
