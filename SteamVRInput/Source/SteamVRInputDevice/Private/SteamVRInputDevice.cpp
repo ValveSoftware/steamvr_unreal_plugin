@@ -987,7 +987,7 @@ void FSteamVRInputDevice::GetControllerFidelity()
 				return;
 			}
 
-			VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &LeftControllerFidelity);
+			InputError = VRInput()->GetSkeletalTrackingLevel(VRSkeletalHandleLeft, &LeftControllerFidelity);
 
 			if (InputError != VRInputError_None)
 			{
@@ -1156,10 +1156,7 @@ void FSteamVRInputDevice::InitControllerMappings()
 	{
 		for (unsigned int hand = 0; hand < k_unMaxTrackedDeviceCount; ++hand)
 		{
-			if (DeviceToControllerMap[id] < SteamVRInputDeviceConstants::MaxUnrealControllers && hand < k_unMaxTrackedDeviceCount)
-			{
-				UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][hand] = INDEX_NONE;
-			}
+			UnrealControllerIdAndHandToDeviceIdMap[DeviceToControllerMap[id]][hand] = INDEX_NONE;
 		}
 	}
 
