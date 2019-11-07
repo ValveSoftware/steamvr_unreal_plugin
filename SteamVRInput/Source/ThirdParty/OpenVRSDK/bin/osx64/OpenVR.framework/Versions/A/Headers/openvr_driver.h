@@ -847,7 +847,7 @@ struct VREvent_t
 * This mesh draws on all the pixels that will be hidden after distortion. 
 *
 * If the HMD does not provide a visible area mesh pVertexData will be
-* NULL and unTriangleCount will be 0. */
+* nullptr and unTriangleCount will be 0. */
 struct HiddenAreaMesh_t
 {
 	const HmdVector2_t *pVertexData;
@@ -1429,18 +1429,18 @@ namespace vr
 	static const char * const k_pch_Lighthouse_DBHistory_Bool = "dbhistory";
 
 	//-----------------------------------------------------------------------------
-	// null keys
-	static const char * const k_pch_Null_Section = "driver_null";
-	static const char * const k_pch_Null_SerialNumber_String = "serialNumber";
-	static const char * const k_pch_Null_ModelNumber_String = "modelNumber";
-	static const char * const k_pch_Null_WindowX_Int32 = "windowX";
-	static const char * const k_pch_Null_WindowY_Int32 = "windowY";
-	static const char * const k_pch_Null_WindowWidth_Int32 = "windowWidth";
-	static const char * const k_pch_Null_WindowHeight_Int32 = "windowHeight";
-	static const char * const k_pch_Null_RenderWidth_Int32 = "renderWidth";
-	static const char * const k_pch_Null_RenderHeight_Int32 = "renderHeight";
-	static const char * const k_pch_Null_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
-	static const char * const k_pch_Null_DisplayFrequency_Float = "displayFrequency";
+	// nullptr keys
+	static const char * const k_pch_nullptr_Section = "driver_nullptr";
+	static const char * const k_pch_nullptr_SerialNumber_String = "serialNumber";
+	static const char * const k_pch_nullptr_ModelNumber_String = "modelNumber";
+	static const char * const k_pch_nullptr_WindowX_Int32 = "windowX";
+	static const char * const k_pch_nullptr_WindowY_Int32 = "windowY";
+	static const char * const k_pch_nullptr_WindowWidth_Int32 = "windowWidth";
+	static const char * const k_pch_nullptr_WindowHeight_Int32 = "windowHeight";
+	static const char * const k_pch_nullptr_RenderWidth_Int32 = "renderWidth";
+	static const char * const k_pch_nullptr_RenderHeight_Int32 = "renderHeight";
+	static const char * const k_pch_nullptr_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
+	static const char * const k_pch_nullptr_DisplayFrequency_Float = "displayFrequency";
 
 	//-----------------------------------------------------------------------------
 	// user interface keys
@@ -1641,13 +1641,13 @@ public:
 	/** Handles a request from the system to put this device into standby mode. What that means is defined per-device. */
 	virtual void EnterStandby() = 0;
 
-	/** Requests a component interface of the driver for device-specific functionality. The driver should return NULL
+	/** Requests a component interface of the driver for device-specific functionality. The driver should return nullptr
 	* if the requested interface or version is not supported. */
 	virtual void *GetComponent( const char *pchComponentNameAndVersion ) = 0;
 
 	/** A VR Client has made this debug request of the driver. The set of valid requests is entirely
 	* up to the driver and the client to figure out, as is the format of the response. Responses that
-	* exceed the length of the supplied buffer should be truncated and null terminated */
+	* exceed the length of the supplied buffer should be truncated and nullptr terminated */
 	virtual void DebugRequest( const char *pchRequest, char *pchResponseBuffer, uint32_t unResponseBufferSize ) = 0;
 
 	// ------------------------------------
@@ -1839,7 +1839,7 @@ typedef PropertyContainerHandle_t DriverHandle_t;
 class IVRDriverContext
 {
 public:
-	/** Returns the requested interface. If the interface was not available it will return NULL and fill
+	/** Returns the requested interface. If the interface was not available it will return nullptr and fill
 	* out the error. */
 	virtual void *GetGenericInterface( const char *pchInterfaceVersion, EVRInitError *peError = nullptr ) = 0;
 
@@ -1855,7 +1855,7 @@ public:
 	/** initializes the driver. This will be called before any other methods are called.
 	* If Init returns anything other than VRInitError_None the driver DLL will be unloaded.
 	*
-	* pDriverHost will never be NULL, and will always be a pointer to a IServerDriverHost interface
+	* pDriverHost will never be nullptr, and will always be a pointer to a IServerDriverHost interface
 	*
 	* pchUserDriverConfigDir - The absolute path of the directory where the driver should store user
 	*	config files.
@@ -1978,13 +1978,13 @@ public:
 
 	/** Returns a single typed property. If the device index is not valid or the property is not a string type this function will
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+	* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 	uint32_t GetProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() void *pvBuffer, uint32_t unBufferSize, PropertyTypeTag_t *punTag, ETrackedPropertyError *pError = 0L );
 
 
 	/** Returns a string property. If the device index is not valid or the property is not a string type this function will
 	* return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-	* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+	* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 	uint32_t GetStringProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, ETrackedPropertyError *pError = 0L );
 
 	/** Returns a string property as a std::string. If the device index is not valid or the property is not a string type this function will
@@ -2061,7 +2061,7 @@ inline ETrackedPropertyError CVRPropertyHelpers::SetProperty( PropertyContainerH
 
 /** Returns a string property. If the device index is not valid or the property is not a string type this function will
 * return 0. Otherwise it returns the length of the number of bytes necessary to hold this string including the trailing
-* null. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
+* nullptr. Strings will always fit in buffers of k_unMaxPropertyStringSize characters. */
 inline uint32_t CVRPropertyHelpers::GetStringProperty( PropertyContainerHandle_t ulContainerHandle, ETrackedDeviceProperty prop, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize, ETrackedPropertyError *pError )
 {
 	PropertyTypeTag_t unTag;
@@ -2412,7 +2412,7 @@ namespace vr
 
 	static const char *IVRVirtualDisplay_Version = "IVRVirtualDisplay_001";
 
-	/** Returns the current IVRVirtualDisplay pointer or NULL the interface could not be found. */
+	/** Returns the current IVRVirtualDisplay pointer or nullptr the interface could not be found. */
 	VR_INTERFACE vr::IVRVirtualDisplay *VR_CALLTYPE VRVirtualDisplay();
 }
 
@@ -2452,7 +2452,7 @@ class IVRDriverManager
 public:
 	virtual uint32_t GetDriverCount() const = 0;
 
-	/** Returns the length of the number of bytes necessary to hold this string including the trailing null. */
+	/** Returns the length of the number of bytes necessary to hold this string including the trailing nullptr. */
 	virtual uint32_t GetDriverName( vr::DriverId_t nDriver, VR_OUT_STRING() char *pchValue, uint32_t unBufferSize ) = 0;
 };
 
