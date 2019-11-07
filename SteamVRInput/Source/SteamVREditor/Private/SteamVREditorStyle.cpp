@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "SteamVREditor.h"
 #include "Runtime/Projects/Public/Interfaces/IPluginManager.h"
 
-TSharedPtr< FSlateStyleSet > FSteamVREditorStyle::StyleInstance = NULL;
+TSharedPtr< FSlateStyleSet > FSteamVREditorStyle::StyleInstance = nullptr;
 
 void FSteamVREditorStyle::Initialize()
 {
