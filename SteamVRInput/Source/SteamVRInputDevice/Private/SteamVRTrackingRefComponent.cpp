@@ -71,7 +71,7 @@ bool USteamVRTrackingReferences::ShowTrackingReferences(UStaticMesh* TrackingRef
 				//UE_LOG(LogSteamVRTrackingRefComponent, Warning, TEXT("[TRACKING REFERENCE] Found the following tracking device: [%i] %s"), id, *stringCache);
 
 				TrackedDevicePose_t TrackedDevicePose = { 0 };
-				VRCompositor()->GetLastPoseForTrackedDeviceIndex(id, &TrackedDevicePose, NULL);
+				VRCompositor()->GetLastPoseForTrackedDeviceIndex(id, &TrackedDevicePose, nullptr);
 
 				// Get SteamVR Transform Matrix for this tracking reference
 				HmdMatrix34_t Matrix = TrackedDevicePose.mDeviceToAbsoluteTracking;
