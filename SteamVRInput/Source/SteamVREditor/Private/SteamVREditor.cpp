@@ -132,7 +132,7 @@ void FSteamVREditorModule::ReloadActionManifest()
 
 void FSteamVREditorModule::LaunchBindingsURL()
 {
-	USteamVRInputDeviceFunctionLibrary::LaunchBindingsURL();
+	USteamVRInputDeviceFunctionLibrary::ShowBindingsUI(EHand::VR_LeftHand, FName("main"), false);
 }
 
 void FSteamVREditorModule::AddSampleInputs()
