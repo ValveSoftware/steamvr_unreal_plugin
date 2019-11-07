@@ -623,6 +623,14 @@ public:
 	static float GetUserIPD();
 
 	/**
+	* Shows the Bindings dashboard
+	* @param ActionSet - The name of the action set to open the bindings to, empty will open the root of the binding page 
+	* @param bShowInVR - Whether to show the bindings UI in VR, false will show the UI in Desktop
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static void ShowBindingsUI(EHand Hand, FName ActionSet = FName("main"), bool bShowInVR = true);
+
+	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
 	* @param SteamBoneTransform - The SteamVR Bone Transform value to get the UE coordinates for
 	*/
