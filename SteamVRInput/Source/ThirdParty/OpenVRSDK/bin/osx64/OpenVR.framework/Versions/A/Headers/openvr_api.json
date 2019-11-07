@@ -955,27 +955,27 @@
 ,{
 	"constname": "k_pch_Lighthouse_DBHistory_Bool","consttype": "const char *const", "constval": "dbhistory"}
 ,{
-	"constname": "k_pch_Null_Section","consttype": "const char *const", "constval": "driver_null"}
+	"constname": "k_pch_nullptr_Section","consttype": "const char *const", "constval": "driver_nullptr"}
 ,{
-	"constname": "k_pch_Null_SerialNumber_String","consttype": "const char *const", "constval": "serialNumber"}
+	"constname": "k_pch_nullptr_SerialNumber_String","consttype": "const char *const", "constval": "serialNumber"}
 ,{
-	"constname": "k_pch_Null_ModelNumber_String","consttype": "const char *const", "constval": "modelNumber"}
+	"constname": "k_pch_nullptr_ModelNumber_String","consttype": "const char *const", "constval": "modelNumber"}
 ,{
-	"constname": "k_pch_Null_WindowX_Int32","consttype": "const char *const", "constval": "windowX"}
+	"constname": "k_pch_nullptr_WindowX_Int32","consttype": "const char *const", "constval": "windowX"}
 ,{
-	"constname": "k_pch_Null_WindowY_Int32","consttype": "const char *const", "constval": "windowY"}
+	"constname": "k_pch_nullptr_WindowY_Int32","consttype": "const char *const", "constval": "windowY"}
 ,{
-	"constname": "k_pch_Null_WindowWidth_Int32","consttype": "const char *const", "constval": "windowWidth"}
+	"constname": "k_pch_nullptr_WindowWidth_Int32","consttype": "const char *const", "constval": "windowWidth"}
 ,{
-	"constname": "k_pch_Null_WindowHeight_Int32","consttype": "const char *const", "constval": "windowHeight"}
+	"constname": "k_pch_nullptr_WindowHeight_Int32","consttype": "const char *const", "constval": "windowHeight"}
 ,{
-	"constname": "k_pch_Null_RenderWidth_Int32","consttype": "const char *const", "constval": "renderWidth"}
+	"constname": "k_pch_nullptr_RenderWidth_Int32","consttype": "const char *const", "constval": "renderWidth"}
 ,{
-	"constname": "k_pch_Null_RenderHeight_Int32","consttype": "const char *const", "constval": "renderHeight"}
+	"constname": "k_pch_nullptr_RenderHeight_Int32","consttype": "const char *const", "constval": "renderHeight"}
 ,{
-	"constname": "k_pch_Null_SecondsFromVsyncToPhotons_Float","consttype": "const char *const", "constval": "secondsFromVsyncToPhotons"}
+	"constname": "k_pch_nullptr_SecondsFromVsyncToPhotons_Float","consttype": "const char *const", "constval": "secondsFromVsyncToPhotons"}
 ,{
-	"constname": "k_pch_Null_DisplayFrequency_Float","consttype": "const char *const", "constval": "displayFrequency"}
+	"constname": "k_pch_nullptr_DisplayFrequency_Float","consttype": "const char *const", "constval": "displayFrequency"}
 ,{
 	"constname": "k_pch_UserInterface_Section","consttype": "const char *const", "constval": "userinterface"}
 ,{

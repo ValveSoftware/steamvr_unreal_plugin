@@ -1688,7 +1688,7 @@ public class CVRSystem
 		{
 			PollNextEventUnion u;
 			VREvent_t_Packed event_packed = new VREvent_t_Packed();
-			u.pPollNextEventPacked = null;
+			u.pPollNextEventPacked = nullptr;
 			u.pPollNextEvent = FnTable.PollNextEvent;
 			bool packed_result = u.pPollNextEventPacked(ref event_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t_Packed)));
 
@@ -1734,7 +1734,7 @@ public class CVRSystem
 		{
 			GetControllerStateUnion u;
 			VRControllerState_t_Packed state_packed = new VRControllerState_t_Packed(pControllerState);
-			u.pGetControllerStatePacked = null;
+			u.pGetControllerStatePacked = nullptr;
 			u.pGetControllerState = FnTable.GetControllerState;
 			bool packed_result = u.pGetControllerStatePacked(unControllerDeviceIndex,ref state_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t_Packed)));
 
@@ -1765,7 +1765,7 @@ public class CVRSystem
 		{
 			GetControllerStateWithPoseUnion u;
 			VRControllerState_t_Packed state_packed = new VRControllerState_t_Packed(pControllerState);
-			u.pGetControllerStateWithPosePacked = null;
+			u.pGetControllerStateWithPosePacked = nullptr;
 			u.pGetControllerStateWithPose = FnTable.GetControllerStateWithPose;
 			bool packed_result = u.pGetControllerStateWithPosePacked(eOrigin,unControllerDeviceIndex,ref state_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t_Packed)),ref pTrackedDevicePose);
 
@@ -2179,7 +2179,7 @@ public class CVRChaperoneSetup
 	public bool GetWorkingCollisionBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
 	{
 		uint punQuadsCount = 0;
-		bool result = FnTable.GetWorkingCollisionBoundsInfo(null,ref punQuadsCount);
+		bool result = FnTable.GetWorkingCollisionBoundsInfo(nullptr,ref punQuadsCount);
 		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
 		result = FnTable.GetWorkingCollisionBoundsInfo(pQuadsBuffer,ref punQuadsCount);
 		return result;
@@ -2187,7 +2187,7 @@ public class CVRChaperoneSetup
 	public bool GetLiveCollisionBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
 	{
 		uint punQuadsCount = 0;
-		bool result = FnTable.GetLiveCollisionBoundsInfo(null,ref punQuadsCount);
+		bool result = FnTable.GetLiveCollisionBoundsInfo(nullptr,ref punQuadsCount);
 		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
 		result = FnTable.GetLiveCollisionBoundsInfo(pQuadsBuffer,ref punQuadsCount);
 		return result;
@@ -2234,7 +2234,7 @@ public class CVRChaperoneSetup
 	public bool GetLiveCollisionBoundsTagsInfo(out byte [] pTagsBuffer)
 	{
 		uint punTagCount = 0;
-		bool result = FnTable.GetLiveCollisionBoundsTagsInfo(null,ref punTagCount);
+		bool result = FnTable.GetLiveCollisionBoundsTagsInfo(nullptr,ref punTagCount);
 		pTagsBuffer= new byte[punTagCount];
 		result = FnTable.GetLiveCollisionBoundsTagsInfo(pTagsBuffer,ref punTagCount);
 		return result;
@@ -2247,7 +2247,7 @@ public class CVRChaperoneSetup
 	public bool GetLivePhysicalBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
 	{
 		uint punQuadsCount = 0;
-		bool result = FnTable.GetLivePhysicalBoundsInfo(null,ref punQuadsCount);
+		bool result = FnTable.GetLivePhysicalBoundsInfo(nullptr,ref punQuadsCount);
 		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
 		result = FnTable.GetLivePhysicalBoundsInfo(pQuadsBuffer,ref punQuadsCount);
 		return result;
@@ -2741,7 +2741,7 @@ public class CVROverlay
 		{
 			PollNextOverlayEventUnion u;
 			VREvent_t_Packed event_packed = new VREvent_t_Packed();
-			u.pPollNextOverlayEventPacked = null;
+			u.pPollNextOverlayEventPacked = nullptr;
 			u.pPollNextOverlayEvent = FnTable.PollNextOverlayEvent;
 			bool packed_result = u.pPollNextOverlayEventPacked(ulOverlayHandle,ref event_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t_Packed)));
 
@@ -3023,7 +3023,7 @@ public class CVRRenderModels
 		{
 			GetComponentStateUnion u;
 			VRControllerState_t_Packed state_packed = new VRControllerState_t_Packed(pControllerState);
-			u.pGetComponentStatePacked = null;
+			u.pGetComponentStatePacked = nullptr;
 			u.pGetComponentState = FnTable.GetComponentState;
 			bool packed_result = u.pGetComponentStatePacked(pchRenderModelName,pchComponentName,ref state_packed,ref pState,ref pComponentState);
 
@@ -4729,17 +4729,17 @@ public class OpenVR
 	public const string k_pch_Lighthouse_DisambiguationDebug_Int32 = "disambiguationdebug";
 	public const string k_pch_Lighthouse_PrimaryBasestation_Int32 = "primarybasestation";
 	public const string k_pch_Lighthouse_DBHistory_Bool = "dbhistory";
-	public const string k_pch_Null_Section = "driver_null";
-	public const string k_pch_Null_SerialNumber_String = "serialNumber";
-	public const string k_pch_Null_ModelNumber_String = "modelNumber";
-	public const string k_pch_Null_WindowX_Int32 = "windowX";
-	public const string k_pch_Null_WindowY_Int32 = "windowY";
-	public const string k_pch_Null_WindowWidth_Int32 = "windowWidth";
-	public const string k_pch_Null_WindowHeight_Int32 = "windowHeight";
-	public const string k_pch_Null_RenderWidth_Int32 = "renderWidth";
-	public const string k_pch_Null_RenderHeight_Int32 = "renderHeight";
-	public const string k_pch_Null_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
-	public const string k_pch_Null_DisplayFrequency_Float = "displayFrequency";
+	public const string k_pch_nullptr_Section = "driver_nullptr";
+	public const string k_pch_nullptr_SerialNumber_String = "serialNumber";
+	public const string k_pch_nullptr_ModelNumber_String = "modelNumber";
+	public const string k_pch_nullptr_WindowX_Int32 = "windowX";
+	public const string k_pch_nullptr_WindowY_Int32 = "windowY";
+	public const string k_pch_nullptr_WindowWidth_Int32 = "windowWidth";
+	public const string k_pch_nullptr_WindowHeight_Int32 = "windowHeight";
+	public const string k_pch_nullptr_RenderWidth_Int32 = "renderWidth";
+	public const string k_pch_nullptr_RenderHeight_Int32 = "renderHeight";
+	public const string k_pch_nullptr_SecondsFromVsyncToPhotons_Float = "secondsFromVsyncToPhotons";
+	public const string k_pch_nullptr_DisplayFrequency_Float = "displayFrequency";
 	public const string k_pch_UserInterface_Section = "userinterface";
 	public const string k_pch_UserInterface_StatusAlwaysOnTop_Bool = "StatusAlwaysOnTop";
 	public const string k_pch_UserInterface_MinimizeToTray_Bool = "MinimizeToTray";
@@ -4816,17 +4816,17 @@ public class OpenVR
 
 		public void Clear()
 		{
-			m_pVRSystem = null;
-			m_pVRChaperone = null;
-			m_pVRChaperoneSetup = null;
-			m_pVRCompositor = null;
-			m_pVROverlay = null;
-			m_pVRRenderModels = null;
-			m_pVRExtendedDisplay = null;
-			m_pVRSettings = null;
-			m_pVRApplications = null;
-			m_pVRScreenshots = null;
-			m_pVRTrackedCamera = null;
+			m_pVRSystem = nullptr;
+			m_pVRChaperone = nullptr;
+			m_pVRChaperoneSetup = nullptr;
+			m_pVRCompositor = nullptr;
+			m_pVROverlay = nullptr;
+			m_pVRRenderModels = nullptr;
+			m_pVRExtendedDisplay = nullptr;
+			m_pVRSettings = nullptr;
+			m_pVRApplications = nullptr;
+			m_pVRScreenshots = nullptr;
+			m_pVRTrackedCamera = nullptr;
 		}
 
 		void CheckClear()
@@ -4841,7 +4841,7 @@ public class OpenVR
 		public CVRSystem VRSystem()
 		{
 			CheckClear();
-			if (m_pVRSystem == null)
+			if (m_pVRSystem == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRSystem_Version, ref eError);
@@ -4854,7 +4854,7 @@ public class OpenVR
 		public CVRChaperone VRChaperone()
 		{
 			CheckClear();
-			if (m_pVRChaperone == null)
+			if (m_pVRChaperone == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRChaperone_Version, ref eError);
@@ -4867,7 +4867,7 @@ public class OpenVR
 		public CVRChaperoneSetup VRChaperoneSetup()
 		{
 			CheckClear();
-			if (m_pVRChaperoneSetup == null)
+			if (m_pVRChaperoneSetup == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRChaperoneSetup_Version, ref eError);
@@ -4880,7 +4880,7 @@ public class OpenVR
 		public CVRCompositor VRCompositor()
 		{
 			CheckClear();
-			if (m_pVRCompositor == null)
+			if (m_pVRCompositor == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRCompositor_Version, ref eError);
@@ -4893,7 +4893,7 @@ public class OpenVR
 		public CVROverlay VROverlay()
 		{
 			CheckClear();
-			if (m_pVROverlay == null)
+			if (m_pVROverlay == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVROverlay_Version, ref eError);
@@ -4906,7 +4906,7 @@ public class OpenVR
 		public CVRRenderModels VRRenderModels()
 		{
 			CheckClear();
-			if (m_pVRRenderModels == null)
+			if (m_pVRRenderModels == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRRenderModels_Version, ref eError);
@@ -4919,7 +4919,7 @@ public class OpenVR
 		public CVRExtendedDisplay VRExtendedDisplay()
 		{
 			CheckClear();
-			if (m_pVRExtendedDisplay == null)
+			if (m_pVRExtendedDisplay == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRExtendedDisplay_Version, ref eError);
@@ -4932,7 +4932,7 @@ public class OpenVR
 		public CVRSettings VRSettings()
 		{
 			CheckClear();
-			if (m_pVRSettings == null)
+			if (m_pVRSettings == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRSettings_Version, ref eError);
@@ -4945,7 +4945,7 @@ public class OpenVR
 		public CVRApplications VRApplications()
 		{
 			CheckClear();
-			if (m_pVRApplications == null)
+			if (m_pVRApplications == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRApplications_Version, ref eError);
@@ -4958,7 +4958,7 @@ public class OpenVR
 		public CVRScreenshots VRScreenshots()
 		{
 			CheckClear();
-			if (m_pVRScreenshots == null)
+			if (m_pVRScreenshots == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRScreenshots_Version, ref eError);
@@ -4971,7 +4971,7 @@ public class OpenVR
 		public CVRTrackedCamera VRTrackedCamera()
 		{
 			CheckClear();
-			if (m_pVRTrackedCamera == null)
+			if (m_pVRTrackedCamera == nullptr)
 			{
 				var eError = EVRInitError.None;
 				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRTrackedCamera_Version, ref eError);
@@ -4994,12 +4994,12 @@ public class OpenVR
 		private CVRTrackedCamera m_pVRTrackedCamera;
 	};
 
-	private static COpenVRContext _OpenVRInternal_ModuleContext = null;
+	private static COpenVRContext _OpenVRInternal_ModuleContext = nullptr;
 	static COpenVRContext OpenVRInternal_ModuleContext
 	{
 		get
 		{
-			if (_OpenVRInternal_ModuleContext == null)
+			if (_OpenVRInternal_ModuleContext == nullptr)
 				_OpenVRInternal_ModuleContext = new COpenVRContext();
 			return _OpenVRInternal_ModuleContext;
 		}
@@ -5024,14 +5024,14 @@ public class OpenVR
 		OpenVRInternal_ModuleContext.Clear();
 
 		if (peError != EVRInitError.None)
-			return null;
+			return nullptr;
 
 		bool bInterfaceValid = IsInterfaceVersionValid(IVRSystem_Version);
 		if (!bInterfaceValid)
 		{
 			ShutdownInternal();
 			peError = EVRInitError.Init_InterfaceNotFound;
-			return null;
+			return nullptr;
 		}
 
 		return OpenVR.System;
