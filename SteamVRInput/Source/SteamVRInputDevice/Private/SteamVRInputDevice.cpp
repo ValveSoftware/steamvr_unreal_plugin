@@ -3220,7 +3220,6 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		// Get Project Name this plugin is used in
 		uint32 AppProcessId = FPlatformProcess::GetCurrentProcessId();
 		GameFileName = FPaths::GetCleanFilename(FPlatformProcess::GetApplicationName(AppProcessId));
-		GameProjectName = GameFileName;
 		if (GConfig)
 		{
 			GConfig->GetString(
@@ -3239,16 +3238,10 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		}
 
 		// Add engine build number 
-		FString ChangeListNum = FString(TEXT("0000"));
 		FString BuildVersion = FApp::GetBuildVersion();
 		int32 ChangeListIdx = BuildVersion.Find(FString(TEXT("-CL-")));
 
-		if (ChangeListIdx > 0)
-		{
-			int32 ChangeListLen = BuildVersion.Len() - ChangeListIdx;	// Get the length of the changelist number only
-			ChangeListNum = BuildVersion.Right(ChangeListLen);
-		}
-
+		FString ChangeListNum = ChangeListIdx > 0 ? BuildVersion.Right(BuildVersion.Len() - ChangeListIdx) : FString(TEXT("0000"));
 		GameProjectName += ChangeListNum;
 
 #if WITH_EDITOR
