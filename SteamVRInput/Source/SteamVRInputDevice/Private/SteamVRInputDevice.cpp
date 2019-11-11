@@ -3232,11 +3232,24 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 
 		}
 
-		// Check for empty project name
+		// Use uprojectname if empty
 		if (GameProjectName.IsEmpty())
 		{
-			GameProjectName = GameFileName;
+			GameProjectName = FApp::GetProjectName();
 		}
+
+		// Add engine build number 
+		FString ChangeListNum = FString(TEXT("0000"));
+		FString BuildVersion = FApp::GetBuildVersion();
+		int32 ChangeListIdx = BuildVersion.Find(FString(TEXT("CL-")));
+
+		if (ChangeListIdx > 0)
+		{
+			int32 ChangeListLen = BuildVersion.Len() - (ChangeListIdx + 3);	// Get the length of the changelist number only
+			ChangeListNum = BuildVersion.Right(ChangeListLen);
+		}
+
+		GameProjectName += (FString(TEXT("-UE")) + ChangeListNum);
 
 #if WITH_EDITOR
 		if (VRApplications())
