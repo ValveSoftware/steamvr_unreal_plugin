@@ -3287,15 +3287,15 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		// Add engine build number 
 		FString ChangeListNum = FString(TEXT("0000"));
 		FString BuildVersion = FApp::GetBuildVersion();
-		int32 ChangeListIdx = BuildVersion.Find(FString(TEXT("CL-")));
+		int32 ChangeListIdx = BuildVersion.Find(FString(TEXT("-CL-")));
 
 		if (ChangeListIdx > 0)
 		{
-			int32 ChangeListLen = BuildVersion.Len() - (ChangeListIdx + 3);	// Get the length of the changelist number only
+			int32 ChangeListLen = BuildVersion.Len() - ChangeListIdx;	// Get the length of the changelist number only
 			ChangeListNum = BuildVersion.Right(ChangeListLen);
 		}
 
-		GameProjectName += (FString(TEXT("-UE")) + ChangeListNum);
+		GameProjectName += ChangeListNum;
 
 #if WITH_EDITOR
 		if (VRApplications())
