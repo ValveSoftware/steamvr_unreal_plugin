@@ -781,6 +781,28 @@ void USteamVRInputDeviceFunctionLibrary::ShowBindingsUI(EHand Hand, FName Action
 	}
 }
 
+bool USteamVRInputDeviceFunctionLibrary::DeleteUserInputIni(FString& UserInputFile)
+{
+	if (GEngine)
+	{
+		FString PlatformDir = UGameplayStatics::GetPlatformName();
+
+		#if !WITH_EDITOR
+		PlatformDir += FString(TEXT("NoEditor"));
+		#endif
+
+		UserInputFile = FPaths::ProjectUserDir() / "Saved" / "Config" / PlatformDir / "Input.ini";
+		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+		if (PlatformFile.FileExists(*UserInputFile) && PlatformFile.DeleteFile(*UserInputFile))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 FTransform USteamVRInputDeviceFunctionLibrary::GetUETransform(VRBoneTransform_t SteamBoneTransform)
 {
 	FTransform RetTransform;
