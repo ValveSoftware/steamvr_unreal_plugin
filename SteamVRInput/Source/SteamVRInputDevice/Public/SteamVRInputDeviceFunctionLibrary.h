@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Features/IModularFeatures.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformProcess.h"
+#include "Runtime/Core/Public/HAL/PlatformFilemanager.h"
 #include "IMotionController.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -629,6 +630,14 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
 	static void ShowBindingsUI(EHand Hand, FName ActionSet = FName("main"), bool bShowInVR = true);
+
+	/**
+	* Deletes the user's input.ini 
+	* @return UserInputFile - The absolute path to the user's input.ini
+	* @return bool - Whether or not the delete was successful
+	*/
+	UFUNCTION(BlueprintCallable, Category = "SteamVR Input")
+	static bool DeleteUserInputIni(FString& UserInputFile);
 
 	/**
 	* Get the SteamVR Bone Transform value in UE coordinates
