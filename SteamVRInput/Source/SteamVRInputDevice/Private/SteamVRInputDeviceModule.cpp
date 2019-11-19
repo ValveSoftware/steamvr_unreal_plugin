@@ -38,7 +38,13 @@ class FSteamVRInputDeviceModule : public ISteamVRInputDeviceModule
 	/* Creates a new instance of SteamVR Input Controller **/
 	virtual TSharedPtr<class IInputDevice> CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override
 	{
-		return TSharedPtr<class IInputDevice>(new FSteamVRInputDevice(InMessageHandler));
+		TSharedPtr<class FSteamVRInputDevice> SteamVRInputDevice(new FSteamVRInputDevice(InMessageHandler));
+		
+		#if WITH_EDITOR
+		FEditorDelegates::OnActionAxisMappingsChanged.AddSP(SteamVRInputDevice.ToSharedRef(), &FSteamVRInputDevice::OnBindingsChangeHandle);
+		#endif
+
+		return SteamVRInputDevice;
 	}
 
 	virtual void StartupModule() override;
