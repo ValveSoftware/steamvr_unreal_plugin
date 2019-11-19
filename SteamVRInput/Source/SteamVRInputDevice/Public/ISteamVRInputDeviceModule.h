@@ -35,6 +35,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ISteamVRControllerPlugin.h"
 #include "IInputDeviceModule.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#include "Editor/EditorEngine.h"
+#endif
+
 STEAMVRINPUT_API class ISteamVRInputDeviceModule : public IInputDeviceModule
 {
 
