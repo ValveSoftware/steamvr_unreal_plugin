@@ -45,7 +45,7 @@ public class SteamVRInputDevice : ModuleRules
 
         if (UEBuildConfiguration.bBuildEditor == true)
         {
-            DynamicallyLoadedModuleNames.Add("UnrealEd");
+            PublicDependencyModuleNames.Add("UnrealEd");
         }
 
         //AddEngineThirdPartyPrivateStaticDependencies(Target, "OpenVR");
