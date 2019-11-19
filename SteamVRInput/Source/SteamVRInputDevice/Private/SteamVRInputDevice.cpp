@@ -2542,11 +2542,11 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 					}
 					else 
 					{
-						LastEditedBy = LastEditedBy.IsEmpty() ? FString(TEXT("likely SteamVR's Input Dashboard")) : LastEditedBy;
+						LastEditedBy = LastEditedBy.IsEmpty() ? FString(TEXT("SteamVR's Input Dashboard (likely)")) : LastEditedBy;
 						OverwriteResponse = FMessageDialog::Open(EAppMsgType::YesNoYesAllNoAll,
 							FText::Format(LOCTEXT("BindingFileExists", 
-							"{0}'s binding file [{1}] was last modified by [{2}]. \n\nAre you sure you want to OVERWRITE this file? You will lose all your changes."), 
-								FText::FromString(ControllerType.ToUpper()), FText::FromString(BindingFile), FText::FromString(LastEditedBy)));
+							"The binding file {0} for the {1} controller was last modified by {2}. \n\nAre you sure you want to OVERWRITE this file? You will lose all your changes."), 
+								FText::FromString(BindingFile.ToUpper()), FText::FromString(ControllerType.ToUpper()), FText::FromString(LastEditedBy)));
 					}
 				}
 
