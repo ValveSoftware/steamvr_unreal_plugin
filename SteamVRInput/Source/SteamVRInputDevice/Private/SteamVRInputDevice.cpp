@@ -1141,6 +1141,11 @@ void FSteamVRInputDevice::RegenerateControllerBindings()
 	this->GenerateActionManifest(false, true, true, true);
 }
 
+void FSteamVRInputDevice::OnBindingsChangeHandle()
+{
+	this->GenerateActionManifest(true, true, true, true, true);
+}
+
 bool FSteamVRInputDevice::GenerateAppManifest(FString ManifestPath, FString ProjectName, FString& OutAppKey, FString& OutAppManifestPath)
 {
 	// Set SteamVR AppKey
@@ -1240,12 +1245,13 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 	for (auto& SupportedController : InOutControllerTypes)
 	{
 		// If there is no user-defined controller binding or it hasn't been auto-generated yet, generate it
-		if (!SupportedController.bIsGenerated || bDeleteIfExists)
+		if (!SupportedController.bIsGenerated)
 		{
 			// Creating bindings file
 			TSharedRef<FJsonObject> BindingsObject = MakeShareable(new FJsonObject());
 			BindingsObject->SetStringField(TEXT("name"), TEXT("Default bindings for ") + SupportedController.Description);
 			BindingsObject->SetStringField(TEXT("controller_type"), SupportedController.Name.ToString());
+			BindingsObject->SetStringField(TEXT("last_edited_by"), FApp::GetEpicProductIdentifier());
 
 			// Create Action Bindings in JSON Format
 			TArray<TSharedPtr<FJsonValue>> JsonValuesArray;
@@ -1255,7 +1261,7 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			if (!SupportedController.Description.Contains(TEXT("Headset"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 			{
 				FControllerType GenericController = FControllerType(TEXT("MotionController"), TEXT("MotionController"), TEXT("MotionController"));
-				GenerateActionBindings(InInputMapping, JsonValuesArray, SupportedController, true);
+				GenerateActionBindings(InInputMapping, JsonValuesArray, GenericController, true);
 			}
 
 			// Create Action Set
@@ -1471,13 +1477,6 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 			// Let's check if there're any SteamVR specific key that already exists for this action
 			for (FSteamVRInputKeyMapping SteamVRKeyInputMappingInner : SteamVRKeyInputMappings)
 			{
-				// Ensure the hmd proximity key is always generated
-				if (SteamVRKeyInputMappingInner.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR_HMD_Proximity")))
-				{
-					bIsGenericController = false;
-					break;
-				}
-
 				// Check for generic controllers that have steamvr inputs already defined
 				if (SteamVRKeyInputMapping.InputKeyMapping.ActionName.ToString().Equals(SteamVRKeyInputMappingInner.InputKeyMapping.ActionName.ToString())
 					&& SteamVRKeyInputMappingInner.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("SteamVR"))
@@ -1494,7 +1493,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 		{
 			// Check this input mapping is of the correct controller type
 			if (!Controller.KeyEquivalent.Contains(SteamVRKeyInputMapping.ControllerName) 
-				&& !SteamVRKeyInputMapping.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController"))
+				&& (!bIsGenericController && !SteamVRKeyInputMapping.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("MotionController")))
 				&& !SteamVRKeyInputMapping.InputKeyMapping.Key.GetFName().ToString().Contains(TEXT("HMD_Proximity"))
 				)
 			{
@@ -2134,7 +2133,7 @@ void FSteamVRInputDevice::GenerateActionBindings(TArray<FInputMapping> &InInputM
 	}
 }
 
-void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists)
+void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool GenerateBindings, bool RegisterApp, bool DeleteIfExists, bool bRegisterManifestOnly)
 {
 	// Set Action Manifest Path
 	const FString ManifestPath = FPaths::GameConfigDir() / CONTROLLER_BINDING_PATH / ACTION_MANIFEST;
@@ -2473,21 +2472,13 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 #pragma endregion
 
 #pragma region DEFAULT CONTROLLER BINDINGS
-
-#if WITH_EDITOR
-	// If we're running in the editor, build the controller bindings if they don't exist yet
-	if (GenerateBindings)
-	{
-		GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings, DeleteIfExists);
-	}
-#endif
-
 	// Start search for controller bindings files
 	TArray<FString> ControllerBindingFiles;
 	FileManager.FindFiles(ControllerBindingFiles, *ControllerBindingsPath, TEXT("*.json"));
 	UE_LOG(LogSteamVRInputDevice, Log, TEXT("Searching for Controller Bindings files at: %s"), *ControllerBindingsPath);
 
 	// Look for existing controller binding files
+	uint32 OverwriteResponse = EAppReturnType::No;
 	for (FString& BindingFile : ControllerBindingFiles)
 	{
 		// Setup cache
@@ -2509,10 +2500,63 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		// Attempt to find what controller this binding file is for 
 		else if (!JsonObject->TryGetStringField(TEXT("controller_type"), ControllerType) || ControllerType.IsEmpty())
 		{
-			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to determine controller type for this binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
+			if (!BindingFile.Contains("steamvr_manifest"))
+			{
+				UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Unable to determine controller type for this binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
+			}
 		}
 		else
 		{
+			// Set controller generated status (default: true, do not overwrite)
+			bool bIsGenerated = true;
+
+			// Check if we need to delete existing controller bindings
+			if (DeleteIfExists)
+			{
+				// Check if we're doing a granular overwrite
+				if (OverwriteResponse == EAppReturnType::No || OverwriteResponse == EAppReturnType::Yes)
+				{
+					// Get the editor that last modified this controller binding
+					FString LastEditedBy;
+					JsonObject->TryGetStringField(TEXT("last_edited_by"), LastEditedBy);
+
+					// Inform user that this file has been edited outside UE
+					if (LastEditedBy.Equals(FApp::GetEpicProductIdentifier()))
+					{
+						OverwriteResponse = EAppReturnType::Yes;
+					}
+					else 
+					{
+						LastEditedBy = LastEditedBy.IsEmpty() ? FString(TEXT("likely SteamVR's Input Dashboard")) : LastEditedBy;
+						OverwriteResponse = FMessageDialog::Open(EAppMsgType::YesNoYesAllNoAll,
+							FText::Format(LOCTEXT("BindingFileExists", 
+							"{0}'s binding file [{1}] was last modified by [{2}]. \n\nAre you sure you want to OVERWRITE this file? You will lose all your changes."), 
+								FText::FromString(ControllerType.ToUpper()), FText::FromString(BindingFile), FText::FromString(LastEditedBy)));
+					}
+				}
+
+				// Set binding file path and backup
+				FString ControllerBindingFile = ControllerBindingsPath / BindingFile;
+				FString ControllerBindingBackup = ControllerBindingFile + ".bak";
+
+				// Check overwrite response
+				switch (OverwriteResponse)
+				{
+					case EAppReturnType::Yes:
+					case EAppReturnType::YesAll:
+						FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*ControllerBindingBackup);
+						FPlatformFileManager::Get().GetPlatformFile().CopyFile(*ControllerBindingBackup, *ControllerBindingFile);
+						bIsGenerated = false; 
+						break;
+
+					case EAppReturnType::No:
+					case EAppReturnType::NoAll:
+					default:
+						bIsGenerated = true;
+						break;
+				}
+			}
+
 			// Create Controller Binding Object for this binding file
 			TSharedRef<FJsonObject> ControllerBindingObject = MakeShareable(new FJsonObject());
 			TArray<FString> ControllerStringFields = { "controller_type", *ControllerType,
@@ -2521,16 +2565,25 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			BuildJsonObject(ControllerStringFields, ControllerBindingObject);
 			ControllerBindings.Add(MakeShareable(new FJsonValueObject(ControllerBindingObject)));
 
-			// Tag this controller as generated
+			// Tag this controller's generated status
 			for (auto& DefaultControllerType : ControllerTypes)
 			{
 				if (DefaultControllerType.Name == FName(*ControllerType))
 				{
-					DefaultControllerType.bIsGenerated = true;
+					DefaultControllerType.bIsGenerated = bIsGenerated;
+					break;
 				}
 			}
 		}
 	}
+
+	#if WITH_EDITOR
+	// If we're running in the editor, build the controller bindings if they don't exist yet
+	if (GenerateBindings)
+	{
+		GenerateControllerBindings(ControllerBindingsPath, ControllerTypes, ControllerBindings, Actions, InputMappings, DeleteIfExists);
+	}
+	#endif
 
 	// Add the default bindings object to the action manifest
 	if (ControllerBindings.Num() == 0)
@@ -2580,7 +2633,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Register Application to SteamVR
 	if (RegisterApp)
 	{
-		RegisterApplication(ManifestPath);
+		RegisterApplication(ManifestPath, bRegisterManifestOnly);
 	}
 
 	// Update action events
@@ -3212,7 +3265,7 @@ void FSteamVRInputDevice::SanitizeActions()
 	Actions.Shrink();
 }
 
-void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
+void FSteamVRInputDevice::RegisterApplication(FString ManifestPath, bool bRegisterManfiestOnly)
 {
 
 	if (VRSystem() && VRInput())
@@ -3245,7 +3298,7 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath)
 		GameProjectName += ChangeListNum;
 
 #if WITH_EDITOR
-		if (VRApplications())
+		if (VRApplications() && !bRegisterManfiestOnly)
 		{
 			// Generate Application Manifest
 			FString AppKey, AppManifestPath;
