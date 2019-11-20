@@ -2,7 +2,7 @@
   "FileVersion": 3,
   "EngineVersion": "4.19.0",
   "Version": 1,
-  "VersionName": "1.51-sdk1.5.17",
+  "VersionName": "1.8-sdk1.8.19",
   "FriendlyName": "SteamVR Input for Unreal",
   "Description": "Integrates Valve's SteamVR Input features in an intuitive and easy to use way for Unreal developers.",
   "Category": "Virtual Reality",
