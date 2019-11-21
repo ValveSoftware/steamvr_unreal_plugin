@@ -791,7 +791,7 @@ bool USteamVRInputDeviceFunctionLibrary::DeleteUserInputIni(FString& UserInputFi
 		PlatformDir += FString(TEXT("NoEditor"));
 		#endif
 
-		UserInputFile = FPaths::ProjectUserDir() / "Saved" / "Config" / PlatformDir / "Input.ini";
+		UserInputFile = FPaths::GameUserDir() / "Saved" / "Config" / PlatformDir / "Input.ini";
 		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
 		if (PlatformFile.FileExists(*UserInputFile) && PlatformFile.DeleteFile(*UserInputFile))

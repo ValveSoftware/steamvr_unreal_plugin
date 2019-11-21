@@ -3276,10 +3276,10 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath, bool bRegist
 
 		}
 
-		// Use uprojectname if empty
+		// Use filename if project name is empty
 		if (GameProjectName.IsEmpty())
 		{
-			GameProjectName = FApp::GetProjectName();
+			GameProjectName = GameFileName;
 		}
 
 		// Add engine build number 
