@@ -2839,7 +2839,7 @@ void FSteamVRInputDevice::ProcessKeyInputMappings(const UInputSettings* InputSet
 				// Save temporary mapping
 				TempInputSettings->ForceRebuildKeymaps();
 				TempInputSettings->SaveKeyMappings();
-				TempInputSettings->UpdateDefaultConfigFile();
+				TempInputSettings->SaveConfig();
 			}
 			//else
 			//{
@@ -3242,7 +3242,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 				// Save temporary mapping
 				TempInputSettings->ForceRebuildKeymaps();
 				TempInputSettings->SaveKeyMappings();
-				TempInputSettings->UpdateDefaultConfigFile();
+				TempInputSettings->SaveConfig();
 			}
 		}
 		else if (AxisMapping.bIsPartofVector3)
@@ -3280,7 +3280,7 @@ void FSteamVRInputDevice::ProcessKeyAxisMappings(const UInputSettings* InputSett
 
 				// Save temporary mapping
 				TempInputSettings->SaveKeyMappings();
-				TempInputSettings->UpdateDefaultConfigFile();
+				TempInputSettings->SaveConfig();
 			}
 			//else
 			//{
@@ -4039,7 +4039,7 @@ void FSteamVRInputDevice::InitSteamVRTemporaryActions()
 	// Save temporary mapping
 	TempInputSettings->ForceRebuildKeymaps();
 	TempInputSettings->SaveKeyMappings();
-	TempInputSettings->UpdateDefaultConfigFile();
+	TempInputSettings->SaveConfig();
 
 	SteamVRTemporaryActions.Empty();
 }
@@ -4155,7 +4155,7 @@ uint32 FSteamVRInputDevice::ClearTemporaryActions()
 	if (Count > 0)
 	{
 		InputSettings->SaveKeyMappings();
-		InputSettings->UpdateDefaultConfigFile();
+		InputSettings->SaveConfig();
 
 		Count = 0;
 		ClearTemporaryActions();
