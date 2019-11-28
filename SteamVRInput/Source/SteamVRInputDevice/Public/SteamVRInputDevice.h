@@ -229,6 +229,15 @@ public:
 	/** The tracker pose tagged as Special8 in UE  */
 	VRActionHandle_t VRSpecial8;
 
+	/** The tracker pose tagged as Special9 in UE  */
+	VRActionHandle_t VRSpecial9;
+
+	/** The tracker pose tagged as Special10 in UE  */
+	VRActionHandle_t VRSpecial10;
+
+	/** The tracker pose tagged as Special11 in UE  */
+	VRActionHandle_t VRSpecial11;
+
 	/** The handle for the skeletal input of the left hand  */
 	VRActionHandle_t VRSkeletalHandleLeft;
 
