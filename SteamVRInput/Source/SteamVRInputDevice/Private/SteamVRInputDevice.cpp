@@ -616,7 +616,71 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 				return false;
 			}
 
+		case EControllerHand::Special_9:
+
+			if (VRSpecial9 == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial9, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial9, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+
+		case EControllerHand::Special_10:
+
+			if (VRSpecial10 == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial10, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial10, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+
+		case EControllerHand::Special_11:
+
+			if (VRSpecial11 == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial11, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial11, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+
 			break;
+
 		default:
 			return false;
 		}
@@ -881,10 +945,50 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			{
 				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial8, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
+		case EControllerHand::Special_9:
 
-			if (InputError != VRInputError_None)
+			if (VRSpecial9 == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial9, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial9, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+		case EControllerHand::Special_10:
+
+			if (VRSpecial10 == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial10, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial10, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+		case EControllerHand::Special_11:
+
+			if (VRSpecial11 == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial11, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial11, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			break;
@@ -1284,15 +1388,15 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			ActionSetJsonObject->SetArrayField(TEXT("sources"), JsonValuesArray);
 
 			// Add tracker poses
-			if (SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Vive_Tracker")))
+			if (SupportedController.Name.IsEqual(TEXT("vive_tracker_handed")) || SupportedController.Name.IsEqual(TEXT("vive_tracker")))
 			{
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
 				// Add Pose: Special 1
 				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
-				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_L));
-				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
+				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
+				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
 				Special1JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
@@ -1300,8 +1404,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 2
 				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
-				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_BACK_R));
-				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
+				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
+				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
 				Special2JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
@@ -1309,8 +1413,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 3
 				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
-				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_L));
-				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
+				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
+				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
 				Special3JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
@@ -1318,8 +1422,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 4
 				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
-				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONT_R));
-				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
+				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
+				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
 				Special4JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
@@ -1327,8 +1431,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 5
 				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
-				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
-				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
+				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
+				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
 				Special5JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
@@ -1336,8 +1440,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 6
 				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
-				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
-				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
+				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
+				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
 				Special6JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
@@ -1345,8 +1449,8 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 7
 				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
-				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
-				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
+				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
+				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
 				Special7JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
@@ -1354,21 +1458,263 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 
 				// Add Pose: Special 8
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
-				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
-				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
+				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
 				Special8JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
 				TrackerPoseArray.Add(Special8JsonValueObject);
 
-				// Add Controller Input Array To Action Set
+				// Add Pose: Special 9
+				TSharedRef<FJsonObject> Special9JsonObject = MakeShareable(new FJsonObject());
+				Special9JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_9));
+				Special9JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
+				Special9JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special9JsonValueObject = MakeShareable(new FJsonValueObject(Special9JsonObject));
+				TrackerPoseArray.Add(Special9JsonValueObject);
+
+				// Add Pose: Special 10
+				TSharedRef<FJsonObject> Special10JsonObject = MakeShareable(new FJsonObject());
+				Special10JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_10));
+				Special10JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
+				Special10JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special10JsonValueObject = MakeShareable(new FJsonValueObject(Special10JsonObject));
+				TrackerPoseArray.Add(Special10JsonValueObject);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_camera")))
+			{
+				// CAMERA - SPECIAL 1
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special1JsonObjectL = MakeShareable(new FJsonObject());
+				Special1JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
+				Special1JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special1JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectL = MakeShareable(new FJsonValueObject(Special1JsonObjectL));
+				TrackerPoseArray.Add(Special1JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special1JsonObjectR = MakeShareable(new FJsonObject());
+				Special1JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
+				Special1JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special1JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectR = MakeShareable(new FJsonValueObject(Special1JsonObjectR));
+				TrackerPoseArray.Add(Special1JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_waist")))
+			{
+				// WAIST - SPECIAL 2
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special2JsonObjectL = MakeShareable(new FJsonObject());
+				Special2JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
+				Special2JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special2JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special2JsonValueObjectL = MakeShareable(new FJsonValueObject(Special2JsonObjectL));
+				TrackerPoseArray.Add(Special2JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special2JsonObjectR = MakeShareable(new FJsonObject());
+				Special2JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
+				Special2JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special2JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special2JsonValueObjectR = MakeShareable(new FJsonValueObject(Special2JsonObjectR));
+				TrackerPoseArray.Add(Special2JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_left_foot")))
+			{
+				// LEFT FOOT - SPECIAL 3
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special3JsonObjectL = MakeShareable(new FJsonObject());
+				Special3JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
+				Special3JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special3JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special3JsonValueObjectL = MakeShareable(new FJsonValueObject(Special3JsonObjectL));
+				TrackerPoseArray.Add(Special3JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special3JsonObjectR = MakeShareable(new FJsonObject());
+				Special3JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
+				Special3JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special3JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special3JsonValueObjectR = MakeShareable(new FJsonValueObject(Special3JsonObjectR));
+				TrackerPoseArray.Add(Special3JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_right_foot")))
+			{
+				// RIGHT FOOT - SPECIAL 4
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special4JsonObjectL = MakeShareable(new FJsonObject());
+				Special4JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
+				Special4JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special4JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special4JsonValueObjectL = MakeShareable(new FJsonValueObject(Special4JsonObjectL));
+				TrackerPoseArray.Add(Special4JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special4JsonObjectR = MakeShareable(new FJsonObject());
+				Special4JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
+				Special4JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special4JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special4JsonValueObjectR = MakeShareable(new FJsonValueObject(Special4JsonObjectR));
+				TrackerPoseArray.Add(Special4JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_left_shoulder")))
+			{
+				// LEFT SHOULDER - SPECIAL 5
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special5JsonObjectL = MakeShareable(new FJsonObject());
+				Special5JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
+				Special5JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special5JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special5JsonValueObjectL = MakeShareable(new FJsonValueObject(Special5JsonObjectL));
+				TrackerPoseArray.Add(Special5JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special5JsonObjectR = MakeShareable(new FJsonObject());
+				Special5JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
+				Special5JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special5JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special5JsonValueObjectR = MakeShareable(new FJsonValueObject(Special5JsonObjectR));
+				TrackerPoseArray.Add(Special5JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_right_shoulder")))
+			{
+				// RIGHT SHOULDER - SPECIAL 6
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special6JsonObjectL = MakeShareable(new FJsonObject());
+				Special6JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
+				Special6JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special6JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special6JsonValueObjectL = MakeShareable(new FJsonValueObject(Special6JsonObjectL));
+				TrackerPoseArray.Add(Special6JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special6JsonObjectR = MakeShareable(new FJsonObject());
+				Special6JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
+				Special6JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special6JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special6JsonValueObjectR = MakeShareable(new FJsonValueObject(Special6JsonObjectR));
+				TrackerPoseArray.Add(Special6JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_chest")))
+			{
+				// CHEST- SPECIAL 7
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special7JsonObjectL = MakeShareable(new FJsonObject());
+				Special7JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
+				Special7JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special7JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special7JsonValueObjectL = MakeShareable(new FJsonValueObject(Special7JsonObjectL));
+				TrackerPoseArray.Add(Special7JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special7JsonObjectR = MakeShareable(new FJsonObject());
+				Special7JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
+				Special7JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special7JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special7JsonValueObjectR = MakeShareable(new FJsonValueObject(Special7JsonObjectR));
+				TrackerPoseArray.Add(Special7JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
+				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
+			}
+			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_keyboard")))
+			{
+				// KEYBOARD - SPECIAL 8
+
+				// Add Controller Pose Mappings
+				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
+
+				// Add Raw Pose (Left)
+				TSharedRef<FJsonObject> Special8JsonObjectL = MakeShareable(new FJsonObject());
+				Special8JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
+				Special8JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
+				Special8JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special8JsonValueObjectL = MakeShareable(new FJsonValueObject(Special8JsonObjectL));
+				TrackerPoseArray.Add(Special8JsonValueObjectL);
+
+				// Add Raw Pose (Right)
+				TSharedRef<FJsonObject> Special8JsonObjectR = MakeShareable(new FJsonObject());
+				Special8JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
+				Special8JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
+				Special8JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special8JsonValueObjectR = MakeShareable(new FJsonValueObject(Special8JsonObjectR));
+				TrackerPoseArray.Add(Special8JsonValueObjectR);
+
+				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 
 			// Do not add any default bindings for headsets and misc devices
 			if (!SupportedController.Description.Contains(TEXT("Headset"))
 				&& !SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Gamepads"))
-				&& !SupportedController.KeyEquivalent.Equals(TEXT("SteamVR_Vive_Tracker"))
+				&& !SupportedController.KeyEquivalent.Contains(TEXT("SteamVR_Vive_Tracker"))
 				)
 			{
 				// Add Controller Pose Mappings
@@ -2177,7 +2523,17 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	ControllerTypes.Emplace(FControllerType(TEXT("vive_pro"), TEXT("Vive Pro Headset"), TEXT("SteamVR_Vive_Pro")));
 	ControllerTypes.Emplace(FControllerType(TEXT("rift"), TEXT("Rift Headset"), TEXT("SteamVR_Rift")));
 
-	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_camera"), TEXT("Vive Trackers"), TEXT("SteamVR_Vive_Tracker")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker"), TEXT("Vive Tracker"), TEXT("SteamVR_Vive_Tracker")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_camera"), TEXT("Vive Tracker (Camera)"), TEXT("SteamVR_Vive_Tracker_Camera")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_waist"), TEXT("Vive Tracker (Waist)"), TEXT("SteamVR_Vive_Tracker_Waist")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_left_foot"), TEXT("Vive Tracker (Left Foot)"), TEXT("SteamVR_Vive_Tracker_Left_Foot")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_right_foot"), TEXT("Vive Tracker (Right Foot)"), TEXT("SteamVR_Vive_Tracker_Right_Foot")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_left_shoulder"), TEXT("Vive Tracker (Left Shoulder)"), TEXT("SteamVR_Vive_Tracker_Left_Shoulder")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_right_shoulder"), TEXT("Vive Tracker (Right Shoulder)"), TEXT("SteamVR_Vive_Tracker_Right_Shoulder")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_chest"), TEXT("Vive Tracker (Chest)"), TEXT("SteamVR_Vive_Tracker_Chest")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_handed"), TEXT("Vive Tracker (Handed)"), TEXT("SteamVR_Vive_Tracker_Handed")));
+	ControllerTypes.Emplace(FControllerType(TEXT("vive_tracker_keyboard"), TEXT("Vive Tracker (Keyboard)"), TEXT("SteamVR_Vive_Tracker_Keyboard")));
+
 	ControllerTypes.Emplace(FControllerType(TEXT("gamepad"), TEXT("Gamepads"), TEXT("SteamVR_Gamepads")));
 	
 #pragma region ACTIONS
@@ -2215,46 +2571,61 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				FName(TEXT("Right Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
 		}
 
-		// Other poses
+		// Other poses - default is handed configuration
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_L));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_1));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 1 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
+				FName(TEXT("Special 1 [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_BACK_R));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_2));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 2 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
+				FName(TEXT("Special 2 [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_L));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_3));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 3 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
+				FName(TEXT("Special 3 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONT_R));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_4));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 4 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
+				FName(TEXT("Special 4 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_L));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_5));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
 				FName(TEXT("Special 5 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_FRONTR_R));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_6));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 6 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+				FName(TEXT("Special 6 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_L));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_7));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 7 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+				FName(TEXT("Special 7 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_PISTOL_R));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_8));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 8 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
+				FName(TEXT("Special 8 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_9));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Special 9 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_10));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Special 10 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_11));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Special 11 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
 		}
 
 		// Skeletal Data
@@ -2512,7 +2883,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 		{
 			UE_LOG(LogSteamVRInputDevice, Warning, TEXT("Invalid json format for controller binding file, skipping: %s"), *(ControllerBindingsPath / BindingFile));
 		}
-		// Attempt to find what controller this binding file is for 
+		// Attempt to find what controller this binding file is for
 		else if (!JsonObject->TryGetStringField(TEXT("controller_type"), ControllerType) || ControllerType.IsEmpty())
 		{
 			if (!BindingFile.Contains("steamvr_manifest"))
@@ -2525,9 +2896,9 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 			// Set controller generated status (default: true, do not overwrite)
 			bool bIsGenerated = true;
 
-			// Check if we need to delete existing controller bindings
-			if (DeleteIfExists)
-			{
+			// Check if we need to delete existing controller bindings - skip trackers
+			if (DeleteIfExists && !ControllerType.Contains("vive_tracker"))
+			{			
 				// Check if we're doing a granular overwrite
 				if (OverwriteResponse == EAppReturnType::No || OverwriteResponse == EAppReturnType::Yes)
 				{
@@ -2555,13 +2926,19 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				FString ControllerBindingBackup = ControllerBindingFile + ".bak";
 
 				// Check overwrite response
-				switch (OverwriteResponse)
+				if (ControllerType.Contains("vive_tracker"))
 				{
+					bIsGenerated = true; // Never overwrite trackers
+				}
+				else
+				{
+					switch (OverwriteResponse)
+					{
 					case EAppReturnType::Yes:
 					case EAppReturnType::YesAll:
 						FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*ControllerBindingBackup);
 						FPlatformFileManager::Get().GetPlatformFile().CopyFile(*ControllerBindingBackup, *ControllerBindingFile);
-						bIsGenerated = false; 
+						bIsGenerated = false;
 						break;
 
 					case EAppReturnType::No:
@@ -2569,6 +2946,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 					default:
 						bIsGenerated = true;
 						break;
+					}
 				}
 			}
 
@@ -3385,37 +3763,53 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath, bool bRegist
 			{
 				VRControllerHandleRight = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_BACK_L))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_1))
 			{
 				VRSpecial1 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_BACK_R))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_2))
 			{
 				VRSpecial2 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONT_L))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_3))
 			{
 				VRSpecial3 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONT_R))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_4))
 			{
 				VRSpecial4 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONTR_L))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_5))
 			{
 				VRSpecial5 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_FRONTR_R))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_6))
 			{
 				VRSpecial6 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_PISTOL_L))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_7))
 			{
 				VRSpecial7 = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_PISTOL_R))
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_8))
 			{
 				VRSpecial8 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_8))
+			{
+				VRSpecial8 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_9))
+			{
+				VRSpecial9 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_10))
+			{
+				VRSpecial10 = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_11))
+			{
+				VRSpecial11 = Action.Handle;
 			}
 
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
