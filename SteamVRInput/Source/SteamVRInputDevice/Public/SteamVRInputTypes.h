@@ -60,14 +60,17 @@ using namespace vr;
 #define ACTION_PATH_IN					"/actions/main/in"
 #define ACTION_PATH_CONTROLLER_LEFT		"/actions/main/in/controllerleft"
 #define ACTION_PATH_CONTROLLER_RIGHT	"/actions/main/in/controllerright"
-#define ACTION_PATH_SPECIAL_BACK_L		"/actions/main/in/special1"
-#define ACTION_PATH_SPECIAL_BACK_R		"/actions/main/in/special2"
-#define ACTION_PATH_SPECIAL_FRONT_L		"/actions/main/in/special3"
-#define ACTION_PATH_SPECIAL_FRONT_R		"/actions/main/in/special4"
-#define ACTION_PATH_SPECIAL_FRONTR_L	"/actions/main/in/special5"
-#define ACTION_PATH_SPECIAL_FRONTR_R	"/actions/main/in/special6"
-#define ACTION_PATH_SPECIAL_PISTOL_L	"/actions/main/in/special7"
-#define ACTION_PATH_SPECIAL_PISTOL_R	"/actions/main/in/special8"
+#define ACTION_PATH_SPECIAL_1			"/actions/main/in/special1"
+#define ACTION_PATH_SPECIAL_2			"/actions/main/in/special2"
+#define ACTION_PATH_SPECIAL_3			"/actions/main/in/special3"
+#define ACTION_PATH_SPECIAL_4			"/actions/main/in/special4"
+#define ACTION_PATH_SPECIAL_5			"/actions/main/in/special5"
+#define ACTION_PATH_SPECIAL_6			"/actions/main/in/special6"
+#define ACTION_PATH_SPECIAL_7			"/actions/main/in/special7"
+#define ACTION_PATH_SPECIAL_8			"/actions/main/in/special8"
+#define ACTION_PATH_SPECIAL_9			"/actions/main/in/special9"
+#define ACTION_PATH_SPECIAL_10			"/actions/main/in/special10"
+#define ACTION_PATH_SPECIAL_11			"/actions/main/in/special11"
 #define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"		
 #define ACTION_PATH_SKELETON_RIGHT		"/actions/main/in/skeletonright"
 #define ACTION_PATH_SKEL_HAND_LEFT		"/skeleton/hand/left"
@@ -78,16 +81,16 @@ using namespace vr;
 
 // Input paths
 #define ACTION_PATH_HEAD_PROXIMITY		"/user/head/proximity"
-#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"
-#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"
-#define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"					// Special 1
-#define ACTION_PATH_SPCL_BACK_RIGHT		"/user/hand/right/pose/back"				// Special 2
-#define ACTION_PATH_SPCL_FRONT_LEFT		"/user/hand/left/pose/front"				// Special 3
-#define ACTION_PATH_SPCL_FRONT_RIGHT	"/user/hand/right/pose/front"				// Special 4
-#define ACTION_PATH_SPCL_FRONTR_LEFT	"/user/hand/left/pose/frontandrolled"		// Special 5
-#define ACTION_PATH_SPCL_FRONTR_RIGHT	"/user/hand/right/pose/frontandrolled"		// Special 6
-#define ACTION_PATH_SPCL_PISTOL_LEFT	"/user/hand/left/pose/pistolgrip"			// Special 7
-#define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistolgrip"			// Special 8
+#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"					// Special 1 (tracker handed and raw poses)
+#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"					// Special 2 (tracker handed and raw poses)
+#define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"					// Special 3 (tracker handed)
+#define ACTION_PATH_SPCL_BACK_RIGHT		"/user/hand/right/pose/back"				// Special 4 (tracker handed)
+#define ACTION_PATH_SPCL_FRONT_LEFT		"/user/hand/left/pose/front"				// Special 5 (tracker handed)
+#define ACTION_PATH_SPCL_FRONT_RIGHT	"/user/hand/right/pose/front"				// Special 6 (tracker handed)
+#define ACTION_PATH_SPCL_FRONTR_LEFT	"/user/hand/left/pose/front_rolled"			// Special 7 (tracker handed)
+#define ACTION_PATH_SPCL_FRONTR_RIGHT	"/user/hand/right/pose/front_rolled"		// Special 8 (tracker handed)
+#define ACTION_PATH_SPCL_PISTOL_LEFT	"/user/hand/left/pose/pistol"				// Special 9 (tracker handed)
+#define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistol"				// Special 10 (tracker handed)
 #define ACTION_PATH_TRIGGER_LEFT		"/user/hand/left/input/trigger"
 #define ACTION_PATH_TRIGGER_RIGHT		"/user/hand/right/input/trigger"
 #define ACTION_PATH_BUMPER_LEFT			"/user/hand/left/input/bumper"
@@ -116,7 +119,6 @@ using namespace vr;
 #define ACTION_PATH_GRIP_GRAB_RIGHT		"/user/hand/right/input/grip"
 #define ACTION_PATH_APPMENU_LEFT        "/user/hand/left/input/application_menu"
 #define ACTION_PATH_APPMENU_RIGHT        "/user/hand/right/input/application_menu"
-
 
 namespace SteamVRInputDeviceConstants 
 {
