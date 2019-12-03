@@ -60,17 +60,26 @@ using namespace vr;
 #define ACTION_PATH_IN					"/actions/main/in"
 #define ACTION_PATH_CONTROLLER_LEFT		"/actions/main/in/controllerleft"
 #define ACTION_PATH_CONTROLLER_RIGHT	"/actions/main/in/controllerright"
-#define ACTION_PATH_SPECIAL_1			"/actions/main/in/special1"
-#define ACTION_PATH_SPECIAL_2			"/actions/main/in/special2"
-#define ACTION_PATH_SPECIAL_3			"/actions/main/in/special3"
-#define ACTION_PATH_SPECIAL_4			"/actions/main/in/special4"
-#define ACTION_PATH_SPECIAL_5			"/actions/main/in/special5"
-#define ACTION_PATH_SPECIAL_6			"/actions/main/in/special6"
-#define ACTION_PATH_SPECIAL_7			"/actions/main/in/special7"
-#define ACTION_PATH_SPECIAL_8			"/actions/main/in/special8"
-#define ACTION_PATH_SPECIAL_9			"/actions/main/in/special9"
-#define ACTION_PATH_SPECIAL_10			"/actions/main/in/special10"
-#define ACTION_PATH_SPECIAL_11			"/actions/main/in/special11"
+
+#define ACTION_PATH_TRACKER_CAMERA				"/actions/main/in/tracker_camera"
+#define ACTION_PATH_TRACKER_CHEST				"/actions/main/in/tracker_chest"
+#define ACTION_PATH_TRACKER_HANDED_BACK_LEFT	"/actions/main/in/tracker_handed_back_left"
+#define ACTION_PATH_TRACKER_HANDED_BACK_RIGHT	"/actions/main/in/tracker_handed_back_right"
+#define ACTION_PATH_TRACKER_HANDED_FRONT_LEFT	"/actions/main/in/tracker_handed_front_left"
+#define ACTION_PATH_TRACKER_HANDED_FRONT_RIGHT	"/actions/main/in/tracker_handed_front_right"
+#define ACTION_PATH_TRACKER_HANDED_FRONTR_LEFT	"/actions/main/in/tracker_handed_frontr_left"
+#define ACTION_PATH_TRACKER_HANDED_FRONTR_RIGHT	"/actions/main/in/tracker_handed_frontr_right"
+#define ACTION_PATH_TRACKER_HANDED_GRIP_LEFT	"/actions/main/in/tracker_handed_grip_left"
+#define ACTION_PATH_TRACKER_HANDED_GRIP_RIGHT	"/actions/main/in/tracker_handed_grip_right"
+#define ACTION_PATH_TRACKER_HANDED_POSE_LEFT	"/actions/main/in/tracker_handed_pose_left"
+#define ACTION_PATH_TRACKER_HANDED_POSE_RIGHT	"/actions/main/in/tracker_handed_pose_right"
+#define ACTION_PATH_TRACKER_FOOT_LEFT			"/actions/main/in/tracker_foot_left"
+#define ACTION_PATH_TRACKER_FOOT_RIGHT			"/actions/main/in/tracker_foot_right"
+#define ACTION_PATH_TRACKER_SHOULDER_LEFT		"/actions/main/in/tracker_shoulder_left"
+#define ACTION_PATH_TRACKER_SHOULDER_RIGHT		"/actions/main/in/tracker_shoulder_right"
+#define ACTION_PATH_TRACKER_KEYBOARD			"/actions/main/in/tracker_keyboard"
+#define ACTION_PATH_TRACKER_WAIST				"/actions/main/in/tracker_waist"
+
 #define ACTION_PATH_SKELETON_LEFT		"/actions/main/in/skeletonleft"		
 #define ACTION_PATH_SKELETON_RIGHT		"/actions/main/in/skeletonright"
 #define ACTION_PATH_SKEL_HAND_LEFT		"/skeleton/hand/left"
@@ -81,16 +90,27 @@ using namespace vr;
 
 // Input paths
 #define ACTION_PATH_HEAD_PROXIMITY		"/user/head/proximity"
-#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"					// Special 1 (tracker handed and raw poses)
-#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"					// Special 2 (tracker handed and raw poses)
-#define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"					// Special 3 (tracker handed)
-#define ACTION_PATH_SPCL_BACK_RIGHT		"/user/hand/right/pose/back"				// Special 4 (tracker handed)
-#define ACTION_PATH_SPCL_FRONT_LEFT		"/user/hand/left/pose/front"				// Special 5 (tracker handed)
-#define ACTION_PATH_SPCL_FRONT_RIGHT	"/user/hand/right/pose/front"				// Special 6 (tracker handed)
-#define ACTION_PATH_SPCL_FRONTR_LEFT	"/user/hand/left/pose/front_rolled"			// Special 7 (tracker handed)
-#define ACTION_PATH_SPCL_FRONTR_RIGHT	"/user/hand/right/pose/front_rolled"		// Special 8 (tracker handed)
-#define ACTION_PATH_SPCL_PISTOL_LEFT	"/user/hand/left/pose/pistol"				// Special 9 (tracker handed)
-#define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistol"				// Special 10 (tracker handed)
+#define ACTION_PATH_CONT_RAW_LEFT		"/user/hand/left/pose/raw"		
+#define ACTION_PATH_CONT_RAW_RIGHT		"/user/hand/right/pose/raw"	
+
+#define ACTION_PATH_SPCL_CAMERA				"/user/camera/pose/raw"	
+#define ACTION_PATH_SPCL_CHEST				"/user/chest/pose/raw"	
+#define ACTION_PATH_SPCL_WAIST				"/user/waist/pose/raw"	
+#define ACTION_PATH_SPCL_SHOULDER_LEFT		"/user/shoulder/left/pose/raw"	
+#define ACTION_PATH_SPCL_SHOULDER_RIGHT		"/user/shoulder/right/pose/raw"	
+#define ACTION_PATH_SPCL_FOOT_LEFT			"/user/foot/left/pose/raw"	
+#define ACTION_PATH_SPCL_FOOT_RIGHT			"/user/foot/right/pose/raw"	
+#define ACTION_PATH_SPCL_KEYBOARD			"/user/keyboard/pose/raw"	
+
+#define ACTION_PATH_SPCL_BACK_LEFT		"/user/hand/left/pose/back"			
+#define ACTION_PATH_SPCL_BACK_RIGHT		"/user/hand/right/pose/back"	
+#define ACTION_PATH_SPCL_FRONT_LEFT		"/user/hand/left/pose/front"	
+#define ACTION_PATH_SPCL_FRONT_RIGHT	"/user/hand/right/pose/front"	
+#define ACTION_PATH_SPCL_FRONTR_LEFT	"/user/hand/left/pose/front_rolled"	
+#define ACTION_PATH_SPCL_FRONTR_RIGHT	"/user/hand/right/pose/front_rolled"	
+#define ACTION_PATH_SPCL_PISTOL_LEFT	"/user/hand/left/pose/pistol"			
+#define ACTION_PATH_SPCL_PISTOL_RIGHT	"/user/hand/right/pose/pistol"	
+
 #define ACTION_PATH_TRIGGER_LEFT		"/user/hand/left/input/trigger"
 #define ACTION_PATH_TRIGGER_RIGHT		"/user/hand/right/input/trigger"
 #define ACTION_PATH_BUMPER_LEFT			"/user/hand/left/input/bumper"
