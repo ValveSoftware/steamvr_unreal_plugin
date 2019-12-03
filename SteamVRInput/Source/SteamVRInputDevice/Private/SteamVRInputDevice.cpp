@@ -394,7 +394,7 @@ bool FSteamVRInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice&
 	return false;
 }
 
-bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const FName MotionSource, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
 {
 	if (VRInput() && VRCompositor())
 	{
@@ -404,9 +404,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 		VRActionHandle_t LeftActionHandle = bUseSkeletonPose ? VRSkeletalHandleLeft : VRControllerHandleLeft;
 		VRActionHandle_t RightActionHandle = bUseSkeletonPose ? VRSkeletalHandleRight : VRControllerHandleRight;
 
-		switch (DeviceHand)
+		//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("MOTION SOURCE: %s"), *MotionSource.ToString());
+		if (MotionSource.IsEqual(TEXT("Left")))
 		{
-		case EControllerHand::Left:
 			if (LeftActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				if (GlobalPredictedSecondsFromNow <= -9999.f)
@@ -423,9 +423,9 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 					return false;
 				}
 			}
-			break;
-		case EControllerHand::Right:
-
+		}
+		else if (MotionSource.IsEqual(TEXT("Right")))
+		{
 			if (RightActionHandle != vr::k_ulInvalidActionHandle)
 			{
 				if (GlobalPredictedSecondsFromNow <= -9999.f)
@@ -442,246 +442,387 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 					return false;
 				}
 			}
-			break;
-		case EControllerHand::Special_1:
-
-			if (VRSpecial1 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Camera")))
+		{
+			if (VRTRackerCamera == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial1, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTRackerCamera, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial1, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTRackerCamera, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-			break;
-		case EControllerHand::Special_2:
-
-			if (VRSpecial2 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Chest")))
+		{
+			if (VRTrackerChest == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial2, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerChest, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial2, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerChest, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-			break;
-		case EControllerHand::Special_3:
-
-			if (VRSpecial3 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Waist")))
+		{
+			if (VRTrackerWaist == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial3, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerWaist, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial3, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerWaist, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-			break;
-		case EControllerHand::Special_4:
-
-			if (VRSpecial4 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Foot_Left")))
+		{
+			if (VRTrackerFootL == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial4, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerFootL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial4, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerFootL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-			break;
-		case EControllerHand::Special_5:
-
-			if (VRSpecial5 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Foot_Right")))
+		{
+			if (VRTrackerFootR == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial5, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerFootR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial5, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerFootR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-			break;
-		case EControllerHand::Special_6:
-
-			if (VRSpecial6 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Shoulder_Left")))
+		{
+			if (VRTrackerShoulderL == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial6, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerShoulderL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial6, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerShoulderL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-			break;
-		case EControllerHand::Special_7:
-
-			if (VRSpecial7 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Shoulder_Right")))
+		{
+			if (VRTrackerShoulderR == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial7, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerShoulderR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial7, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerShoulderR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-			break;
-		case EControllerHand::Special_8:
-
-			if (VRSpecial8 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_RawPose_Left")))
+		{
+			if (VRTrackerHandedPoseL == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial8, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedPoseL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial8, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedPoseL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-		case EControllerHand::Special_9:
-
-			if (VRSpecial9 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_RawPose_Right")))
+		{
+			if (VRTrackerHandedPoseR == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial9, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedPoseR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial9, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedPoseR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-		case EControllerHand::Special_10:
-
-			if (VRSpecial10 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Back_Left")))
+		{
+			if (VRTrackerHandedBackL == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial10, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedBackL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial10, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedBackL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
-
-		case EControllerHand::Special_11:
-
-			if (VRSpecial11 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Back_Right")))
+		{
+			if (VRTrackerHandedBackR == k_ulInvalidActionHandle)
 			{
 				return false;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial11, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedBackR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial11, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedBackR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return false;
 			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Front_Left")))
+		{
+			if (VRTrackerHandedFrontL == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
 
-			break;
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
 
-		default:
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Front_Right")))
+		{
+			if (VRTrackerHandedFrontR == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_FrontRolled_Left")))
+		{
+			if (VRTrackerHandedFrontRL == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontRL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontRL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_FrontRolled_Right")))
+		{
+			if (VRTrackerHandedFrontRR == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontRR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontRR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_PistolGrip_Left")))
+		{
+			if (VRTrackerHandedGripL == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedGripL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedGripL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_PistolGrip_Right")))
+		{
+			if (VRTrackerHandedGripR == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedGripR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedGripR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Keyboard")))
+		{
+			if (VRTrackerKeyboard == k_ulInvalidActionHandle)
+			{
+				return false;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerKeyboard, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerKeyboard, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return false;
+			}
+		}
+		else
+		{
 			return false;
 		}
 
@@ -721,19 +862,24 @@ bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 Contro
 	return true;
 }
 
-ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
+bool FSteamVRInputDevice::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
+{
+	return GetControllerOrientationAndPosition(ControllerIndex, GetMotionSourceName(DeviceHand), OutOrientation, OutPosition, WorldToMetersScale);
+}
+
+ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const FName MotionSource) const
 {
 	ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
+	//UE_LOG(LogSteamVRInputDevice, Warning, TEXT("STATUS MOTION SOURCE: %s"), *MotionSource.ToString());
 
 	if (VRInput() && VRCompositor())
 	{
+		//FName MotionSource = GetMotionSourceName(DeviceHand);
 		InputPoseActionData_t PoseData = {};
 		EVRInputError InputError = VRInputError_NoData;
 
-		switch (DeviceHand)
+		if (MotionSource.IsEqual(TEXT("Left")))
 		{
-		case EControllerHand::Left:
-
 			if (VRControllerHandleLeft == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -752,10 +898,9 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Right:
-
+		}
+		else if (MotionSource.IsEqual(TEXT("Right")))
+		{
 			if (VRControllerHandleRight == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
@@ -774,226 +919,374 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_1:
-
-			if (VRSpecial1 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Camera")))
+		{
+			if (VRTRackerCamera == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial1, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTRackerCamera, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial1, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTRackerCamera, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_2:
-
-			if (VRSpecial2 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Chest")))
+		{
+			if (VRTrackerChest == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial2, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerChest, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial2, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerChest, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_3:
-
-			if (VRSpecial3 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Waist")))
+		{
+			if (VRTrackerWaist == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial3, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerWaist, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial3, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerWaist, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_4:
-
-			if (VRSpecial4 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Foot_Left")))
+		{
+			if (VRTrackerFootL == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial4, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerFootL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial4, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerFootL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_5:
-
-			if (VRSpecial5 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Foot_Right")))
+		{
+			if (VRTrackerFootR == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial5, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerFootR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial5, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerFootR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_6:
-
-			if (VRSpecial6 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Shoulder_Left")))
+		{
+			if (VRTrackerShoulderL == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial6, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerShoulderL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial6, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerShoulderL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_7:
-
-			if (VRSpecial7 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Shoulder_Right")))
+		{
+			if (VRTrackerShoulderR == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial7, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerShoulderR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial7, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerShoulderR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
 			if (InputError != VRInputError_None)
 			{
 				return ETrackingStatus::NotTracked;
 			}
-
-			break;
-		case EControllerHand::Special_8:
-
-			if (VRSpecial8 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_RawPose_Left")))
+		{
+			if (VRTrackerHandedPoseL == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial8, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedPoseL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial8, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedPoseL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-		case EControllerHand::Special_9:
-
-			if (VRSpecial9 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_RawPose_Right")))
+		{
+			if (VRTrackerHandedPoseR == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial9, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedPoseR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial9, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedPoseR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-		case EControllerHand::Special_10:
-
-			if (VRSpecial10 == k_ulInvalidActionHandle)
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Back_Left")))
+		{
+			if (VRTrackerHandedBackL == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial10, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedBackL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial10, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedBackL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
-		case EControllerHand::Special_11:
 
-			if (VRSpecial11 == k_ulInvalidActionHandle)
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Back_Right")))
+		{
+			if (VRTrackerHandedBackR == k_ulInvalidActionHandle)
 			{
 				return ETrackingStatus::NotTracked;
 			}
 
 			if (GlobalPredictedSecondsFromNow <= -9999.f)
 			{
-				InputError = VRInput()->GetPoseActionDataForNextFrame(VRSpecial11, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedBackR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 			else
 			{
-				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRSpecial11, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedBackR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
 			}
 
-			break;
-		default:
-			break;
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Front_Left")))
+		{
+			if (VRTrackerHandedFrontL == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_Front_Right")))
+		{
+			if (VRTrackerHandedFrontR == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_FrontRolled_Left")))
+		{
+			if (VRTrackerHandedFrontRL == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontRL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontRL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_FrontRolled_Right")))
+		{
+			if (VRTrackerHandedFrontRR == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedFrontRR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedFrontRR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_PistolGrip_Left")))
+		{
+			if (VRTrackerHandedGripL == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedGripL, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedGripL, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Handheld_PistolGrip_Right")))
+		{
+			if (VRTrackerHandedGripR == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerHandedGripR, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerHandedGripR, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+		}
+		else if (MotionSource.IsEqual(TEXT("Tracker_Keyboard")))
+		{
+			if (VRTrackerKeyboard == k_ulInvalidActionHandle)
+			{
+				return ETrackingStatus::NotTracked;
+			}
+
+			if (GlobalPredictedSecondsFromNow <= -9999.f)
+			{
+				InputError = VRInput()->GetPoseActionDataForNextFrame(VRTrackerKeyboard, VRCompositor()->GetTrackingSpace(), &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+			else
+			{
+				InputError = VRInput()->GetPoseActionDataRelativeToNow(VRTrackerKeyboard, VRCompositor()->GetTrackingSpace(), GlobalPredictedSecondsFromNow, &PoseData, sizeof(PoseData), k_ulInvalidInputValueHandle);
+			}
+
+			if (InputError != VRInputError_None)
+			{
+				return ETrackingStatus::NotTracked;
+			}
 		}
 
 		if (InputError == VRInputError_None && PoseData.pose.bDeviceIsConnected)
@@ -1005,31 +1298,158 @@ ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 Con
 	return TrackingStatus;
 }
 
+ETrackingStatus FSteamVRInputDevice::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
+{
+	return GetControllerTrackingStatus(ControllerIndex, GetMotionSourceName(DeviceHand));
+}
+
 FName FSteamVRInputDevice::GetMotionControllerDeviceTypeName() const
 {
 	return FName(TEXT("SteamVRInputDevice"));
 }
 
-//void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
-//{
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Left")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Right")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("AnyHand")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Pad")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("ExternalCamera")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Gun")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_1")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_2")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_3")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_4")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_5")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_6")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_7")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_8")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_9")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_10")));
-//	SourcesOut.Add(FMotionControllerSource(TEXT("Special_11")));
-//}
+FName FSteamVRInputDevice::GetMotionSourceName(const EControllerHand MotionSource) const
+{
+	switch ((uint32)MotionSource)
+	{
+	case 0:
+		return FName(TEXT("Left"));
+		break;
+	case 1:
+		return FName(TEXT("Right"));
+		break;
+	case 2:
+		return FName(TEXT("AnyHand"));
+		break;
+	case 3:
+		return FName(TEXT("Pad"));
+		break;
+	case 4:
+		return FName(TEXT("ExternalCamera"));
+		break;
+	case 5:
+		return FName(TEXT("Gun"));
+		break;
+	case 6:
+		return FName(TEXT("Special_1"));
+		break;
+	case 7:
+		return FName(TEXT("Special_2"));
+		break;
+	case 8:
+		return FName(TEXT("Special_3"));
+		break;
+	case 9:
+		return FName(TEXT("Special_4"));
+		break;
+	case 10:
+		return FName(TEXT("Special_5"));
+		break;
+	case 11:
+		return FName(TEXT("Special_6"));
+		break;
+	case 12:
+		return FName(TEXT("Special_7"));
+		break;
+	case 13:
+		return FName(TEXT("Special_8"));
+		break;
+	case 14:
+		return FName(TEXT("Special_9"));
+		break;
+	case 15:
+		return FName(TEXT("Special_10"));
+		break;
+	case 16:
+		return FName(TEXT("Special_11"));
+		break;
+	case 17:
+		return FName(TEXT("Tracker_Camera"));
+		break;
+	case 18:
+		return FName(TEXT("Tracker_Chest"));
+		break;
+	case 19:
+		return FName(TEXT("Tracker_Handheld_Back_Left"));
+		break;
+	case 20:
+		return FName(TEXT("Tracker_Handheld_Back_Right"));
+		break;
+	case 21:
+		return FName(TEXT("Tracker_Handheld_Front_Left"));
+		break;
+	case 22:
+		return FName(TEXT("Tracker_Handheld_Front_Right"));
+		break;
+	case 23:
+		return FName(TEXT("Tracker_Handheld_FrontRolled_Left"));
+		break;
+	case 24:
+		return FName(TEXT("Tracker_Handheld_FrontRolled_Right"));
+		break;
+	case 25:
+		return FName(TEXT("Tracker_Handheld_PistolGrip_Left"));
+		break;
+	case 26:
+		return FName(TEXT("Tracker_Handheld_PistolGrip_Right"));
+		break;
+	case 27:
+		return FName(TEXT("Tracker_Handheld_RawPose_Left"));
+		break;
+	case 28:
+		return FName(TEXT("Tracker_Handheld_RawPose_Right"));
+		break;
+	case 29:
+		return FName(TEXT("Tracker_Foot_Left"));
+		break;
+	case 30:
+		return FName(TEXT("Tracker_Foot_Right"));
+		break;
+	case 31:
+		return FName(TEXT("Tracker_Shoulder_Left"));
+		break;
+	case 32:
+		return FName(TEXT("Tracker_Shoulder_Right"));
+		break;
+	case 33:
+		return FName(TEXT("Tracker_Keyboard"));
+		break;
+	case 34:
+		return FName(TEXT("Tracker_Waist"));
+		break;
+	default:
+		return NAME_None;
+		break;
+	}
+}
+
+void FSteamVRInputDevice::EnumerateSources(TArray<FMotionControllerSource>& SourcesOut) const
+{
+	SourcesOut.Add(FMotionControllerSource(TEXT("Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("AnyHand")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Pad")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("ExternalCamera")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Gun")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Camera")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Chest")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Foot_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Foot_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Shoulder_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Shoulder_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Keyboard")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Waist")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_RawPose_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_RawPose_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_Back_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_Back_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_Front_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_Front_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_FrontRolled_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_FrontRolled_Right")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_PistolGrip_Left")));
+	SourcesOut.Add(FMotionControllerSource(TEXT("Tracker_Handheld_PistolGrip_Right")));
+}
 
 void FSteamVRInputDevice::SetHapticFeedbackValues(int32 ControllerId, int32 Hand, const FHapticFeedbackValues& Values)
 {
@@ -1064,6 +1484,8 @@ float FSteamVRInputDevice::GetHapticAmplitudeScale() const
 {
 	return 1.f;
 }
+
+
 
 void FSteamVRInputDevice::GetControllerFidelity()
 {
@@ -1414,90 +1836,90 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Pose: Special 1
+				// Add Pose: Handed, Pose Left
 				TSharedRef<FJsonObject> Special1JsonObject = MakeShareable(new FJsonObject());
-				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
+				Special1JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_POSE_LEFT));
 				Special1JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
 				Special1JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special1JsonValueObject = MakeShareable(new FJsonValueObject(Special1JsonObject));
 				TrackerPoseArray.Add(Special1JsonValueObject);
 
-				// Add Pose: Special 2
+				// Add Pose: Handed, Pose Right
 				TSharedRef<FJsonObject> Special2JsonObject = MakeShareable(new FJsonObject());
-				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
+				Special2JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_POSE_RIGHT));
 				Special2JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
 				Special2JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special2JsonObjectJsonValueObject = MakeShareable(new FJsonValueObject(Special2JsonObject));
 				TrackerPoseArray.Add(Special2JsonObjectJsonValueObject);
 
-				// Add Pose: Special 3
+				// Add Pose: Handed, Back Left
 				TSharedRef<FJsonObject> Special3JsonObject = MakeShareable(new FJsonObject());
-				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
+				Special3JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_BACK_LEFT));
 				Special3JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_LEFT));
 				Special3JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special3JsonValueObject = MakeShareable(new FJsonValueObject(Special3JsonObject));
 				TrackerPoseArray.Add(Special3JsonValueObject);
 
-				// Add Pose: Special 4
+				// Add Pose: Handed, Back Right
 				TSharedRef<FJsonObject> Special4JsonObject = MakeShareable(new FJsonObject());
-				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
+				Special4JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_BACK_RIGHT));
 				Special4JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_BACK_RIGHT));
 				Special4JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special4JsonValueObject = MakeShareable(new FJsonValueObject(Special4JsonObject));
 				TrackerPoseArray.Add(Special4JsonValueObject);
 
-				// Add Pose: Special 5
+				// Add Pose: Handed, Front Left
 				TSharedRef<FJsonObject> Special5JsonObject = MakeShareable(new FJsonObject());
-				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
+				Special5JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_LEFT));
 				Special5JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_LEFT));
 				Special5JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special5JsonValueObject = MakeShareable(new FJsonValueObject(Special5JsonObject));
 				TrackerPoseArray.Add(Special5JsonValueObject);
 
-				// Add Pose: Special 6
+				// Add Pose: Handed, Front Right
 				TSharedRef<FJsonObject> Special6JsonObject = MakeShareable(new FJsonObject());
-				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
+				Special6JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_RIGHT));
 				Special6JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONT_RIGHT));
 				Special6JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special6JsonValueObject = MakeShareable(new FJsonValueObject(Special6JsonObject));
 				TrackerPoseArray.Add(Special6JsonValueObject);
 
-				// Add Pose: Special 7
+				// Add Pose: Handed, Front Rolled Left
 				TSharedRef<FJsonObject> Special7JsonObject = MakeShareable(new FJsonObject());
-				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
+				Special7JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_LEFT));
 				Special7JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_LEFT));
 				Special7JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special7JsonValueObject = MakeShareable(new FJsonValueObject(Special7JsonObject));
 				TrackerPoseArray.Add(Special7JsonValueObject);
 
-				// Add Pose: Special 8
+				// Add Pose: Handed, Front Rolled Right
 				TSharedRef<FJsonObject> Special8JsonObject = MakeShareable(new FJsonObject());
-				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
+				Special8JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_RIGHT));
 				Special8JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT));
 				Special8JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special8JsonValueObject = MakeShareable(new FJsonValueObject(Special8JsonObject));
 				TrackerPoseArray.Add(Special8JsonValueObject);
 
-				// Add Pose: Special 9
+				// Add Pose: Handed, Pistol Grip Left
 				TSharedRef<FJsonObject> Special9JsonObject = MakeShareable(new FJsonObject());
-				Special9JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_9));
+				Special9JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_LEFT));
 				Special9JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_LEFT));
 				Special9JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special9JsonValueObject = MakeShareable(new FJsonValueObject(Special9JsonObject));
 				TrackerPoseArray.Add(Special9JsonValueObject);
 
-				// Add Pose: Special 10
+				// Add Pose: Handed, Pistol Grip Right
 				TSharedRef<FJsonObject> Special10JsonObject = MakeShareable(new FJsonObject());
-				Special10JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_10));
+				Special10JsonObject->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_RIGHT));
 				Special10JsonObject->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT));
 				Special10JsonObject->SetStringField(TEXT("requirement"), TEXT("optional"));
 
@@ -1509,224 +1931,188 @@ void FSteamVRInputDevice::GenerateControllerBindings(const FString& BindingsPath
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_camera")))
 			{
-				// CAMERA - SPECIAL 1
+				// CAMERA
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special1JsonObjectL = MakeShareable(new FJsonObject());
-				Special1JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
-				Special1JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special1JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_CAMERA));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_CAMERA));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special1JsonValueObjectL = MakeShareable(new FJsonValueObject(Special1JsonObjectL));
-				TrackerPoseArray.Add(Special1JsonValueObjectL);
-
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special1JsonObjectR = MakeShareable(new FJsonObject());
-				Special1JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_1));
-				Special1JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special1JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special1JsonValueObjectR = MakeShareable(new FJsonValueObject(Special1JsonObjectR));
-				TrackerPoseArray.Add(Special1JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_waist")))
 			{
-				// WAIST - SPECIAL 2
+				// WAIST
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special2JsonObjectL = MakeShareable(new FJsonObject());
-				Special2JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
-				Special2JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special2JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special2JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special2JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_WAIST));
+				Special2JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_WAIST));
+				Special2JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special2JsonValueObjectL = MakeShareable(new FJsonValueObject(Special2JsonObjectL));
-				TrackerPoseArray.Add(Special2JsonValueObjectL);
-
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special2JsonObjectR = MakeShareable(new FJsonObject());
-				Special2JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_2));
-				Special2JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special2JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special2JsonValueObjectR = MakeShareable(new FJsonValueObject(Special2JsonObjectR));
-				TrackerPoseArray.Add(Special2JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special2JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special2JsonObjectRaw));
+				TrackerPoseArray.Add(Special2JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_left_foot")))
 			{
-				// LEFT FOOT - SPECIAL 3
+				// LEFT FOOT
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
 				// Add Raw Pose (Left)
 				TSharedRef<FJsonObject> Special3JsonObjectL = MakeShareable(new FJsonObject());
-				Special3JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
+				Special3JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_FOOT_LEFT));
 				Special3JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
 				Special3JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special3JsonValueObjectL = MakeShareable(new FJsonValueObject(Special3JsonObjectL));
 				TrackerPoseArray.Add(Special3JsonValueObjectL);
 
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special3JsonObjectR = MakeShareable(new FJsonObject());
-				Special3JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_3));
-				Special3JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special3JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_FOOT_LEFT));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FOOT_LEFT));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special3JsonValueObjectR = MakeShareable(new FJsonValueObject(Special3JsonObjectR));
-				TrackerPoseArray.Add(Special3JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_right_foot")))
 			{
-				// RIGHT FOOT - SPECIAL 4
+				// RIGHT FOOT
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special4JsonObjectL = MakeShareable(new FJsonObject());
-				Special4JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
-				Special4JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special4JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special4JsonValueObjectL = MakeShareable(new FJsonValueObject(Special4JsonObjectL));
-				TrackerPoseArray.Add(Special4JsonValueObjectL);
-
 				// Add Raw Pose (Right)
 				TSharedRef<FJsonObject> Special4JsonObjectR = MakeShareable(new FJsonObject());
-				Special4JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_4));
+				Special4JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_FOOT_RIGHT));
 				Special4JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
 				Special4JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special4JsonValueObjectR = MakeShareable(new FJsonValueObject(Special4JsonObjectR));
 				TrackerPoseArray.Add(Special4JsonValueObjectR);
 
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_FOOT_RIGHT));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_FOOT_RIGHT));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
+
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_left_shoulder")))
 			{
-				// LEFT SHOULDER - SPECIAL 5
+				// LEFT SHOULDER
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
 				// Add Raw Pose (Left)
 				TSharedRef<FJsonObject> Special5JsonObjectL = MakeShareable(new FJsonObject());
-				Special5JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
+				Special5JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_SHOULDER_LEFT));
 				Special5JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
 				Special5JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special5JsonValueObjectL = MakeShareable(new FJsonValueObject(Special5JsonObjectL));
 				TrackerPoseArray.Add(Special5JsonValueObjectL);
 
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special5JsonObjectR = MakeShareable(new FJsonObject());
-				Special5JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_5));
-				Special5JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special5JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_SHOULDER_LEFT));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_SHOULDER_LEFT));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special5JsonValueObjectR = MakeShareable(new FJsonValueObject(Special5JsonObjectR));
-				TrackerPoseArray.Add(Special5JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_right_shoulder")))
 			{
-				// RIGHT SHOULDER - SPECIAL 6
+				// RIGHT SHOULDER
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special6JsonObjectL = MakeShareable(new FJsonObject());
-				Special6JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
-				Special6JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special6JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special6JsonValueObjectL = MakeShareable(new FJsonValueObject(Special6JsonObjectL));
-				TrackerPoseArray.Add(Special6JsonValueObjectL);
-
 				// Add Raw Pose (Right)
 				TSharedRef<FJsonObject> Special6JsonObjectR = MakeShareable(new FJsonObject());
-				Special6JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_6));
+				Special6JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_SHOULDER_RIGHT));
 				Special6JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
 				Special6JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
 
 				TSharedRef<FJsonValueObject> Special6JsonValueObjectR = MakeShareable(new FJsonValueObject(Special6JsonObjectR));
 				TrackerPoseArray.Add(Special6JsonValueObjectR);
 
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_SHOULDER_RIGHT));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_SHOULDER_RIGHT));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
+
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
+
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_chest")))
 			{
-				// CHEST- SPECIAL 7
+				// CHEST
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special7JsonObjectL = MakeShareable(new FJsonObject());
-				Special7JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
-				Special7JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special7JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_CHEST));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_CHEST));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special7JsonValueObjectL = MakeShareable(new FJsonValueObject(Special7JsonObjectL));
-				TrackerPoseArray.Add(Special7JsonValueObjectL);
-
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special7JsonObjectR = MakeShareable(new FJsonObject());
-				Special7JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_7));
-				Special7JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special7JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special7JsonValueObjectR = MakeShareable(new FJsonValueObject(Special7JsonObjectR));
-				TrackerPoseArray.Add(Special7JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
 			}
 			else if (SupportedController.Name.IsEqual(TEXT("vive_tracker_keyboard")))
 			{
-				// KEYBOARD - SPECIAL 8
+				// KEYBOARD
 
 				// Add Controller Pose Mappings
 				TArray<TSharedPtr<FJsonValue>> TrackerPoseArray;
 
-				// Add Raw Pose (Left)
-				TSharedRef<FJsonObject> Special8JsonObjectL = MakeShareable(new FJsonObject());
-				Special8JsonObjectL->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
-				Special8JsonObjectL->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_LEFT));
-				Special8JsonObjectL->SetStringField(TEXT("requirement"), TEXT("optional"));
+				// Add Raw Pose
+				TSharedRef<FJsonObject> Special1JsonObjectRaw = MakeShareable(new FJsonObject());
+				Special1JsonObjectRaw->SetStringField(TEXT("output"), TEXT(ACTION_PATH_TRACKER_KEYBOARD));
+				Special1JsonObjectRaw->SetStringField(TEXT("path"), TEXT(ACTION_PATH_SPCL_KEYBOARD));
+				Special1JsonObjectRaw->SetStringField(TEXT("requirement"), TEXT("optional"));
 
-				TSharedRef<FJsonValueObject> Special8JsonValueObjectL = MakeShareable(new FJsonValueObject(Special8JsonObjectL));
-				TrackerPoseArray.Add(Special8JsonValueObjectL);
-
-				// Add Raw Pose (Right)
-				TSharedRef<FJsonObject> Special8JsonObjectR = MakeShareable(new FJsonObject());
-				Special8JsonObjectR->SetStringField(TEXT("output"), TEXT(ACTION_PATH_SPECIAL_8));
-				Special8JsonObjectR->SetStringField(TEXT("path"), TEXT(ACTION_PATH_CONT_RAW_RIGHT));
-				Special8JsonObjectR->SetStringField(TEXT("requirement"), TEXT("optional"));
-
-				TSharedRef<FJsonValueObject> Special8JsonValueObjectR = MakeShareable(new FJsonValueObject(Special8JsonObjectR));
-				TrackerPoseArray.Add(Special8JsonValueObjectR);
+				TSharedRef<FJsonValueObject> Special1JsonValueObjectRaw = MakeShareable(new FJsonValueObject(Special1JsonObjectRaw));
+				TrackerPoseArray.Add(Special1JsonValueObjectRaw);
 
 				// Add Tracker Pose Array To Action Set
 				ActionSetJsonObject->SetArrayField(TEXT("poses"), TrackerPoseArray);
@@ -2592,61 +2978,96 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				FName(TEXT("Right Controller [Pose]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
 		}
 
-		// Other poses - default is handed configuration
+		// Tracker Poses
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_1));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_CAMERA));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 1 [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_LEFT))));
+				FName(TEXT("Camera [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_CAMERA))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_2));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_CHEST));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 2 [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
+				FName(TEXT("Chest [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_CHEST))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_3));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_SHOULDER_LEFT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 3 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
+				FName(TEXT("Shoulder Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_SHOULDER_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_4));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_SHOULDER_RIGHT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 4 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
+				FName(TEXT("Shoulder Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_SHOULDER_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_5));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_WAIST));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 5 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+				FName(TEXT("Waist [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_WAIST))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_6));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_FOOT_LEFT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 6 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
+				FName(TEXT("Foot Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FOOT_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_7));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_FOOT_RIGHT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 7 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
+				FName(TEXT("Foot Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FOOT_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_8));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_KEYBOARD));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 8 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+				FName(TEXT("Keyboard [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_KEYBOARD))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_9));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_POSE_LEFT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 9 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+				FName(TEXT("Raw Pose Left [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_LEFT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_10));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_POSE_RIGHT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 10 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+				FName(TEXT("Raw Pose Right [Tracker]")), FString(TEXT(ACTION_PATH_CONT_RAW_RIGHT))));
 		}
 		{
-			FString ConstActionPath = FString(TEXT(ACTION_PATH_SPECIAL_11));
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_BACK_LEFT));
 			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
-				FName(TEXT("Special 11 [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
+				FName(TEXT("Handed Back Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_BACK_RIGHT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Back Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_BACK_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_LEFT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Front Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_RIGHT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Front Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONT_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_LEFT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Front Rolled Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_RIGHT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Front Rolled Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_FRONTR_RIGHT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_LEFT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Pistol Grip Left [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_LEFT))));
+		}
+		{
+			FString ConstActionPath = FString(TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_RIGHT));
+			Actions.Add(FSteamVRInputAction(ConstActionPath, EActionType::Pose, false,
+				FName(TEXT("Handed Pistol Grip Right [Tracker]")), FString(TEXT(ACTION_PATH_SPCL_PISTOL_RIGHT))));
 		}
 
 		// Skeletal Data
@@ -3784,53 +4205,77 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath, bool bRegist
 			{
 				VRControllerHandleRight = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_1))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_CAMERA))
 			{
-				VRSpecial1 = Action.Handle;
+				VRTRackerCamera = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_2))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_CHEST))
 			{
-				VRSpecial2 = Action.Handle;
+				VRTrackerChest = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_3))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_BACK_LEFT))
 			{
-				VRSpecial3 = Action.Handle;
+				VRTrackerHandedBackL = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_4))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_BACK_RIGHT))
 			{
-				VRSpecial4 = Action.Handle;
+				VRTrackerHandedBackR = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_5))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_LEFT))
 			{
-				VRSpecial5 = Action.Handle;
+				VRTrackerHandedFrontL = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_6))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_FRONT_RIGHT))
 			{
-				VRSpecial6 = Action.Handle;
+				VRTrackerHandedFrontR = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_7))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_LEFT))
 			{
-				VRSpecial7 = Action.Handle;
+				VRTrackerHandedFrontRL = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_8))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_FRONTR_RIGHT))
 			{
-				VRSpecial8 = Action.Handle;
+				VRTrackerHandedFrontRR = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_8))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_LEFT))
 			{
-				VRSpecial8 = Action.Handle;
+				VRTrackerHandedGripL = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_9))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_GRIP_RIGHT))
 			{
-				VRSpecial9 = Action.Handle;
+				VRTrackerHandedGripR = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_10))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_POSE_LEFT))
 			{
-				VRSpecial10 = Action.Handle;
+				VRTrackerHandedPoseL = Action.Handle;
 			}
-			else if (Action.Path == TEXT(ACTION_PATH_SPECIAL_11))
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_HANDED_POSE_RIGHT))
 			{
-				VRSpecial11 = Action.Handle;
+				VRTrackerHandedPoseR = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_FOOT_LEFT))
+			{
+				VRTrackerFootL = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_FOOT_RIGHT))
+			{
+				VRTrackerFootR = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_SHOULDER_LEFT))
+			{
+				VRTrackerShoulderL = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_SHOULDER_RIGHT))
+			{
+				VRTrackerShoulderR = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_KEYBOARD))
+			{
+				VRTrackerKeyboard = Action.Handle;
+			}
+			else if (Action.Path == TEXT(ACTION_PATH_TRACKER_WAIST))
+			{
+				VRTrackerWaist = Action.Handle;
 			}
 
 			UE_LOG(LogSteamVRInputDevice, Display, TEXT("Retrieving Action Handle: %s"), *Action.Path);
