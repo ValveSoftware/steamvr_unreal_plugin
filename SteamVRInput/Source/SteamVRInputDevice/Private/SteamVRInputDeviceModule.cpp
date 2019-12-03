@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 class FSteamVRInputDeviceModule : public ISteamVRInputDeviceModule
 {
 	/* Creates a new instance of SteamVR Input Controller **/
-	virtual TSharedPtr<class IInputDevice> CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override
+	virtual TSharedPtr<class IInputDevice> CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 	{
 		TSharedPtr<class FSteamVRInputDevice> SteamVRInputDevice(new FSteamVRInputDevice(InMessageHandler));
 		
