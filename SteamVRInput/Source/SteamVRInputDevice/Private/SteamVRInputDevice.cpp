@@ -3082,15 +3082,6 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 				FName(TEXT("Skeleton (Right)")), FString(TEXT(ACTION_PATH_SKEL_HAND_RIGHT))));
 		}
 
-		// Open console
-		{
-			const FKey* ConsoleKey = InputSettings->ConsoleKeys.FindByPredicate([](FKey& Key) { return Key.IsValid(); });
-			if (ConsoleKey != nullptr)
-			{
-				Actions.Add(FSteamVRInputAction(FString(TEXT(ACTION_PATH_OPEN_CONSOLE)), FName(TEXT("Open Console")), false, ConsoleKey->GetFName(), false));
-			}
-		}
-
 		// Haptics
 		{
 			FString ConstActionPath = FString(TEXT(ACTION_PATH_VIBRATE_LEFT));
@@ -3103,6 +3094,15 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 
 		// Add base actions to the action manifest
 		ActionManifestObject->SetArrayField(TEXT("actions"), InputActionsArray);
+
+		// Open console
+		{
+			const FKey* ConsoleKey = InputSettings->ConsoleKeys.FindByPredicate([](FKey& Key) { return Key.IsValid(); });
+			if (ConsoleKey != nullptr)
+			{
+				Actions.Add(FSteamVRInputAction(FString(TEXT(ACTION_PATH_OPEN_CONSOLE)), FName(TEXT("Open Console")), false, ConsoleKey->GetFName(), false));
+			}
+		}
 
 		// Initialize Temporary Actions
 		InitSteamVRTemporaryActions();
@@ -3450,7 +3450,7 @@ void FSteamVRInputDevice::GenerateActionManifest(bool GenerateActions, bool Gene
 	// Save json as a UTF8 file
 	if (GenerateActions)
 	{
-		if (FileManager.FileExists(*ManifestPath) && DeleteIfExists)
+		if (FileManager.FileExists(*ManifestPath))
 		{
 			FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*ManifestPath);
 		}
@@ -4167,9 +4167,11 @@ void FSteamVRInputDevice::RegisterApplication(FString ManifestPath, bool bRegist
 
 		// Set Main Action Set
 		InputError = VRInput()->GetActionSetHandle(ACTION_SET, &MainActionSet);
+		UE_LOG(LogSteamVRInputDevice, Display, TEXT("[STEAMVR INPUT] Main Action Set Handle: %i"), (uint64)MainActionSet);
 		GetInputError(InputError, FString(TEXT("Setting main action set")));
 
 		// Add to action set array
+		SteamVRInputActionSets.Empty();
 		SteamVRInputActionSets.Add(FSteamVRInputActionSet(0, ACTION_SET, MainActionSet));
 
 		// Populate Active Action sets that will later be used in OpenVR calls
