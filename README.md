@@ -1,3 +1,6 @@
+# NOTE FOR PACKAGED BUILDS in 4.24 and above
+Copy the *Config/SteamVRBindings* folder and all the files here to your build package under {BuildType/WindownsNoEditor}/{ProjectName}/Config/SteamVRBindings
+
 # SteamVR Input for Unreal 1.8-sdk1.8.19
 
 | Branch | Notes | Download |
