@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ValveSoftware/steamvr_unreal_plugin)
+
 # NOTE FOR PACKAGED BUILDS in UE 4.24 and above
 Copy the *Config/SteamVRBindings* folder and all the files here to your build package under {BuildType/WindownsNoEditor}/{ProjectName}/Config/SteamVRBindings
 
